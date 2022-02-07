@@ -1,7 +1,7 @@
 local kit = {}
 
----Merge two table.
----NOTE: This doesn't merge list-like table.
+---Merge two tables.
+---NOTE: This doesn't merge array-like table.
 ---@param tbl1 table
 ---@param tbl2 table
 function kit.merge(tbl1, tbl2)
@@ -27,6 +27,21 @@ function kit.merge(tbl1, tbl2)
   else
     return tbl1
   end
+end
+
+---Concatenate two tables.
+---NOTE: This doesn't concatenate dict-like table.
+---@param tbl1 table
+---@param tbl2 table
+function kit.concat(tbl1, tbl2)
+  local new_tbl = {}
+  for _, item in ipairs(tbl1) do
+    table.insert(new_tbl, item)
+  end
+  for _, item in ipairs(tbl2) do
+    table.insert(new_tbl, item)
+  end
+  return new_tbl
 end
 
 return kit
