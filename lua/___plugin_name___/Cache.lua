@@ -40,7 +40,7 @@ end
 ---@return boolean
 function Cache:has(key)
   key = self:_key(key)
-  return self.keys[key]
+  return not not self.keys[key]
 end
 
 ---Ensure cache entry.
