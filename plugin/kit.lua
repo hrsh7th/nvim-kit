@@ -4,6 +4,6 @@ end
 vim.g.loaded_kit = true
 
 vim.cmd([[
-  command! KitInstall lua require('kit.install')()
+  command! -nargs=* KitInstall lua require('kit.install')(<f-args>)
 ]])
 

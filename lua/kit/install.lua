@@ -25,23 +25,27 @@ local function execute(command, confirm)
 end
 
 ---Install kit.
-return function()
-  vim.cmd([[redraw]])
-  local install_path = vim.fn.expand(vim.fn.input('install_path: ', '', 'file'), ':p')
-  if install_path == '' then
+return function(install_path, plugin_name)
+  if not install_path or install_path == '' then
     vim.cmd([[redraw]])
-    return vim.api.nvim_echo({{ 'Cancelled.', 'Normal' }}, true, {})
+    install_path = vim.fn.expand(vim.fn.input('install_path: ', '', 'file'), ':p')
+    if install_path == '' then
+      vim.cmd([[redraw]])
+      return vim.api.nvim_echo({{ 'Cancelled.', 'Normal' }}, true, {})
+    end
   end
   if vim.fn.isdirectory(install_path) ~= 1 then
     vim.cmd([[redraw]])
     return vim.api.nvim_echo({{ '`install_path` is not directory.', 'ErrorMsg' }}, true, {})
   end
 
-  vim.cmd([[redraw]])
-  local plugin_name = vim.fn.input('plugin_name: ')
-  if plugin_name == '' then
+  if not plugin_name or plugin_name == '' then
     vim.cmd([[redraw]])
-    return vim.api.nvim_echo({{ 'Cancelled.', 'Normal' }}, false, {})
+    plugin_name = vim.fn.input('plugin_name: ')
+    if plugin_name == '' then
+      vim.cmd([[redraw]])
+      return vim.api.nvim_echo({{ 'Cancelled.', 'Normal' }}, false, {})
+    end
   end
   if not string.match(plugin_name, '[%a_]+') then
     vim.cmd([[redraw]])
