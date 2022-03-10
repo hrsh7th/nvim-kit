@@ -7,7 +7,7 @@ local Syntax = {}
 ---@param cursor number[]
 ---@return string[]
 function Syntax.get_syntax_groups(cursor)
-  return kit.concat(Syntax.get_syntax_groups(cursor), Syntax.get_treesitter_syntax_groups(cursor))
+  return kit.concat(Syntax.get_vim_syntax_groups(cursor), Syntax.get_treesitter_syntax_groups(cursor))
 end
 
 ---Get vim's syntax groups for specified position.
