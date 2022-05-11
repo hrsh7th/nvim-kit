@@ -16,7 +16,7 @@ end
 ---@return string[]
 function Syntax.get_vim_syntax_groups(cursor)
   local groups = {}
-  for _, syntax_id in ipairs(vim.fn.synstack({ cursor[1] + 1, cursor[2] + 1 })) do
+  for _, syntax_id in ipairs(vim.fn.synstack(cursor[1] + 1, cursor[2] + 1)) do
     table.insert(groups, vim.fn.synIDattr(vim.fn.synIDtrans(syntax_id), 'name'))
   end
   return groups

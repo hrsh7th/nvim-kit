@@ -10,14 +10,20 @@ function kit.merge(tbl1, tbl2)
   if is_dict1 and is_dict2 then
     local new_tbl = {}
     for k, v in pairs(tbl2) do
-      new_tbl[k] = kit.merge(tbl1[k], v)
+      if tbl1[k] ~= vim.NIL then
+        new_tbl[k] = kit.merge(tbl1[k], v)
+      end
     end
     for k, v in pairs(tbl1) do
-      if tbl2[k] == nil and v ~= vim.NIL then
-        new_tbl[k] = v
+      if tbl2[k] == nil then
+        new_tbl[k] = v ~= vim.NIL and v or nil
       end
     end
     return new_tbl
+  elseif is_dict1 and not is_dict2 then
+    return kit.merge(tbl1, {})
+  elseif not is_dict1 and is_dict2 then
+    return kit.merge(tbl2, {})
   end
 
   if tbl1 == vim.NIL then
