@@ -1,3 +1,14 @@
+---Create cache key.
+---@private
+---@param key string[]|string
+---@return string
+local function _key(key)
+  if type(key) == 'table' then
+    return table.concat(key, ':')
+  end
+  return key
+end
+
 ---@class kit.Cache
 ---@field private keys table<string, boolean>
 ---@field private entries table<string, any>
@@ -22,7 +33,7 @@ end
 ---@param key string[]|string
 ---@param val any
 function Cache:set(key, val)
-  key = self:_key(key)
+  key = _key(key)
   self.keys[key] = true
   self.entries[key] = val
 end
@@ -30,7 +41,7 @@ end
 ---Delete cache entry.
 ---@param key string[]|string
 function Cache:del(key)
-  key = self:_key(key)
+  key = _key(key)
   self.keys[key] = nil
   self.entries[key] = nil
 end
@@ -39,7 +50,7 @@ end
 ---@param key string[]|string
 ---@return boolean
 function Cache:has(key)
-  key = self:_key(key)
+  key = _key(key)
   return not not self.keys[key]
 end
 
@@ -53,17 +64,6 @@ function Cache:ensure(key, callback)
     self:set(key, callback())
   end
   return self:get(key)
-end
-
----Create cache key.
----@private
----@param key string[]|string
----@return string
-function Cache:_key(key)
-  if type(key) == 'table' then
-    return table.concat(key, ':')
-  end
-  return key
 end
 
 return Cache
