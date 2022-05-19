@@ -26,7 +26,7 @@ end
 ---@param key string[]|string
 ---@return any
 function Cache:get(key)
-  return self.entries[self:_key(key)]
+  return self.entries[_key(key)]
 end
 
 ---Set cache entry.
