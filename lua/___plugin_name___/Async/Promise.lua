@@ -69,6 +69,18 @@ local new_pending = function(on_fullfilled, on_rejected)
   return self
 end
 
+---Wait one promise.
+---
+function Promise.wait(promise, timeout)
+  vim.wait(timeout or 1000, function()
+    return promise._status ~= PromiseStatus.Pending
+  end)
+  if promise._status == PromiseStatus.Fulfilled then
+    return promise._value
+  end
+  error(promise._value)
+end
+
 --- Equivalents to JavaScript's Promise.new.
 --- @param executor function: `(resolve: function(...), reject: function(...))`
 --- @return table: Promise
