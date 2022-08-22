@@ -8,7 +8,7 @@ lint:
 
 .PHONY: test
 test:
-	vusted --output=gtest ./lua
+	vusted --output=gtest --pattern=.spec ./lua
 
 .PHONY: prepare
 prepare:

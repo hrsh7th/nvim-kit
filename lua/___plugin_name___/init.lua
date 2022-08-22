@@ -1,5 +1,16 @@
 local kit = {}
 
+---Create unique id.
+---@return integer
+kit.uuid = setmetatable({
+  uuid = 0,
+}, {
+  __call = function(self)
+    self.uuid = self.uuid + 1
+    return self.uuid
+  end
+})
+
 ---Merge two tables.
 ---NOTE: This doesn't merge array-like table.
 ---@param tbl1 table
@@ -48,6 +59,53 @@ function kit.concat(tbl1, tbl2)
     table.insert(new_tbl, item)
   end
   return new_tbl
+end
+
+---The value to array.
+---@param value any
+---@return table
+function kit.to_array(value)
+  if type(value) == 'table' then
+    if vim.tbl_islist(value) or vim.tbl_isempty(value) then
+      return value
+    end
+  end
+  return { value }
+end
+
+---Check the value is array.
+---@param value any
+---@return boolean
+function kit.is_array(value)
+  return type(value) == 'table' and (vim.tbl_islist(value) or vim.tbl_isempty(value))
+end
+
+---Reverse the array.
+---@param array table
+---@return table
+function kit.reverse(array)
+  if not kit.is_array(array) then
+    error('[kit] specified value is not an array.')
+  end
+
+  local new_array = {}
+  for i = #array, 1, -1 do
+    table.insert(new_array, array[i])
+  end
+  return new_array
+end
+
+---Map array values.
+---@generic T
+---@param array T[]
+---@parma func fun(item: T, index: number): V
+---@reutrn T[]
+function kit.map(array, func)
+  local new_array = {}
+  for i, item in ipairs(array) do
+    table.insert(new_array, func(item, i))
+  end
+  return new_array
 end
 
 return kit
