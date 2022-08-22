@@ -1,11 +1,16 @@
 local Async = {}
 
----@alias kit.Async.Status 'pending'|'complete'
+---@alias kit.Async.Status 'pending'|'canceled'|'complete'
 Async.Status = {}
 Async.Status.Pending = 'pending'
+Async.Status.Canceled = 'canceled'
 Async.Status.Complete = 'complete'
 
----The constructor of Async.
+---@class kit.Async.Progress<T>
+---@field public status kit.Async.Status
+---@field public res? any
+---@field public err? string
+---@field private callbacks (fun(err?: string, ...: any))[]
 local Progress = {}
 Progress.__index = Progress
 
@@ -19,8 +24,12 @@ function Progress.new()
   return self
 end
 
+---Sync progress and return resolved value.
+---NOTE: This fucntion uses `vim.wait` so you can't wait the type-ahead is empty.
+---@param timeout? integer # default 20 * 10000
+---@return any
 function Progress:sync(timeout)
-  vim.wait(timeout or 1000, function()
+  vim.wait(timeout or (20 * 1000), function()
     return self.status == Async.Status.Complete
   end)
   if self.err then
@@ -29,6 +38,15 @@ function Progress:sync(timeout)
   return unpack(self.res)
 end
 
+---Cancel progress if this is pending.
+function Progress:cancel()
+  if self.status === Async.Status.Pending then
+    self.status = Async.Status.Canceled
+  end
+end
+
+---Listen finished this progress.
+---@param callback fun(err?: string, ...: any)
 function Progress:__call(callback)
   if self.status == Async.Status.Pending then
     table.insert(self.callbacks, callback)
@@ -38,15 +56,18 @@ function Progress:__call(callback)
 end
 
 ---Create async function.
-function Async.run(fn)
-  local thread = coroutine.create(fn)
+---@generic T
+---@param runner fun(): any
+---@return kit.Async.Progress<T>
+function Async.run(runner)
+  local thread = coroutine.create(runner)
   return Async.async(function(callback)
     local function next_step(ok, ...)
       if coroutine.status(thread) == 'dead' then
         if ok then
           callback(nil, ...)
         else
-          callback(...)
+          callback(..., nil)
         end
         return
       end
@@ -66,9 +87,13 @@ end
 
 ---Run async function.
 ---@param runner function
+---@return kit.Async.Progress
 function Async.async(runner)
   local progress = Progress.new()
   runner(function(err, ...)
+    if progress.status == Async.Status.Canceled then
+      return
+    end
     progress.err = err
     progress.res = { ... }
     progress.status = Async.Status.Complete
@@ -79,17 +104,18 @@ function Async.async(runner)
   return progress
 end
 
----Await progress.
+---Await progress or return value.
+---@param progress_or_value any
 ---@return any
-function Async.await(progres_or_value)
-  if getmetatable(progres_or_value) == Progress then
-    local res = { coroutine.yield(progres_or_value) }
+function Async.await(progress_or_value)
+  if getmetatable(progress_or_value) == Progress then
+    local res = { coroutine.yield(progress_or_value) }
     if res[1] then
       error(res[1])
     end
     return res[2]
   end
-  return progres_or_value
+  return progress_or_value
 end
 
 return Async
