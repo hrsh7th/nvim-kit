@@ -6,7 +6,10 @@ Async.Status.Pending = 'pending'
 Async.Status.Canceled = 'canceled'
 Async.Status.Complete = 'complete'
 
----@class kit.Async.Progress<T>
+---@alias kit.Async.CancelError
+Async.CancelError = 'kit.Async.CancelError'
+
+---@class kit.Async.Progress
 ---@field public status kit.Async.Status
 ---@field public res? any
 ---@field public err? string
@@ -29,6 +32,10 @@ end
 ---@param timeout? integer # default 20 * 10000
 ---@return any
 function Progress:sync(timeout)
+  if self.status == Async.Status.Canceled then
+    error(Async.CancelError)
+  end
+
   vim.wait(timeout or (20 * 1000), function()
     return self.status == Async.Status.Complete
   end)
@@ -40,7 +47,7 @@ end
 
 ---Cancel progress if this is pending.
 function Progress:cancel()
-  if self.status === Async.Status.Pending then
+  if self.status == Async.Status.Pending then
     self.status = Async.Status.Canceled
   end
 end
@@ -58,7 +65,7 @@ end
 ---Create async function.
 ---@generic T
 ---@param runner fun(): any
----@return kit.Async.Progress<T>
+---@return kit.Async.Progress
 function Async.run(runner)
   local thread = coroutine.create(runner)
   return Async.async(function(callback)
