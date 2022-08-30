@@ -13,7 +13,10 @@ describe('kit.Vim.Syntax', function()
 
   it('should return vim syntax group', function()
     vim.cmd([[ syntax on ]])
+    assert.are.same(Syntax.get_syntax_groups({ 0, 3 }), {})
     assert.are.same(Syntax.get_syntax_groups({ 0, 4 }), { 'Identifier' })
+    assert.are.same(Syntax.get_syntax_groups({ 0, 6 }), { 'Identifier' })
+    assert.are.same(Syntax.get_syntax_groups({ 0, 7 }), {})
   end)
 
   it('should return treesitter syntax group', function()
@@ -25,7 +28,10 @@ describe('kit.Vim.Syntax', function()
       },
     }
     vim.fn.execute([[ TSUpdateSync vim ]])
-    assert.are.same(Syntax.get_syntax_groups({ 0, 4 }), { 'TSVariable' })
+    assert.are.same(Syntax.get_syntax_groups({ 0, 3 }), {})
+    assert.are.same(Syntax.get_syntax_groups({ 0, 4 }), { '@variable' })
+    assert.are.same(Syntax.get_syntax_groups({ 0, 6 }), { '@variable' })
+    assert.are.same(Syntax.get_syntax_groups({ 0, 7 }), {})
   end)
 
 end)

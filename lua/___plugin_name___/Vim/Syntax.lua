@@ -34,14 +34,6 @@ function Syntax.get_treesitter_syntax_groups(cursor)
     return {}
   end
 
-  local contains = function(node)
-    local row_s, col_s, row_e, col_e = node:range()
-    local contains = true
-    contains = contains and (row_s < cursor[1] or (row_s == cursor[1] and col_s <= cursor[2]))
-    contains = contains and (cursor[1] < row_e or (row_e == cursor[1] and cursor[2] < col_e))
-    return contains
-  end
-
   local names = {}
   highlighter.tree:for_each_tree(function(tstree, ltree)
     if not tstree then
@@ -49,14 +41,15 @@ function Syntax.get_treesitter_syntax_groups(cursor)
     end
 
     local root = tstree:root()
-    if contains(root) then
+    if vim.treesitter.is_in_node_range(root, cursor[1], cursor[2]) then
       local query = highlighter:get_query(ltree:lang()):query()
       for id, node in query:iter_captures(root, bufnr, cursor[1], cursor[1] + 1) do
-        if contains(node) then
-          local name = vim.treesitter.highlighter.hl_map[query.captures[id]]
-          if name then
+        if vim.treesitter.is_in_node_range(node, cursor[1], cursor[2]) then
+          pcall(function()
+            local name = ('@%s'):format(query.captures[id])
+            vim.api.nvim_get_hl_by_name(name, true)
             table.insert(names, name)
-          end
+          end)
         end
       end
     end
