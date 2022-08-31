@@ -1,4 +1,4 @@
-local Async = require('___plugin_name___.Async')
+local AsyncTask = require('___plugin_name___.Async.AsyncTask')
 
 local Keymap = {}
 
@@ -16,17 +16,27 @@ end
 ---@param option { remap: boolean, insert: boolean }
 function Keymap.send(keys, option)
   option = option or {}
-  return Async.async(function(callback)
-    local insert = option.insert or false
-    if insert then
+  option.insert = option.insert or false
+  option.remap = option.remap or false
+
+  return AsyncTask.new(function(resolve)
+    if option.insert then
       vim.api.nvim_feedkeys(Keymap.termcodes('<Cmd>lua require("___plugin_name___.Vim.Keymap")._callback()<CR>'), 'in', true)
       vim.api.nvim_feedkeys(keys, 'i' .. (option.remap and 'm' or 'n'), true)
     else
       vim.api.nvim_feedkeys(keys, (option.remap and 'm' or 'n'), true)
       vim.api.nvim_feedkeys(Keymap.termcodes('<Cmd>lua require("___plugin_name___.Vim.Keymap")._callback()<CR>'), 'n', true)
     end
-    table.insert(Keymap._callbacks, callback)
+    table.insert(Keymap._callbacks, resolve)
   end)
+end
+
+---Test spec helper.
+---@param spec fun(): any
+function Keymap.spec(spec)
+  local task = AsyncTask.resolve(spec())
+  vim.api.nvim_feedkeys('', 'x', true)
+  task:sync()
 end
 
 ---Resolve running keys.
