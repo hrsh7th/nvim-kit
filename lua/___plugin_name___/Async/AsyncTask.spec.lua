@@ -47,7 +47,7 @@ describe('kit.Async', function()
     end)
     assert.are_not.equals(string.match(err, 'error$'), nil)
 
-    -- skip on fulfilled.
+    -- skip rejected task's next.
     local steps = {}
     local catch_task = err_task:next(once(function()
       table.insert(steps, 1)
@@ -64,3 +64,4 @@ describe('kit.Async', function()
   end)
 
 end)
+
