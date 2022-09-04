@@ -80,7 +80,7 @@ function TreeSitter.search_next(node, predicate)
     -- down search.
     local matched = nil
     TreeSitter.visit(current, function(node_)
-      if node:id() ~= node_:id() and predicate(node_) then
+      if node ~= node_ and predicate(node_) then
         matched = node_
         return TreeSitter.VisitStatus.Stop
       end
