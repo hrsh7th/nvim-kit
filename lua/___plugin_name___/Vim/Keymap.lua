@@ -13,36 +13,33 @@ end
 
 ---Send keys.
 ---@param keys string
----@param option { remap: boolean, insert: boolean }
-function Keymap.send(keys, option)
-  option = option or {}
-  option.insert = option.insert or false
-  option.remap = option.remap or false
-
+---@param mode string
+function Keymap.send(keys, mode)
+  local callback = Keymap.termcodes('<Cmd>lua require("___plugin_name___.Vim.Keymap")._resolve()<CR>')
   return AsyncTask.new(function(resolve)
-    if option.insert then
-      vim.api.nvim_feedkeys(Keymap.termcodes('<Cmd>lua require("___plugin_name___.Vim.Keymap")._callback()<CR>'), 'in', true)
-      vim.api.nvim_feedkeys(keys, 'i' .. (option.remap and 'm' or 'n'), true)
-    else
-      vim.api.nvim_feedkeys(keys, (option.remap and 'm' or 'n'), true)
-      vim.api.nvim_feedkeys(Keymap.termcodes('<Cmd>lua require("___plugin_name___.Vim.Keymap")._callback()<CR>'), 'n', true)
-    end
     table.insert(Keymap._callbacks, resolve)
+    if string.match(mode, 'i') then
+      vim.api.nvim_feedkeys(callback, 'in', true)
+      vim.api.nvim_feedkeys(keys, mode, true)
+    else
+      vim.api.nvim_feedkeys(keys, mode, true)
+      vim.api.nvim_feedkeys(callback, 'n', true)
+    end
   end)
 end
 
 ---Test spec helper.
 ---@param spec fun(): any
 function Keymap.spec(spec)
-  local task = AsyncTask.resolve(spec())
+  local task = AsyncTask.resolve():next(spec)
   vim.api.nvim_feedkeys('', 'x', true)
   task:sync()
+  collectgarbage('collect')
 end
 
 ---Resolve running keys.
-function Keymap._callback()
+function Keymap._resolve()
   table.remove(Keymap._callbacks, 1)()
 end
 
 return Keymap
-
