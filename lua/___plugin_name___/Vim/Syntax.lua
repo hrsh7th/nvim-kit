@@ -27,34 +27,11 @@ end
 ---@param cursor number[]
 ---@return string[]
 function Syntax.get_treesitter_syntax_groups(cursor)
-  local bufnr = vim.api.nvim_get_current_buf()
-
-  local highlighter = vim.treesitter.highlighter.active[bufnr]
-  if not highlighter then
-    return {}
+  local groups = {}
+  for _, capture in ipairs(vim.treesitter.get_captures_at_position(0, cursor[1], cursor[2])) do
+    table.insert(groups, ('@%s'):format(capture.capture))
   end
-
-  local names = {}
-  highlighter.tree:for_each_tree(function(tstree, ltree)
-    if not tstree then
-      return
-    end
-
-    local root = tstree:root()
-    if vim.treesitter.is_in_node_range(root, cursor[1], cursor[2]) then
-      local query = highlighter:get_query(ltree:lang()):query()
-      for id, node in query:iter_captures(root, bufnr, cursor[1], cursor[1] + 1) do
-        if vim.treesitter.is_in_node_range(node, cursor[1], cursor[2]) then
-          pcall(function()
-            local name = ('@%s'):format(query.captures[id])
-            vim.api.nvim_get_hl_by_name(name, true)
-            table.insert(names, name)
-          end)
-        end
-      end
-    end
-  end)
-  return names
+  return groups
 end
 
 return Syntax
