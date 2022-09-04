@@ -1,7 +1,10 @@
+local Lua = require('___plugin_name___.Lua')
+
 ---@class kit.Async.AsyncTask
+---@field private value any
 ---@field private status kit.Async.AsyncTask.Status
----@field private values any
----@field private children (fun(): void)[]
+---@field private chained boolean
+---@field private children (fun(): any)[]
 local AsyncTask = {}
 AsyncTask.__index = AsyncTask
 
@@ -11,6 +14,12 @@ AsyncTask.Status.Pending = 0
 AsyncTask.Status.Fulfilled = 1
 AsyncTask.Status.Rejected = 2
 
+---Handle unhandled rejection.
+---@param err any
+function AsyncTask.on_unhandled_rejection(err)
+  error(err)
+end
+
 ---Return the value is AsyncTask or not.
 ---@param value any
 ---@return boolean
@@ -18,17 +27,34 @@ function AsyncTask.is(value)
   return getmetatable(value) == AsyncTask
 end
 
+---Resolve all tasks.
+---@param tasks any[]
+---@return kit.Async.AsyncTask
+function AsyncTask.all(tasks)
+  return AsyncTask.new(function(resolve, reject)
+    local values = {}
+    local count = 0
+    for i, task in ipairs(tasks) do
+      AsyncTask.resolve(task):next(function(value)
+        values[i] = value
+        count = count + 1
+        if #tasks == count then
+          resolve(values)
+        end
+      end):catch(reject)
+    end
+  end)
+end
+
 ---Create resolved AsyncTask.
 ---@param v any
----@param ... any
 ---@return kit.Async.AsyncTask
-function AsyncTask.resolve(v, ...)
+function AsyncTask.resolve(v)
   if AsyncTask.is(v) then
     return v
   end
-  local args = { ... }
   return AsyncTask.new(function(resolve)
-    resolve(v, unpack(args))
+    resolve(v)
   end)
 end
 
@@ -49,18 +75,35 @@ end
 ---@param runner any
 function AsyncTask.new(runner)
   local self = setmetatable({}, AsyncTask)
+
+  self.gc = Lua.gc(function()
+    if self.status == AsyncTask.Status.Rejected then
+      if not self.chained then
+        AsyncTask.on_unhandled_rejection(self.value)
+      end
+    end
+  end)
+
+  self.value = nil
   self.status = AsyncTask.Status.Pending
+  self.chained = false
   self.children = {}
   local ok, err = pcall(function()
-    runner(function(...)
+    runner(function(res)
+      if self.status ~= AsyncTask.Status.Pending then
+        return
+      end
       self.status = AsyncTask.Status.Fulfilled
-      self.values = { ... }
+      self.value = res
       for _, c in ipairs(self.children) do
         c()
       end
-    end, function(...)
+    end, function(err)
+      if self.status ~= AsyncTask.Status.Pending then
+        return
+      end
       self.status = AsyncTask.Status.Rejected
-      self.values = { ... }
+      self.value = err
       for _, c in ipairs(self.children) do
         c()
       end
@@ -68,7 +111,7 @@ function AsyncTask.new(runner)
   end)
   if not ok then
     self.status = AsyncTask.Status.Rejected
-    self.values = { err }
+    self.value = err
     for _, c in ipairs(self.children) do
       c()
     end
@@ -85,9 +128,9 @@ function AsyncTask:sync(timeout)
     return self.status ~= AsyncTask.Status.Pending
   end, 0)
   if self.status == AsyncTask.Status.Rejected then
-    error(unpack(self.values))
+    error(self.value)
   end
-  return unpack(self.values)
+  return self.value
 end
 
 ---Register next step.
@@ -112,20 +155,21 @@ end
 ---@param on_rejected fun(...: any): any
 ---@return kit.Async.AsyncTask
 function AsyncTask:_dispatch(on_fulfilled, on_rejected)
+  self.chained = true
   local function dispatch(resolve, reject)
     if self.status == AsyncTask.Status.Fulfilled then
-      local values = { on_fulfilled(unpack(self.values)) }
-      if AsyncTask.is(values[1]) then
-        values[1]:next(resolve, reject)
+      local res = on_fulfilled(self.value)
+      if AsyncTask.is(res) then
+        res:next(resolve, reject)
       else
-        resolve(unpack(values))
+        resolve(res)
       end
     else
-      local values = { on_rejected(self.values[1]) }
-      if AsyncTask.is(values[1]) then
-        values[1]:next(resolve, reject)
+      local res = on_rejected(self.value)
+      if AsyncTask.is(res) then
+        res:next(resolve, reject)
       else
-        resolve(values[1])
+        resolve(res)
       end
     end
   end
@@ -141,4 +185,3 @@ function AsyncTask:_dispatch(on_fulfilled, on_rejected)
 end
 
 return AsyncTask
-

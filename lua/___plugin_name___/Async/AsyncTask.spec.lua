@@ -13,7 +13,7 @@ describe('kit.Async', function()
     end
   end
 
-  it('should work like JavaScript Promise', function()
+  it('should work AsyncTask:{next/catch}', function()
     -- first.
     local one_task = AsyncTask.new(once(function(resolve)
       vim.schedule(function()
@@ -61,6 +61,71 @@ describe('kit.Async', function()
     end)
     assert.are.same(steps, { 3 })
     assert.are.equals(catch_task:sync(), 'catch')
+  end)
+
+  it('should work AsyncTask.all', function()
+    local now = vim.loop.now()
+    local values = AsyncTask.all({
+      AsyncTask.new(function(resolve)
+        vim.defer_fn(function()
+          resolve(1)
+        end, 300)
+      end),
+      AsyncTask.new(function(resolve)
+        vim.defer_fn(function()
+          resolve(2)
+        end, 200)
+      end),
+      AsyncTask.new(function(resolve)
+        vim.defer_fn(function()
+          resolve(3)
+        end, 100)
+      end),
+    }):sync()
+    assert.are.same(values, { 1, 2, 3 })
+    assert.is_true((vim.loop.now() - now) - 300 < 10)
+  end)
+
+  it('should work AsyncTask.on_unhandled_rejection', function()
+    local object
+    local called = false
+    AsyncTask.on_unhandled_rejection = function()
+      called = true
+    end
+
+    -- has no catched task.
+    object = AsyncTask.new(function()
+      error('error')
+    end)
+    object = nil
+    called = false
+    collectgarbage('collect')
+    assert.are.equals(object, nil)
+    assert.are.equals(called, true)
+
+    -- has no catched task.
+    object = AsyncTask.new(function()
+      error('error')
+    end):catch(function()
+      -- ignore
+    end)
+    object = nil
+    called = false
+    collectgarbage('collect')
+    assert.are.equals(object, nil)
+    assert.are.equals(called, false)
+
+    -- has no catched task.
+    object = AsyncTask.new(function()
+      error('error')
+    end):next(function()
+      -- ignore
+    end)
+    object = nil
+    called = false
+    collectgarbage('collect')
+    assert.are.equals(object, nil)
+    assert.are.equals(called, true)
   end)
 
 end)

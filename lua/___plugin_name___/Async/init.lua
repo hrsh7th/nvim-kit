@@ -13,11 +13,11 @@ function Async.async(runner)
     return AsyncTask.new(function(resolve, reject)
       local thread = coroutine.create(runner)
       _G.__kit__.Async.threads[thread] = true
-      local function next_step(ok, v, ...)
+      local function next_step(ok, v)
         if coroutine.status(thread) == 'dead' then
           _G.__kit__.Async.threads[thread] = nil
           if not ok then
-            return reject(v, ...)
+            return reject(v)
           end
           return AsyncTask.resolve(v):next(resolve):catch(reject)
         end
@@ -36,7 +36,7 @@ end
 ---Await async task.
 function Async.await(...)
   if not _G.__kit__.Async.threads[coroutine.running()] then
-    error('await must be called in async function')
+    error('`Async.await` must be called in async function.')
   end
   return coroutine.yield(AsyncTask.resolve(...))
 end
