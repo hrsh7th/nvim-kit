@@ -5,46 +5,46 @@ local TreeSitter = require('___plugin_name___.Lua.TreeSitter')
 
 local pairs = {
   if_statement = {
-    ['if'] = 1,
+    ['if'] = true,
     elseif_statement = {
-      ['elseif'] = 2,
+      ['elseif'] = true,
     },
     else_statement = {
-      ['else'] = 3,
+      ['else'] = true,
     },
-    ['end'] = 4,
+    ['end'] = true,
   },
   for_statement = {
-    ['for'] = 1,
-    ['end'] = 2,
+    ['for'] = true,
+    ['end'] = true,
   },
   table_constructor = {
-    ['{'] = 1,
-    ['}'] = 2,
+    ['{'] = true,
+    ['}'] = true,
   },
   while_statement = {
-    ['while'] = 1,
-    ['end'] = 2,
+    ['while'] = true,
+    ['end'] = true,
   },
   function_definition = {
-    ['function'] = 1,
-    ['end'] = 2,
+    ['function'] = true,
+    ['end'] = true,
   },
   function_declaration = {
-    ['function'] = 1,
-    ['end'] = 2,
+    ['function'] = true,
+    ['end'] = true,
   },
   parameters = {
-    ['('] = 1,
-    [')'] = 2,
+    ['('] = true,
+    [')'] = true,
   },
   arguments = {
-    ['('] = 1,
-    [')'] = 2,
+    ['('] = true,
+    [')'] = true,
   },
   parenthesized_expression = {
-    ['('] = 1,
-    [')'] = 2,
+    ['('] = true,
+    [')'] = true,
   },
 }
 
