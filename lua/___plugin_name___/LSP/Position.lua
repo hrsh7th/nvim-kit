@@ -15,8 +15,8 @@ Position.Encoding.UTF32 = 'utf32'
 ---Convert position to utf8 from specified encoding.
 ---@param position kit.LSP.Position
 ---@param encoding? kit.LSP.PositionEncoding
----@param expr? string|integer
-function Position.to_utf8(position, encoding, expr)
+---@param text string
+function Position.to_utf8(position, encoding, text)
   encoding = encoding or Position.Encoding.UTF16
 
   if encoding == Position.Encoding.UTF8 then
@@ -24,7 +24,7 @@ function Position.to_utf8(position, encoding, expr)
   end
 
   local ok, byteindex = pcall(function()
-    return vim.str_byteindex(Buffer.at(expr or '%', position.line), position.character, encoding == Position.Encoding.UTF16)
+    return vim.str_byteindex(text, position.character, encoding == Position.Encoding.UTF16)
   end)
   if not ok then
     return position
