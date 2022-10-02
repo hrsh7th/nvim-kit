@@ -63,6 +63,16 @@ describe('kit.Async', function()
     assert.are.equals(catch_task:sync(), 'catch')
   end)
 
+  it('should throw timeout error', function()
+    local task = AsyncTask.new(function(resolve)
+      vim.defer_fn(resolve, 500)
+    end)
+    local ok = pcall(function()
+      return task:sync(100)
+    end)
+    assert.is_false(ok)
+  end)
+
   it('should work AsyncTask.all', function()
     local now = vim.loop.now()
     local values = AsyncTask.all({

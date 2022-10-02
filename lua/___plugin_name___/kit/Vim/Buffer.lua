@@ -1,3 +1,6 @@
+local kit = require('___plugin_name___.kit')
+local Highlight = require('___plugin_name___.kit.Vim.Highlight')
+
 local Buffer = {}
 
 ---Ensure buffer number.
@@ -33,6 +36,19 @@ end
 ---@return string
 function Buffer.at(expr, line)
   return vim.api.nvim_buf_get_lines(Buffer.ensure(expr), line, line + 1, false)[1] or ''
+end
+
+---Open buffer.
+---@param cmd table # The `new` command argument. See :help nvim_parse_cmd()`
+---@param range? ___plugin_name___.kit.Vim.Range
+function Buffer.open(cmd, range)
+  vim.cmd.new(cmd)
+
+  local Range = require('___plugin_name___.kit.LSP.Range')
+  if Range.is(range) and not Range.empty(range) then
+    vim.api.nvim_win_set_cursor(0, { range.start.line + 1, range.start.character })
+    Highlight.blink(range)
+  end
 end
 
 return Buffer

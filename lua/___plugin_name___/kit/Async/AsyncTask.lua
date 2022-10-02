@@ -131,14 +131,17 @@ function AsyncTask:sync(timeout)
   if self.status == AsyncTask.Status.Rejected then
     error(self.value)
   end
+  if self.status ~= AsyncTask.Status.Fulfilled then
+    error('AsyncTask:sync is timeout.')
+  end
   return self.value
 end
 
 ---Register next step.
 ---@param on_fulfilled fun(value: any): any
 function AsyncTask:next(on_fulfilled)
-  return self:_dispatch(on_fulfilled, function(...)
-    error(...)
+  return self:_dispatch(on_fulfilled, function(err)
+    error(err)
   end)
 end
 
@@ -146,14 +149,14 @@ end
 ---@param on_rejected fun(value: any): any
 ---@return ___plugin_name___.kit.Async.AsyncTask
 function AsyncTask:catch(on_rejected)
-  return self:_dispatch(function(...)
-    return ...
+  return self:_dispatch(function(value)
+    return value
   end, on_rejected)
 end
 
 ---Dispatch task state.
----@param on_fulfilled fun(...: any): any
----@param on_rejected fun(...: any): any
+---@param on_fulfilled fun(value: any): any
+---@param on_rejected fun(err: any): any
 ---@return ___plugin_name___.kit.Async.AsyncTask
 function AsyncTask:_dispatch(on_fulfilled, on_rejected)
   self.chained = true
