@@ -2,14 +2,15 @@ local kit = require('___plugin_name___.kit')
 local Cache = require('___plugin_name___.kit.Cache')
 
 ---@class ___plugin_name___.kit.Config.Schema # kit.macro.remove
----@field private revision? integer # kit.macro.remove
+
+---@alias ___plugin_name___.kit.Config.SchemaInternal ___plugin_name___.kit.Config.Schema|{ revision: integer }
 
 ---@class ___plugin_name___.kit.Config
 ---@field private _cache ___plugin_name___.kit.Cache
----@field private _default ___plugin_name___.kit.Config.Schema
----@field private _global ___plugin_name___.kit.Config.Schema
----@field private _filetype table<string, ___plugin_name___.kit.Config.Schema>
----@field private _buffer table<integer, ___plugin_name___.kit.Config.Schema>
+---@field private _default ___plugin_name___.kit.Config.SchemaInternal
+---@field private _global ___plugin_name___.kit.Config.SchemaInternal
+---@field private _filetype table<string, ___plugin_name___.kit.Config.SchemaInternal>
+---@field private _buffer table<integer, ___plugin_name___.kit.Config.SchemaInternal>
 local Config = {}
 
 ---Create new config instance.

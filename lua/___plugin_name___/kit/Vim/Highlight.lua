@@ -9,7 +9,7 @@ Highlight.namespace = vim.api.nvim_create_namespace('___plugin_name___.kit.Vim.H
 ---Blink specified range.
 ---@param range ___plugin_name___.kit.LSP.Range
 ---@param option? { delay: integer, count: integer }
----@param ___plugin_name___.kit.Async.AsyncTask
+---@return ___plugin_name___.kit.Async.AsyncTask
 function Highlight.blink(range, option)
   option = kit.merge(option or {}, {
     delay = 150,
