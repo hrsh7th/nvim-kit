@@ -1,5 +1,5 @@
 local helper = require('kit.helper')
-local Syntax = require('___plugin_name___.Vim.Syntax')
+local Syntax = require('___plugin_name___.kit.Vim.Syntax')
 
 describe('kit.Vim.Syntax', function()
 

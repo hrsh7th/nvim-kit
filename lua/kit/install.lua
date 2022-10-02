@@ -5,14 +5,17 @@ local function get_script_path()
 end
 
 ---Execute system command.
+---@param bang integer
 ---@param command string
 ---@param confirm boolean
-local function execute(command, confirm)
+local function execute(bang, command, confirm)
   if confirm then
     vim.cmd([[redraw]])
-    local input = vim.fn.input(('---\n%s\n---\nExecute command? (y/n): '):format(command))
-    if input ~= 'y' then
-      return false
+    if bang == 0 then
+      local input = vim.fn.input(('---\n%s\n---\nExecute command? (y/n): '):format(command))
+      if input ~= 'y' then
+        return false
+      end
     end
   end
 
@@ -25,7 +28,7 @@ local function execute(command, confirm)
 end
 
 ---Install kit.
-return function(install_path, plugin_name)
+return function(bang, install_path, plugin_name)
   if not install_path or install_path == '' then
     vim.cmd([[redraw]])
     install_path = vim.fn.expand(vim.fn.input('install_path: ', '', 'file'), ':p')
@@ -54,13 +57,15 @@ return function(install_path, plugin_name)
 
   local kit_path = ([[%s/lua/%s/kit]]):format(install_path, plugin_name)
   if vim.fn.isdirectory(install_path) then
-    if not execute(([[rm -rf %s]]):format(kit_path), true) then
+    if not execute(bang, ([[rm -rf %s]]):format(kit_path), true) then
       vim.cmd([[redraw]])
       return vim.api.nvim_echo({{ 'command execution cancelled.', 'ErrorMsg' }}, true, {})
     end
   end
 
-  execute(([[cp -r %s/___plugin_name___ %s]]):format(vim.fn.fnamemodify(get_script_path(), ':p:h:h'), kit_path), false)
-  execute(([[find %s -name "*.lua" | xargs sed -i '' 's/___plugin_name___/%s.kit/g']]):format(kit_path, plugin_name), false)
+  execute(bang, ([[cp -r %s/___plugin_name___/kit %s]]):format(vim.fn.fnamemodify(get_script_path(), ':p:h:h'), kit_path), false)
+  execute(bang, ([[find %s -name "*.lua" | xargs sed -i '' 's/___plugin_name___/%s/g']]):format(kit_path, plugin_name), false)
+  execute(bang, ([[find %s -name "*.lua" | xargs sed -i '' '/.*kit\.macro\.remove.*/d']]):format(kit_path), false)
+
 end
 

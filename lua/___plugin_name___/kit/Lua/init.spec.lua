@@ -1,4 +1,4 @@
-local Lua = require('___plugin_name___.Lua')
+local Lua = require('___plugin_name___.kit.Lua')
 
 describe('kit.Lua', function()
 

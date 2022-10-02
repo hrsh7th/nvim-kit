@@ -1,4 +1,4 @@
-local Cache = require('___plugin_name___.Cache')
+local Cache = require('___plugin_name___.kit.Cache')
 
 describe('kit.Cache', function()
 

@@ -1,4 +1,4 @@
-local AsyncTask = require('___plugin_name___.Async.AsyncTask')
+local AsyncTask = require('___plugin_name___.kit.Async.AsyncTask')
 
 describe('kit.Async', function()
 

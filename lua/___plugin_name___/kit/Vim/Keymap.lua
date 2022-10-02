@@ -1,4 +1,4 @@
-local AsyncTask = require('___plugin_name___.Async.AsyncTask')
+local AsyncTask = require('___plugin_name___.kit.Async.AsyncTask')
 
 local Keymap = {}
 
@@ -15,7 +15,7 @@ end
 ---@param keys string
 ---@param mode string
 function Keymap.send(keys, mode)
-  local callback = Keymap.termcodes('<Cmd>lua require("___plugin_name___.Vim.Keymap")._resolve()<CR>')
+  local callback = Keymap.termcodes('<Cmd>lua require("___plugin_name___.kit.Vim.Keymap")._resolve()<CR>')
   return AsyncTask.new(function(resolve)
     table.insert(Keymap._callbacks, resolve)
     if string.match(mode, 'i') then

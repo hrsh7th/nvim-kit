@@ -1,5 +1,5 @@
-local Async = require('___plugin_name___.Async')
-local AsyncTask = require('___plugin_name___.Async.AsyncTask')
+local Async = require('___plugin_name___.kit.Async')
+local AsyncTask = require('___plugin_name___.kit.Async.AsyncTask')
 
 local async = Async.async
 local await = Async.await

@@ -1,5 +1,5 @@
-local Async = require('___plugin_name___.Async')
-local Keymap = require('___plugin_name___.Vim.Keymap')
+local Async = require('___plugin_name___.kit.Async')
+local Keymap = require('___plugin_name___.kit.Vim.Keymap')
 
 local async = Async.async
 local await = Async.await

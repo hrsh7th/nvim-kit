@@ -1,4 +1,4 @@
-local Config = require('___plugin_name___.Config')
+local Config = require('___plugin_name___.kit.Config')
 
 describe('kit.Config', function()
 

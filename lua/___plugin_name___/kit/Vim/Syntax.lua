@@ -1,4 +1,4 @@
-local kit = require('___plugin_name___')
+local kit = require('___plugin_name___.kit')
 
 local Syntax = {}
 

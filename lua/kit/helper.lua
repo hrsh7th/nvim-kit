@@ -1,6 +1,11 @@
 local helper = {}
 
 function helper.ensure_treesitter_parser(name)
+  vim.cmd(([[
+    syntax off
+    set filetype=%s
+  ]]):format(name))
+
   vim.o.runtimepath = vim.o.runtimepath .. ',' .. vim.fn.fnamemodify('./tmp/nvim-treesitter', ':p')
   require 'nvim-treesitter'.setup()
   require 'nvim-treesitter.configs'.setup {

@@ -12,9 +12,11 @@ kit.uuid = setmetatable({
 })
 
 ---Merge two tables.
+---@generic T
 ---NOTE: This doesn't merge array-like table.
----@param tbl1 table
----@param tbl2 table
+---@param tbl1 T
+---@param tbl2 T
+---@return T
 function kit.merge(tbl1, tbl2)
   local is_dict1 = type(tbl1) == 'table' and (not vim.tbl_islist(tbl1) or vim.tbl_isempty(tbl1))
   local is_dict2 = type(tbl2) == 'table' and (not vim.tbl_islist(tbl2) or vim.tbl_isempty(tbl2))

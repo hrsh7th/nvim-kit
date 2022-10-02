@@ -1,4 +1,4 @@
-local Position = require('___plugin_name___.LSP.Position')
+local Position = require('___plugin_name___.kit.LSP.Position')
 
 describe('kit.Vim.Buffer', function()
 

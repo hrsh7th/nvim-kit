@@ -1,14 +1,14 @@
-local Lua = require('___plugin_name___.Lua')
+local Lua = require('___plugin_name___.kit.Lua')
 
----@class kit.Async.AsyncTask
----@field private value any
----@field private status kit.Async.AsyncTask.Status
+---@class ___plugin_name___.kit.Async.AsyncTask<T>: { value: T }
+---@field private value T
+---@field private status ___plugin_name___.kit.Async.AsyncTask.Status
 ---@field private chained boolean
 ---@field private children (fun(): any)[]
 local AsyncTask = {}
 AsyncTask.__index = AsyncTask
 
----@alias kit.Async.AsyncTask.Status integer
+---@alias ___plugin_name___.kit.Async.AsyncTask.Status integer
 AsyncTask.Status = {}
 AsyncTask.Status.Pending = 0
 AsyncTask.Status.Fulfilled = 1
@@ -29,7 +29,7 @@ end
 
 ---Resolve all tasks.
 ---@param tasks any[]
----@return kit.Async.AsyncTask
+---@return ___plugin_name___.kit.Async.AsyncTask
 function AsyncTask.all(tasks)
   return AsyncTask.new(function(resolve, reject)
     local values = {}
@@ -48,7 +48,7 @@ end
 
 ---Create resolved AsyncTask.
 ---@param v any
----@return kit.Async.AsyncTask
+---@return ___plugin_name___.kit.Async.AsyncTask
 function AsyncTask.resolve(v)
   if AsyncTask.is(v) then
     return v
@@ -61,7 +61,7 @@ end
 ---Create new AsyncTask.
 ---@NOET: The AsyncTask has similar interface to JavaScript Promise but the AsyncTask can be worked as synchronous.
 ---@param v any
----@return kit.Async.AsyncTask
+---@return ___plugin_name___.kit.Async.AsyncTask
 function AsyncTask.reject(v)
   if AsyncTask.is(v) then
     return v
@@ -72,7 +72,8 @@ function AsyncTask.reject(v)
 end
 
 ---Create new async task object.
----@param runner any
+---@generic T
+---@param runner fun(resolve: fun(value: T), reject: fun(err: any))
 function AsyncTask.new(runner)
   local self = setmetatable({}, AsyncTask)
 
@@ -143,7 +144,7 @@ end
 
 ---Register catch step.
 ---@param on_rejected fun(value: any): any
----@return kit.Async.AsyncTask
+---@return ___plugin_name___.kit.Async.AsyncTask
 function AsyncTask:catch(on_rejected)
   return self:_dispatch(function(...)
     return ...
@@ -153,7 +154,7 @@ end
 ---Dispatch task state.
 ---@param on_fulfilled fun(...: any): any
 ---@param on_rejected fun(...: any): any
----@return kit.Async.AsyncTask
+---@return ___plugin_name___.kit.Async.AsyncTask
 function AsyncTask:_dispatch(on_fulfilled, on_rejected)
   self.chained = true
   local function dispatch(resolve, reject)
