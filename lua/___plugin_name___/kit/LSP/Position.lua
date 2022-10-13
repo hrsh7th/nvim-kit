@@ -30,27 +30,27 @@ function Position.cursor(encoding)
   local utf8 = { line = cursor[1] - 1, character = cursor[2] }
   if encoding == Position.Encoding.UTF8 then
     return utf8
-  elseif encoding == Position.Encoding.UTF16 then
-    return Position.to_utf16(text, utf8, Position.Encoding.UTF8)
   elseif encoding == Position.Encoding.UTF32 then
     return Position.to_utf32(text, utf8, Position.Encoding.UTF8)
+  else
+    return Position.to_utf16(text, utf8, Position.Encoding.UTF8)
   end
 end
 
 ---Convert position to utf8 from specified encoding.
 ---@param expr string|integer
 ---@param position ___plugin_name___.kit.LSP.Position
----@param from_encoding ___plugin_name___.kit.LSP.Position.Encoding
+---@param from_encoding? ___plugin_name___.kit.LSP.Position.Encoding
 ---@return ___plugin_name___.kit.LSP.Position
 function Position.to_vim(expr, position, from_encoding)
   if from_encoding == Position.Encoding.UTF8 then
     return position
   end
   local text = Buffer.at(expr, position.line)
-  if from_encoding == Position.Encoding.UTF16 then
-    return Position.to_utf8(text, position, Position.Encoding.UTF16)
-  elseif from_encoding == Position.Encoding.UTF32 then
+  if from_encoding == Position.Encoding.UTF32 then
     return Position.to_utf8(text, position, Position.Encoding.UTF32)
+  else
+    return Position.to_utf8(text, position, Position.Encoding.UTF16)
   end
 end
 

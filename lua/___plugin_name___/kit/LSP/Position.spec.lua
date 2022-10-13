@@ -10,11 +10,24 @@ describe('kit.LSP.Position', function()
   before_each(function()
     vim.cmd(([[
       enew!
-      set noswapfile
+      setlocal noswapfile
+      setlocal virtualedit=onemore
       call setline(1, ['%s'])
     ]]):format(text))
   end)
-  
+
+  for _, from_encoding in ipairs({
+    Position.Encoding.UTF16,
+    Position.Encoding.UTF32,
+  }) do
+    it('should convert vim <- %s', function()
+      vim.cmd([[normal! gg$]])
+      local position = Position.cursor(from_encoding)
+      assert.are_not.same(position, Position.cursor(Position.Encoding.UTF8))
+      assert.are.same(Position.to_vim(0, position, from_encoding), Position.cursor(Position.Encoding.UTF8))
+    end)
+  end
+
   for _, to in ipairs({
     {
       method = 'to_utf8',
