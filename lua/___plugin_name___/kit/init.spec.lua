@@ -1,7 +1,6 @@
 local kit = require('___plugin_name___.kit')
 
 describe('kit', function()
-
   describe('.merge', function()
     it('should merge two dict', function()
       assert.are.same(
@@ -12,7 +11,7 @@ describe('kit', function()
           },
           d = {
             e = 3,
-          }
+          },
         }, {
           a = false,
           b = {
@@ -20,18 +19,17 @@ describe('kit', function()
           },
           d = {
             f = {
-              g = vim.NIL
-            }
-          }
+              g = vim.NIL,
+            },
+          },
         }),
         {
           a = true,
-          b = {
-          },
+          b = {},
           d = {
             e = 3,
-            f = {}
-          }
+            f = {},
+          },
         }
       )
     end)
@@ -67,13 +65,21 @@ describe('kit', function()
     end)
   end)
 
-  describe('.map', function()
-    it('should map array values', function()
-      local array = kit.map({ '1', '2', '3' }, function(v)
-        return tonumber(v, 10)
-      end)
-      assert.are.same(array, { 1, 2, 3 })
+  describe('.default', function()
+    it('should return default value', function()
+      assert.are.equal(kit.default(nil, 1), 1)
+      assert.are.equal(kit.default(false, {}), false)
+      assert.are.equal(kit.default(2, 1), 2)
     end)
   end)
 
+  describe('.get', function()
+    it('should return value of the paths', function()
+      assert.are.equal(kit.get({ a = { b = 1 } }, { 'a', 'b' }), 1)
+      assert.are.equal(kit.get({ a = { b = 1 } }, { 'a', 'c' }), nil)
+      assert.are.equal(kit.get({ a = { b = 1 } }, { 'a', 'c' }, 2), 2)
+      assert.are.equal(kit.get({ a = { b = { 1 } } }, { 'a', 'b', 1 }), 1)
+      assert.are.equal(kit.get({ a = { b = { 1 } } }, { 'a', 'b', 2 }), nil)
+    end)
+  end)
 end)

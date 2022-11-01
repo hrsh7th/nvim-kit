@@ -1,7 +1,6 @@
 local Config = require('___plugin_name___.kit.Config')
 
 describe('kit.Config', function()
-
   before_each(function()
     vim.cmd([[enew]])
   end)
@@ -35,7 +34,7 @@ describe('kit.Config', function()
     vim.cmd([[set filetype=lua]])
     config:global({ global = 1 })
     config:filetype('lua', { filetype = 1 })
-    config:buffer(0, { buffer = 1  })
+    config:buffer(0, { buffer = 1 })
     assert.are.same(config:get(), { global = 1, filetype = 1, buffer = 1 })
     vim.cmd([[set filetype=]])
     assert.are.same(config:get(), { global = 1, buffer = 1 })
@@ -46,6 +45,4 @@ describe('kit.Config', function()
     vim.cmd([[set filetype=lua]])
     assert.are.same(config:get(), { global = 1, filetype = 1, buffer = 1 })
   end)
-
 end)
-

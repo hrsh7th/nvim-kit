@@ -8,7 +8,7 @@ kit.uuid = setmetatable({
   __call = function(self)
     self.uuid = self.uuid + 1
     return self.uuid
-  end
+  end,
 })
 
 ---Merge two tables.
@@ -97,18 +97,32 @@ function kit.reverse(array)
   return new_array
 end
 
----Map array values.
 ---@generic T
----@param array T[]
----@parma func fun(item: T, index: number): V
----@reutrn T[]
-function kit.map(array, func)
-  local new_array = {}
-  for i, item in ipairs(array) do
-    table.insert(new_array, func(item, i))
+---@param value T?
+---@param default T
+function kit.default(value, default)
+  if value == nil then
+    return default
   end
-  return new_array
+  return value
+end
+
+---Get object path with default value.
+---@generic T
+---@param value table
+---@param path string|string[]
+---@param default? T
+---@return T
+function kit.get(value, path, default)
+  local result = value
+  for _, key in ipairs(kit.to_array(path)) do
+    if type(result) == 'table' then
+      result = result[key]
+    else
+      return default
+    end
+  end
+  return result or default
 end
 
 return kit
-

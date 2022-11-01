@@ -5,7 +5,6 @@ local async = Async.async
 local await = Async.await
 
 describe('kit.Async', function()
-
   it('should work like JavaScript Promise', function()
     local multiply = async(function(v)
       return AsyncTask.new(function(resolve)
@@ -22,5 +21,4 @@ describe('kit.Async', function()
     end)():sync()
     assert.are.equal(num, 16)
   end)
-
 end)

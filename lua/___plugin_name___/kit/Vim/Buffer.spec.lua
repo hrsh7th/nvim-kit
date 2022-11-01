@@ -1,7 +1,6 @@
 local Buffer = require('___plugin_name___.kit.Vim.Buffer')
 
 describe('kit.Vim.Buffer', function()
-
   before_each(function()
     vim.cmd([[
       enew!
@@ -9,12 +8,12 @@ describe('kit.Vim.Buffer', function()
     ]])
   end)
 
-  it('should ensure bufnr via didn\'t loaded filename', function()
+  it("should ensure bufnr via didn't loaded filename", function()
     local buf = Buffer.ensure(vim.api.nvim_get_runtime_file('syntax/markdown.vim', true)[1])
     assert.are.equal(vim.api.nvim_buf_get_option(buf, 'buflisted'), true)
     assert.are.equal(vim.api.nvim_buf_is_valid(buf), true)
     assert.are.equal(vim.api.nvim_buf_is_loaded(buf), true)
-    assert.are.equal(#vim.api.nvim_buf_get_lines(buf, 0, -1, true), 169)
+    assert.are.equal(#vim.api.nvim_buf_get_lines(buf, 0, -1, true), 200)
   end)
 
   it('should ensure bufnr via pseudo filename', function()
@@ -34,6 +33,4 @@ describe('kit.Vim.Buffer', function()
     assert.are.equal(vim.api.nvim_buf_is_loaded(buf), true)
     assert.are.equal(#vim.api.nvim_buf_get_lines(buf, 0, -1, true), 1)
   end)
-
 end)
-

@@ -7,12 +7,12 @@ function helper.ensure_treesitter_parser(name)
   ]]):format(name))
 
   vim.o.runtimepath = vim.o.runtimepath .. ',' .. vim.fn.fnamemodify('./tmp/nvim-treesitter', ':p')
-  require 'nvim-treesitter'.setup()
-  require 'nvim-treesitter.configs'.setup {
+  require('nvim-treesitter').setup()
+  require('nvim-treesitter.configs').setup({
     highlight = {
       enable = true,
     },
-  }
+  })
   if not require('nvim-treesitter.parsers').has_parser(name) then
     vim.cmd(([[TSInstallSync! %s]]):format(name))
   else

@@ -10,4 +10,3 @@ function Lua.gc(callback)
 end
 
 return Lua
-

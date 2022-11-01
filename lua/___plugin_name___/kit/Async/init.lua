@@ -32,11 +32,13 @@ function Async.async(runner)
           return AsyncTask.resolve(v):next(resolve):catch(reject)
         end
 
-        AsyncTask.resolve(v):next(function(...)
-          next_step(coroutine.resume(thread, ...))
-        end):catch(function(...)
-          next_step(coroutine.resume(thread, ...))
-        end)
+        AsyncTask.resolve(v)
+          :next(function(...)
+            next_step(coroutine.resume(thread, ...))
+          end)
+          :catch(function(...)
+            next_step(coroutine.resume(thread, ...))
+          end)
       end
       next_step(coroutine.resume(thread, unpack(args)))
     end)
@@ -54,4 +56,3 @@ function Async.await(task)
 end
 
 return Async
-

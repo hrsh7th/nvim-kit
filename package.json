@@ -1,0 +1,22 @@
+{
+  "preivate": true,
+  "name": "nvim-kit",
+  "version": "1.0.0",
+  "description": "My personal Lua utilities for neovim.",
+  "scripts": {
+    "generate": "npm run generate:language-server-protocol",
+    "generate:language-server-protocol": "ts-node ./script/generate-language-server-protocol.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hrsh7th/nvim-kit.git"
+  },
+  "author": "hrsh7th",
+  "license": "MIT",
+  "devDependencies": {
+    "ts-dedent": "^2.2.0",
+    "ts-node": "^10.9.1",
+    "tslib": "^2.4.1",
+    "typescript": "^4.8.4"
+  }
+}

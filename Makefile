@@ -13,4 +13,7 @@ test:
 .PHONY: prepare
 prepare:
 	if [ ! -e "./tmp/nvim-treesitter" ]; then git clone git@github.com:nvim-treesitter/nvim-treesitter ./tmp/nvim-treesitter; fi
+	git -C ./tmp/nvim-treesitter pull --rebase
+	if [ ! -e "./tmp/language-server-protocol" ]; then git clone git@github.com:microsoft/language-server-protocol ./tmp/language-server-protocol; fi
+	git -C ./tmp/language-server-protocol pull --rebase
 

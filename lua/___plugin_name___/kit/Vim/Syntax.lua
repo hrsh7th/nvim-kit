@@ -15,9 +15,21 @@ end
 ---@param cursor number[]
 ---@return string[]
 function Syntax.get_vim_syntax_groups(cursor)
+  local unique = {}
   local groups = {}
   for _, syntax_id in ipairs(vim.fn.synstack(cursor[1] + 1, cursor[2] + 1)) do
-    table.insert(groups, vim.fn.synIDattr(vim.fn.synIDtrans(syntax_id), 'name'))
+    local name = vim.fn.synIDattr(vim.fn.synIDtrans(syntax_id), 'name')
+    if not unique[name] then
+      unique[name] = true
+      table.insert(groups, name)
+    end
+  end
+  for _, syntax_id in ipairs(vim.fn.synstack(cursor[1] + 1, cursor[2] + 1)) do
+    local name = vim.fn.synIDattr(syntax_id, 'name')
+    if not unique[name] then
+      unique[name] = true
+      table.insert(groups, name)
+    end
   end
   return groups
 end
@@ -35,4 +47,3 @@ function Syntax.get_treesitter_syntax_groups(cursor)
 end
 
 return Syntax
-

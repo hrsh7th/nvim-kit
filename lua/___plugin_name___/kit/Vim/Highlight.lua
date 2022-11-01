@@ -16,23 +16,16 @@ function Highlight.blink(range, option)
     count = 2,
   })
 
-  local function timeout(timeout)
+  local function timeout(time)
     return AsyncTask.new(function(resolve)
-      vim.defer_fn(vim.schedule_wrap(resolve), timeout)
+      vim.defer_fn(vim.schedule_wrap(resolve), time)
     end)
   end
 
   return Async.run(function()
     Async.await(timeout(option.delay * 1.2))
-    for i = 1, option.count do
-      vim.highlight.range(
-        0,
-        Highlight.namespace,
-        'IncSearch',
-        { range.start.line, range.start.character },
-        { range['end'].line, range['end'].character },
-        {}
-      )
+    for _ = 1, option.count do
+      vim.highlight.range(0, Highlight.namespace, 'IncSearch', { range.start.line, range.start.character }, { range['end'].line, range['end'].character }, {})
       Async.await(timeout(option.delay * 0.8))
       vim.api.nvim_buf_clear_namespace(0, Highlight.namespace, 0, -1)
       Async.await(timeout(option.delay))
@@ -41,4 +34,3 @@ function Highlight.blink(range, option)
 end
 
 return Highlight
-

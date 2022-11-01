@@ -35,13 +35,15 @@ function AsyncTask.all(tasks)
     local values = {}
     local count = 0
     for i, task in ipairs(tasks) do
-      AsyncTask.resolve(task):next(function(value)
-        values[i] = value
-        count = count + 1
-        if #tasks == count then
-          resolve(values)
-        end
-      end):catch(reject)
+      AsyncTask.resolve(task)
+        :next(function(value)
+          values[i] = value
+          count = count + 1
+          if #tasks == count then
+            resolve(values)
+          end
+        end)
+        :catch(reject)
     end
   end)
 end

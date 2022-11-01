@@ -1,7 +1,6 @@
 local Cache = require('___plugin_name___.kit.Cache')
 
 describe('kit.Cache', function()
-
   it('should works {get,set,has,del}', function()
     local cache = Cache.new()
     assert.equal(cache:get('unknown'), nil)
@@ -16,11 +15,11 @@ describe('kit.Cache', function()
 
   it('should work ensure', function()
     local ensure = setmetatable({
-      count = 0
+      count = 0,
     }, {
       __call = function(self)
         self.count = self.count + 1
-      end
+      end,
     })
     local cache = Cache.new()
 
@@ -33,11 +32,9 @@ describe('kit.Cache', function()
     assert.equal(cache:ensure('key', ensure), nil)
     assert.equal(ensure.count, 1)
 
-
     -- Call after delete.
     cache:del('key')
     assert.equal(cache:ensure('key', ensure), nil)
     assert.equal(ensure.count, 2)
   end)
-
 end)

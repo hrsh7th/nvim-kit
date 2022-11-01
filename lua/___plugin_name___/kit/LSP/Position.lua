@@ -1,16 +1,7 @@
+local LSP = require('___plugin_name___.kit.LSP')
 local Buffer = require('___plugin_name___.kit.Vim.Buffer')
 
----@class ___plugin_name___.kit.LSP.Position
----@field public line integer
----@field public character integer
-
 local Position = {}
-
----@alias ___plugin_name___.kit.LSP.Position.Encoding 'utf8'|'utf16'|'utf32'
-Position.Encoding = {}
-Position.Encoding.UTF8 = 'utf8'
-Position.Encoding.UTF16 = 'utf16'
-Position.Encoding.UTF32 = 'utf32'
 
 ---Return the value is position or not.
 ---@param v any
@@ -20,54 +11,54 @@ function Position.is(v)
 end
 
 ---Create cursor position.
----@param encoding ___plugin_name___.kit.LSP.Position.Encoding
+---@param encoding ___plugin_name___.kit.LSP.PositionEncodingKind
 ---@return ___plugin_name___.kit.LSP.Position
 function Position.cursor(encoding)
-  encoding = encoding or Position.Encoding.UTF16
+  encoding = encoding or LSP.PositionEncodingKind.UTF16
   local cursor = vim.api.nvim_win_get_cursor(0)
   local text = vim.api.nvim_get_current_line()
 
   local utf8 = { line = cursor[1] - 1, character = cursor[2] }
-  if encoding == Position.Encoding.UTF8 then
+  if encoding == LSP.PositionEncodingKind.UTF8 then
     return utf8
-  elseif encoding == Position.Encoding.UTF32 then
-    return Position.to_utf32(text, utf8, Position.Encoding.UTF8)
+  elseif encoding == LSP.PositionEncodingKind.UTF32 then
+    return Position.to_utf32(text, utf8, LSP.PositionEncodingKind.UTF8)
   else
-    return Position.to_utf16(text, utf8, Position.Encoding.UTF8)
+    return Position.to_utf16(text, utf8, LSP.PositionEncodingKind.UTF8)
   end
 end
 
 ---Convert position to utf8 from specified encoding.
 ---@param expr string|integer
 ---@param position ___plugin_name___.kit.LSP.Position
----@param from_encoding? ___plugin_name___.kit.LSP.Position.Encoding
+---@param from_encoding? ___plugin_name___.kit.LSP.PositionEncodingKind
 ---@return ___plugin_name___.kit.LSP.Position
 function Position.to_vim(expr, position, from_encoding)
-  if from_encoding == Position.Encoding.UTF8 then
+  if from_encoding == LSP.PositionEncodingKind.UTF8 then
     return position
   end
   local text = Buffer.at(expr, position.line)
-  if from_encoding == Position.Encoding.UTF32 then
-    return Position.to_utf8(text, position, Position.Encoding.UTF32)
+  if from_encoding == LSP.PositionEncodingKind.UTF32 then
+    return Position.to_utf8(text, position, LSP.PositionEncodingKind.UTF32)
   else
-    return Position.to_utf8(text, position, Position.Encoding.UTF16)
+    return Position.to_utf8(text, position, LSP.PositionEncodingKind.UTF16)
   end
 end
 
 ---Convert position to utf8 from specified encoding.
 ---@param text string
 ---@param position ___plugin_name___.kit.LSP.Position
----@param from_encoding? ___plugin_name___.kit.LSP.Position.Encoding
+---@param from_encoding? ___plugin_name___.kit.LSP.PositionEncodingKind
 ---@return ___plugin_name___.kit.LSP.Position
 function Position.to_utf8(text, position, from_encoding)
-  from_encoding = from_encoding or Position.Encoding.UTF16
+  from_encoding = from_encoding or LSP.PositionEncodingKind.UTF16
 
-  if from_encoding == Position.Encoding.UTF8 then
+  if from_encoding == LSP.PositionEncodingKind.UTF8 then
     return position
   end
 
   local ok, byteindex = pcall(function()
-    return vim.str_byteindex(text, position.character, from_encoding == Position.Encoding.UTF16)
+    return vim.str_byteindex(text, position.character, from_encoding == LSP.PositionEncodingKind.UTF16)
   end)
   if not ok then
     return position
@@ -78,7 +69,7 @@ end
 ---Convert position to utf16 from specified encoding.
 ---@param text string
 ---@param position ___plugin_name___.kit.LSP.Position
----@param from_encoding? ___plugin_name___.kit.LSP.Position.Encoding
+---@param from_encoding? ___plugin_name___.kit.LSP.PositionEncodingKind
 ---@return ___plugin_name___.kit.LSP.Position
 function Position.to_utf16(text, position, from_encoding)
   local utf8 = Position.to_utf8(text, position, from_encoding)
@@ -96,7 +87,7 @@ end
 ---Convert position to utf32 from specified encoding.
 ---@param text string
 ---@param position ___plugin_name___.kit.LSP.Position
----@param from_encoding? ___plugin_name___.kit.LSP.Position.Encoding
+---@param from_encoding? ___plugin_name___.kit.LSP.PositionEncodingKind
 ---@return ___plugin_name___.kit.LSP.Position
 function Position.to_utf32(text, position, from_encoding)
   local utf8 = Position.to_utf8(text, position, from_encoding)

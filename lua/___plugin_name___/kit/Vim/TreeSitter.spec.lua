@@ -1,9 +1,7 @@
 ---@diagnostic disable: need-check-nil, param-type-mismatch
-local helper = require('kit.helper')
-local TreeSitter = require('___plugin_name___.kit.Lua.TreeSitter')
+local TreeSitter = require('___plugin_name___.kit.Vim.TreeSitter')
 
 describe('kit.Lua.TreeSitter', function()
-
   before_each(function()
     vim.cmd([[
       enew!
@@ -52,17 +50,20 @@ describe('kit.Lua.TreeSitter', function()
 
   describe('get_captures', function()
     it('should return all captured name', function()
-      vim.treesitter.set_query('lua', 'pairs', [[
+      vim.treesitter.set_query(
+        'lua',
+        'pairs',
+        [[
         [
           (function_declaration [
             ("function" @pair)
             ("end" @pair)
           ])
         ] @pair_context
-      ]])
+      ]]
+      )
       local node = TreeSitter.get_node_at(0, 0)
       assert.is_true(TreeSitter.is_capture(vim.treesitter.get_query('lua', 'pairs'), node, 'pair'))
     end)
   end)
-
 end)

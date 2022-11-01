@@ -67,4 +67,3 @@ function Cache:ensure(key, callback)
 end
 
 return Cache
-

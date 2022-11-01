@@ -1,9 +1,5 @@
 local Position = require('___plugin_name___.kit.LSP.Position')
 
----@class ___plugin_name___.kit.LSP.Range
----@field public start ___plugin_name___.kit.LSP.Position
----@field public ['end'] ___plugin_name___.kit.LSP.Position
-
 local Range = {}
 
 ---Return the value is range or not.
@@ -23,7 +19,7 @@ end
 ---Convert range to utf8 from specified encoding.
 ---@param expr string|integer
 ---@param range ___plugin_name___.kit.LSP.Range
----@param from_encoding? ___plugin_name___.kit.LSP.Position.Encoding
+---@param from_encoding? ___plugin_name___.kit.LSP.PositionEncodingKind
 ---@return ___plugin_name___.kit.LSP.Range
 function Range.to_vim(expr, range, from_encoding)
   return {
@@ -35,7 +31,7 @@ end
 ---Convert range to utf8 from specified encoding.
 ---@param text_start string
 ---@param range ___plugin_name___.kit.LSP.Range
----@param from_encoding? ___plugin_name___.kit.LSP.Position.Encoding
+---@param from_encoding? ___plugin_name___.kit.LSP.PositionEncodingKind
 ---@return ___plugin_name___.kit.LSP.Range
 function Range.to_utf8(text_start, text_end, range, from_encoding)
   return {
@@ -47,7 +43,7 @@ end
 ---Convert range to utf16 from specified encoding.
 ---@param text_start string
 ---@param range ___plugin_name___.kit.LSP.Range
----@param from_encoding? ___plugin_name___.kit.LSP.Position.Encoding
+---@param from_encoding? ___plugin_name___.kit.LSP.PositionEncodingKind
 ---@return ___plugin_name___.kit.LSP.Range
 function Range.to_utf16(text_start, text_end, range, from_encoding)
   return {
@@ -59,7 +55,7 @@ end
 ---Convert range to utf32 from specified encoding.
 ---@param text_start string
 ---@param range ___plugin_name___.kit.LSP.Range
----@param from_encoding? ___plugin_name___.kit.LSP.Position.Encoding
+---@param from_encoding? ___plugin_name___.kit.LSP.PositionEncodingKind
 ---@return ___plugin_name___.kit.LSP.Range
 function Range.to_utf32(text_start, text_end, range, from_encoding)
   return {
@@ -69,4 +65,3 @@ function Range.to_utf32(text_start, text_end, range, from_encoding)
 end
 
 return Range
-
