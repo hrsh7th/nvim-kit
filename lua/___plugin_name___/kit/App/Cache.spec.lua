@@ -1,6 +1,6 @@
-local Cache = require('___plugin_name___.kit.Cache')
+local Cache = require('___plugin_name___.kit.App.Cache')
 
-describe('kit.Cache', function()
+describe('kit.App.Cache', function()
   it('should works {get,set,has,del}', function()
     local cache = Cache.new()
     assert.equal(cache:get('unknown'), nil)

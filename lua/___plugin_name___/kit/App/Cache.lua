@@ -9,7 +9,7 @@ local function _key(key)
   return key
 end
 
----@class ___plugin_name___.kit.Cache
+---@class ___plugin_name___.kit.App.Cache
 ---@field private keys table<string, boolean>
 ---@field private entries table<string, any>
 local Cache = {}

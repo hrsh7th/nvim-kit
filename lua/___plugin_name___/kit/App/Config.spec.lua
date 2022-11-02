@@ -1,4 +1,4 @@
-local Config = require('___plugin_name___.kit.Config')
+local Config = require('___plugin_name___.kit.App.Config')
 
 describe('kit.Config', function()
   before_each(function()
