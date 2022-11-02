@@ -14,6 +14,9 @@ import metaModel from '../tmp/language-server-protocol/_specifications/lsp/3.18/
   fs.writeFileSync(`${__dirname}/../lua/___plugin_name___/kit/LSP/init.lua`, definitions, 'utf-8');
 })();
 
+/**
+ * Generate all type definitions.
+ */
 function generate(metaModel: MetaModel.MetaModel) {
   return dedent`
     ${metaModel.enumerations.map(enums => {
@@ -30,24 +33,31 @@ function generate(metaModel: MetaModel.MetaModel) {
   `;
 }
 
+/**
+ * Generate enum definitions.
+ */
 function generateEnum(enums: MetaModel.Enumeration) {
   return dedent`
     ---@enum ${toPackageName(enums.name)}
     LSP.${enums.name} = {
       ${enums.values.map((value: typeof enums.values[number]) => {
-        const typeNotation = toTypeNotation(enums.type);
-        if (typeNotation === 'string') {
-          return `  ${escapeKeyword(value.name)} = ${JSON.stringify(value.value)},`;
-        } else if (typeNotation === 'integer') {
-          return `  ${escapeKeyword(value.name)} = ${value.value},`;
-        } else {
-          throw new Error(`Invalid enumeration type: ${enums.type.name}`);
+        switch (toTypeNotation(enums.type)) {
+          case 'string': {
+            return `${escapeLuaKeyword(value.name)} = ${JSON.stringify(value.value)},`;
+          }
+          case 'integer': {
+            return `${escapeLuaKeyword(value.name)} = ${value.value},`;
+          }
         }
+        throw new Error(`Invalid enumeration type: ${enums.type.name}`);
       }).join('\n').trim()}
     }
   `;
 }
 
+/**
+ * Generate struct definitions.
+ */
 function generateStruct(struct: MetaModel.Structure) {
   const extend = ((extends_: MetaModel.Structure['extends']) => {
     const extend = extends_?.[0];
@@ -60,21 +70,23 @@ function generateStruct(struct: MetaModel.Structure) {
   return dedent`
     ---@class ${toPackageName(struct.name)}${extend}
     ${struct.properties.map((prop: typeof struct.properties[number]) => {
-      return `---@field public ${prop.name} ${toTypeNotation(prop.type)}`;
+      return `---@field public ${prop.name}${prop.optional ? '?' : ''} ${toTypeNotation(prop.type)}`;
     }).join('\n').trim()}
   `;
 }
 
+/**
+ * Generate alias definitions.
+ */
 function generateAlias(alias: MetaModel.TypeAlias) {
   return dedent`
     ---@alias ${toPackageName(alias.name)} ${toTypeNotation(alias.type)}
   `;
 }
 
-function toPackageName(name: string) {
-  return `___plugin_name___.kit.LSP.${name}`;
-}
-
+/**
+ * Get lua-language-server's notation.
+ */
 function toTypeNotation(type: MetaModel.Type): string {
   if (type.kind === 'base') {
     return ({
@@ -115,9 +127,20 @@ function toTypeNotation(type: MetaModel.Type): string {
   throw new Error(`Invalid type: ${JSON.stringify(type)}`);
 }
 
-function escapeKeyword(field: string) {
+/**
+ * Get type name with namespace.
+ */
+function toPackageName(name: string) {
+  return `___plugin_name___.kit.LSP.${name}`;
+}
+
+/**
+ * Escape Lua keywords.
+ */
+function escapeLuaKeyword(field: string) {
   return ({
     'function': "['function']",
     'local': "['local']",
   })[field] ?? field;
 }
+
