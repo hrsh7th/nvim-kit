@@ -5,7 +5,7 @@
   "description": "My personal Lua utilities for neovim.",
   "scripts": {
     "generate": "npm run generate:language-server-protocol",
-    "generate:language-server-protocol": "ts-node ./script/generate-language-server-protocol.ts"
+    "generate:language-server-protocol": "ts-node ./script/generate-language-server-protocol.ts && make fmt"
   },
   "repository": {
     "type": "git",

@@ -9,7 +9,7 @@ import metaModel from '../tmp/language-server-protocol/_specifications/lsp/3.18/
 
     ${generate(metaModel as unknown as MetaModel.MetaModel)}
 
-    return LSP;
+    return LSP
   `;;
   fs.writeFileSync(`${__dirname}/../lua/___plugin_name___/kit/LSP/init.lua`, definitions, 'utf-8');
 })();
