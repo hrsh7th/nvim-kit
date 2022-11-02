@@ -105,6 +105,7 @@ function toTypeNotation(type: MetaModel.Type): string {
   } else if (type.kind === 'array') {
     return `${toTypeNotation(type.element)}[]`;
   } else if (type.kind === 'tuple') {
+    // TODO: Tuple notation is not supported propery.
     return `(${type.items.map(toTypeNotation).join(' | ')})[]`;
   } else if (type.kind === 'literal') {
     return `{ ${type.value.properties.map(prop => {
@@ -117,7 +118,7 @@ function toTypeNotation(type: MetaModel.Type): string {
   } else if (type.kind === 'integerLiteral') {
     return type.value.toString();
   } else if (type.kind === 'and') {
-    console.log('We can\'t support `and` kind.');
+    // TODO: And notation is not supported propery.
     return '';
   } else if (type.kind === 'or') {
     return `(${type.items.map(toTypeNotation).join(' | ')})`;
