@@ -58,7 +58,7 @@ function generateEnum(enums: MetaModel.Enumeration) {
 /**
  * Generate struct definitions.
  */
-function generateStruct(struct: MetaModel.Structure) {
+function generateStruct(struct: MetaModel.Structure): string {
   const extend = ((extends_: MetaModel.Structure['extends']) => {
     const extend = extends_?.[0];
     if (extend?.kind !== 'reference') {
@@ -67,11 +67,36 @@ function generateStruct(struct: MetaModel.Structure) {
     return dedent` : ${toPackageName(extend.name)}`;
   })(struct.extends);
 
-  return dedent`
+  const mainStruct = dedent`
     ---@class ${toPackageName(struct.name)}${extend}
-    ${struct.properties.map((prop: typeof struct.properties[number]) => {
-      return `---@field public ${prop.name}${prop.optional ? '?' : ''} ${toTypeNotation(prop.type)}`;
-    }).join('\n').trim()}
+    ${struct.properties
+      .map((prop: MetaModel.Property) => {
+        const documentation = prop.documentation ? ` ${oneline(prop.documentation ?? '')}` : '';
+        if (prop.type.kind === 'literal') {
+          return `---@field public ${prop.name}${prop.optional ? '?' : ''} ${toPackageName(`${struct.name}.${prop.name}`)}${documentation}`;
+        }
+        return `---@field public ${prop.name}${prop.optional ? '?' : ''} ${toTypeNotation(prop.type)}${documentation}`;
+      }).join('\n').trim()
+    }
+
+  `;
+  const literalStruct = dedent`
+    ${struct.properties
+      .filter(prop => prop.type.kind === 'literal')
+      .map((prop: MetaModel.Property) => {
+        if (prop.type.kind !== 'literal') {
+          return;
+        }
+        return generateStruct({
+          name: `${struct.name}.${prop.name}`,
+          ...prop.type.value,
+        });
+      }).join('\n\n').trim()
+    }
+  `;
+  return dedent`
+    ${mainStruct}
+    ${literalStruct}
   `;
 }
 
@@ -145,3 +170,6 @@ function escapeLuaKeyword(field: string) {
   })[field] ?? field;
 }
 
+function oneline(s: string) {
+  return s.replace(/(\r\n|\r|\n)/g, '<br>').trim();
+}
