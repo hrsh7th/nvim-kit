@@ -1,7 +1,7 @@
 local Lua = require('___plugin_name___.kit.Lua')
 
----@class ___plugin_name___.kit.Async.AsyncTask<T>: { value: T }
----@field private value T
+---@class ___plugin_name___.kit.Async.AsyncTask
+---@field private value any
 ---@field private status ___plugin_name___.kit.Async.AsyncTask.Status
 ---@field private chained boolean
 ---@field private children (fun(): any)[]
