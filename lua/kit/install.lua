@@ -70,4 +70,5 @@ return function(bang, install_path, plugin_name)
   execute(bang, ([[cp -r %s/___plugin_name___/kit %s]]):format(vim.fn.fnamemodify(get_script_path(), ':p:h:h'), kit_path), false)
   execute(bang, ([[find %s -name "*.lua" | xargs sed -i '' 's/___plugin_name___/%s/g']]):format(kit_path, plugin_name), false)
   execute(bang, ([[find %s -name "*.lua" | xargs sed -i '' '/.*kit\.macro\.remove.*/d']]):format(kit_path), false)
+  execute(bang, ([[rm -r %s/**/*.spec.lua]]):format(kit_path), false)
 end

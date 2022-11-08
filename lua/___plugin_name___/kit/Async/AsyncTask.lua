@@ -3,6 +3,7 @@ local Lua = require('___plugin_name___.kit.Lua')
 ---@class ___plugin_name___.kit.Async.AsyncTask
 ---@field private value any
 ---@field private status ___plugin_name___.kit.Async.AsyncTask.Status
+---@field private synced boolean
 ---@field private chained boolean
 ---@field private children (fun(): any)[]
 local AsyncTask = {}
@@ -17,7 +18,7 @@ AsyncTask.Status.Rejected = 2
 ---Handle unhandled rejection.
 ---@param err any
 function AsyncTask.on_unhandled_rejection(err)
-  error(err)
+  error('AsyncTask.on_unhandled_rejection: ' .. err)
 end
 
 ---Return the value is AsyncTask or not.
@@ -81,7 +82,7 @@ function AsyncTask.new(runner)
 
   self.gc = Lua.gc(function()
     if self.status == AsyncTask.Status.Rejected then
-      if not self.chained then
+      if not self.chained and not self.synced then
         AsyncTask.on_unhandled_rejection(self.value)
       end
     end
@@ -89,6 +90,7 @@ function AsyncTask.new(runner)
 
   self.value = nil
   self.status = AsyncTask.Status.Pending
+  self.synced = false
   self.chained = false
   self.children = {}
   local ok, err = pcall(function()
@@ -127,9 +129,11 @@ end
 ---@param timeout? number
 ---@return any
 function AsyncTask:sync(timeout)
+  self.synced = true
+
   vim.wait(timeout or 24 * 60 * 60 * 1000, function()
     return self.status ~= AsyncTask.Status.Pending
-  end, 0)
+  end, 10)
   if self.status == AsyncTask.Status.Rejected then
     error(self.value)
   end

@@ -12,11 +12,12 @@ local Cache = require('___plugin_name___.kit.App.Cache')
 ---@field private _filetype table<string, ___plugin_name___.kit.App.Config.SchemaInternal>
 ---@field private _buffer table<integer, ___plugin_name___.kit.App.Config.SchemaInternal>
 local Config = {}
+Config.__index = Config
 
 ---Create new config instance.
 ---@param default? ___plugin_name___.kit.App.Config.Schema
 function Config.new(default)
-  local self = setmetatable({}, { __index = Config })
+  local self = setmetatable({}, Config)
   self._cache = Cache.new()
   self._default = default or {}
   self._global = {}

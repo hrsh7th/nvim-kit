@@ -139,5 +139,18 @@ describe('kit.Async', function()
     collectgarbage('collect')
     assert.are.equals(object, nil)
     assert.are.equals(called, true)
+
+    -- has no catched task but synced.
+    object = AsyncTask.new(function()
+      error('error')
+    end)
+    pcall(function()
+      object:sync()
+    end)
+    object = nil
+    called = false
+    collectgarbage('collect')
+    assert.are.equals(object, nil)
+    assert.are.equals(called, false)
   end)
 end)
