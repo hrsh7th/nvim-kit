@@ -19,7 +19,7 @@ describe('kit.Vim.Keymap', function()
     if not ok then
       assert.are_not.equals(
         string.match(
-          err--[[@as string]],
+          err--[[@as string]] ,
           'error$'
         ),
         nil
@@ -27,7 +27,7 @@ describe('kit.Vim.Keymap', function()
     end
   end)
 
-  it('should insert keysequence with async-await', function()
+  it('should insert multiple keys in order', function()
     vim.keymap.set(
       'i',
       '<Plug>(kit.Vim.Keymap.send)',
@@ -44,5 +44,21 @@ describe('kit.Vim.Keymap', function()
       Keymap.send(Keymap.termcodes('i{<Plug>(kit.Vim.Keymap.send)}'), 'i'):await()
     end))
     assert.are.equals(vim.api.nvim_get_current_line(), '{foobarbaz}')
+  end)
+
+  it('should treat flags as separated', function()
+    vim.keymap.set(
+      'i',
+      '<Plug>(kit.Vim.Keymap.send)',
+      Async.async(function()
+        Keymap.send('foo', 'nt'):await()
+      end)
+    )
+    local _, err = pcall(function()
+      Keymap.spec(Async.async(function()
+        Keymap.send(Keymap.termcodes('i<Plug>(kit.Vim.Keymap.send)'), 'i'):await()
+      end))
+    end)
+    assert.are_not.equals(string.match(err--[[@as string]] , 'Keymap.send:'), nil)
   end)
 end)

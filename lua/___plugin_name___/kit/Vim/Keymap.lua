@@ -16,6 +16,10 @@ end
 ---@param keys string
 ---@param mode string
 function Keymap.send(keys, mode)
+  if mode:find('t', 1, true) ~= nil then
+    error('Keymap.send: mode must not contain "t"')
+  end
+
   local uuid = kit.uuid()
   return AsyncTask.new(function(resolve)
     Keymap._callbacks[uuid] = resolve
