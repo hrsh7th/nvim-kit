@@ -106,7 +106,7 @@ describe('kit.Async', function()
       called = true
     end
 
-    -- has no catched task.
+    -- has no catched.
     object = AsyncTask.new(function()
       error('error')
     end)
@@ -116,19 +116,7 @@ describe('kit.Async', function()
     assert.are.equals(object, nil)
     assert.are.equals(called, true)
 
-    -- has no catched task.
-    object = AsyncTask.new(function()
-      error('error')
-    end):catch(function()
-      -- ignore
-    end)
-    object = nil
-    called = false
-    collectgarbage('collect')
-    assert.are.equals(object, nil)
-    assert.are.equals(called, false)
-
-    -- has no catched task.
+    -- has no catched.
     object = AsyncTask.new(function()
       error('error')
     end):next(function()
@@ -139,6 +127,42 @@ describe('kit.Async', function()
     collectgarbage('collect')
     assert.are.equals(object, nil)
     assert.are.equals(called, true)
+
+    -- has no catched.
+    object = AsyncTask.new(function(resolve)
+      resolve(nil)
+    end):next(function()
+      error('error')
+    end)
+    object = nil
+    called = false
+    collectgarbage('collect')
+    assert.are.equals(object, nil)
+    assert.are.equals(called, true)
+
+    -- has no catched.
+    object = AsyncTask.new(function(_, reject)
+      reject('error')
+    end):catch(function(err)
+      error(err)
+    end)
+    object = nil
+    called = false
+    collectgarbage('collect')
+    assert.are.equals(object, nil)
+    assert.are.equals(called, true)
+
+    -- catched.
+    object = AsyncTask.new(function()
+      error('error')
+    end):catch(function()
+      -- ignore
+    end)
+    object = nil
+    called = false
+    collectgarbage('collect')
+    assert.are.equals(object, nil)
+    assert.are.equals(called, false)
 
     -- has no catched task but synced.
     object = AsyncTask.new(function()

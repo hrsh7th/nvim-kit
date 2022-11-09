@@ -93,26 +93,24 @@ function AsyncTask.new(runner)
   self.synced = false
   self.chained = false
   self.children = {}
-  local ok, err = pcall(function()
-    runner(function(res)
-      if self.status ~= AsyncTask.Status.Pending then
-        return
-      end
-      self.status = AsyncTask.Status.Fulfilled
-      self.value = res
-      for _, c in ipairs(self.children) do
-        c()
-      end
-    end, function(err)
-      if self.status ~= AsyncTask.Status.Pending then
-        return
-      end
-      self.status = AsyncTask.Status.Rejected
-      self.value = err
-      for _, c in ipairs(self.children) do
-        c()
-      end
-    end)
+  local ok, err = pcall(runner, function(res)
+    if self.status ~= AsyncTask.Status.Pending then
+      return
+    end
+    self.status = AsyncTask.Status.Fulfilled
+    self.value = res
+    for _, c in ipairs(self.children) do
+      c()
+    end
+  end, function(err)
+    if self.status ~= AsyncTask.Status.Pending then
+      return
+    end
+    self.status = AsyncTask.Status.Rejected
+    self.value = err
+    for _, c in ipairs(self.children) do
+      c()
+    end
   end)
   if not ok then
     self.status = AsyncTask.Status.Rejected
@@ -143,6 +141,12 @@ function AsyncTask:sync(timeout)
   return self.value
 end
 
+---Await async task.
+---@return any
+function AsyncTask:await()
+  return require('___plugin_name___.kit.Async').await(self)
+end
+
 ---Register next step.
 ---@param on_fulfilled fun(value: any): any
 function AsyncTask:next(on_fulfilled)
@@ -166,28 +170,25 @@ end
 ---@return ___plugin_name___.kit.Async.AsyncTask
 function AsyncTask:_dispatch(on_fulfilled, on_rejected)
   self.chained = true
+
   local function dispatch(resolve, reject)
-    if self.status == AsyncTask.Status.Fulfilled then
-      local res = on_fulfilled(self.value)
-      if AsyncTask.is(res) then
-        res:next(resolve, reject)
-      else
-        resolve(res)
-      end
+    local on_next = self.status == AsyncTask.Status.Fulfilled and on_fulfilled or on_rejected
+    local res = on_next(self.value)
+    if AsyncTask.is(res) then
+      res:next(resolve):catch(reject)
     else
-      local res = on_rejected(self.value)
-      if AsyncTask.is(res) then
-        res:next(resolve, reject)
-      else
-        resolve(res)
-      end
+      resolve(res)
     end
   end
 
   if self.status == AsyncTask.Status.Pending then
     return AsyncTask.new(function(resolve, reject)
       table.insert(self.children, function()
-        dispatch(resolve, reject)
+        self.chained = true
+        local ok, err = pcall(dispatch, resolve, reject)
+        if not ok then
+          reject(err)
+        end
       end)
     end)
   end

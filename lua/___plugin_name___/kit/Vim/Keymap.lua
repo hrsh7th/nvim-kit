@@ -1,3 +1,4 @@
+local kit = require('___plugin_name___.kit')
 local AsyncTask = require('___plugin_name___.kit.Async.AsyncTask')
 
 local Keymap = {}
@@ -15,9 +16,11 @@ end
 ---@param keys string
 ---@param mode string
 function Keymap.send(keys, mode)
-  local callback = Keymap.termcodes('<Cmd>lua require("___plugin_name___.kit.Vim.Keymap")._resolve()<CR>')
+  local uuid = kit.uuid()
   return AsyncTask.new(function(resolve)
-    table.insert(Keymap._callbacks, resolve)
+    Keymap._callbacks[uuid] = resolve
+
+    local callback = Keymap.termcodes(('<Cmd>lua require("___plugin_name___.kit.Vim.Keymap")._resolve(%s)<CR>'):format(uuid))
     if string.match(mode, 'i') then
       vim.api.nvim_feedkeys(callback, 'in', true)
       vim.api.nvim_feedkeys(keys, mode, true)
@@ -25,6 +28,8 @@ function Keymap.send(keys, mode)
       vim.api.nvim_feedkeys(keys, mode, true)
       vim.api.nvim_feedkeys(callback, 'n', true)
     end
+  end):catch(function()
+    Keymap._callbacks[uuid] = nil
   end)
 end
 
@@ -38,8 +43,10 @@ function Keymap.spec(spec)
 end
 
 ---Resolve running keys.
-function Keymap._resolve()
-  table.remove(Keymap._callbacks, 1)()
+---@param uuid integer
+function Keymap._resolve(uuid)
+  Keymap._callbacks[uuid]()
+  Keymap._callbacks[uuid] = nil
 end
 
 return Keymap

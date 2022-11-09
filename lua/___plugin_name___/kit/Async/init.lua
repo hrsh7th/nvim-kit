@@ -30,7 +30,7 @@ function Async.async(runner)
         if coroutine.status(thread) == 'dead' then
           _G.__kit__.Async.threads[thread] = nil
           if not ok then
-            reject(v)
+            AsyncTask.reject(v):next(resolve):catch(reject)
           else
             AsyncTask.resolve(v):next(resolve):catch(reject)
           end
@@ -38,12 +38,12 @@ function Async.async(runner)
         end
 
         AsyncTask.resolve(v)
-            :next(function(...)
-              next_step(coroutine.resume(thread, ...))
-            end)
-            :catch(function(...)
-              next_step(coroutine.resume(thread, ...))
-            end)
+          :next(function(...)
+            next_step(coroutine.resume(thread, ...))
+          end)
+          :catch(function(...)
+            next_step(coroutine.resume(thread, ...))
+          end)
       end
 
       next_step(coroutine.resume(thread, unpack(args)))
