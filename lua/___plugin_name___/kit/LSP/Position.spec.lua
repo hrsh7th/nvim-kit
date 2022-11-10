@@ -16,6 +16,27 @@ describe('kit.LSP.Position', function()
     ]]):format(text))
   end)
 
+  describe('.is', function()
+    it('should not contain encoding property to the json encoded value', function()
+      local position = Position.to_utf8(text, { line = 0, character = 0 })
+      local json = vim.fn.json_encode(position)
+      assert.is_not.match(json, '"encoding"')
+    end)
+    it('should accept position without encoding', function()
+      local position = { line = 0, character = 0 }
+      assert.is_true(Position.is(position))
+      assert.is_false(Position.is(position, LSP.PositionEncodingKind.UTF8))
+      assert.is_false(Position.is(position, LSP.PositionEncodingKind.UTF16))
+      assert.is_false(Position.is(position, LSP.PositionEncodingKind.UTF32))
+    end)
+    it('should accept position with encoding', function()
+      local position = { line = 0, character = 0 }
+      assert.is_true(Position.is(Position.to_utf8(text, position), LSP.PositionEncodingKind.UTF8))
+      assert.is_true(Position.is(Position.to_utf16(text, position), LSP.PositionEncodingKind.UTF16))
+      assert.is_true(Position.is(Position.to_utf32(text, position), LSP.PositionEncodingKind.UTF32))
+    end)
+  end)
+
   for _, from_encoding in ipairs({
     LSP.PositionEncodingKind.UTF16,
     LSP.PositionEncodingKind.UTF32,
@@ -53,6 +74,8 @@ describe('kit.LSP.Position', function()
       it(('should convert %s <- %s'):format(to.encoding, from.encoding), function()
         local converted = Position[to.method](text, { line = 1, character = from.character }, from.encoding)
         assert.are.same(to.character, converted.character)
+        assert.is_true(Position.is(converted))
+        assert.is_true(Position.is(converted, to.encoding))
       end)
     end
   end
