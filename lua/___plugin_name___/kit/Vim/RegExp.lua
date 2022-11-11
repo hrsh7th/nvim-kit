@@ -22,7 +22,7 @@ function RegExp.gsub(text, pattern, replacement)
   local regex = RegExp.get(pattern)
 
   local new_text = {}
-  while true do
+  while text ~= '' do
     local s, e = regex:match_str(text)
     if not s then
       break
