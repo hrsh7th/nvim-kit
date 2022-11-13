@@ -184,7 +184,6 @@ function AsyncTask:_dispatch(on_fulfilled, on_rejected)
   if self.status == AsyncTask.Status.Pending then
     return AsyncTask.new(function(resolve, reject)
       table.insert(self.children, function()
-        self.chained = true
         local ok, err = pcall(dispatch, resolve, reject)
         if not ok then
           reject(err)
