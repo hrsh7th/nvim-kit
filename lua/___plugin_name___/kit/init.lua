@@ -110,7 +110,7 @@ end
 ---Get object path with default value.
 ---@generic T
 ---@param value table
----@param path string|string[]
+---@param path integer|string|string[]
 ---@param default? T
 ---@return T
 function kit.get(value, path, default)

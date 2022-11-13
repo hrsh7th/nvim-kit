@@ -23,5 +23,4 @@ describe('kit.Vim.RegExp', function()
       )
     end)
   end)
-
 end)

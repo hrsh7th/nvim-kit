@@ -1,5 +1,4 @@
 local LSP = require('___plugin_name___.kit.LSP')
-local Buffer = require('___plugin_name___.kit.Vim.Buffer')
 
 ---Mark encoding for given position.
 ---@param position ___plugin_name___.kit.LSP.Position
@@ -37,23 +36,6 @@ function Position.cursor(encoding)
     return Position.to_utf32(text, utf8, LSP.PositionEncodingKind.UTF8)
   else
     return Position.to_utf16(text, utf8, LSP.PositionEncodingKind.UTF8)
-  end
-end
-
----Convert position to utf8 from specified encoding.
----@param expr string|integer
----@param position ___plugin_name___.kit.LSP.Position
----@param from_encoding? ___plugin_name___.kit.LSP.PositionEncodingKind
----@return ___plugin_name___.kit.LSP.Position
-function Position.to_vim(expr, position, from_encoding)
-  if from_encoding == LSP.PositionEncodingKind.UTF8 then
-    return position
-  end
-  local text = Buffer.at(expr, position.line)
-  if from_encoding == LSP.PositionEncodingKind.UTF32 then
-    return Position.to_utf8(text, position, LSP.PositionEncodingKind.UTF32)
-  else
-    return Position.to_utf8(text, position, LSP.PositionEncodingKind.UTF16)
   end
 end
 
