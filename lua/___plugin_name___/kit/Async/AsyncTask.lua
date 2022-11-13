@@ -9,11 +9,12 @@ local Lua = require('___plugin_name___.kit.Lua')
 local AsyncTask = {}
 AsyncTask.__index = AsyncTask
 
----@alias ___plugin_name___.kit.Async.AsyncTask.Status integer
-AsyncTask.Status = {}
-AsyncTask.Status.Pending = 0
-AsyncTask.Status.Fulfilled = 1
-AsyncTask.Status.Rejected = 2
+---@enum ___plugin_name___.kit.Async.AsyncTask.Status
+AsyncTask.Status = {
+  Pending = 0,
+  Fulfilled = 1,
+  Rejected = 2,
+}
 
 ---Handle unhandled rejection.
 ---@param err any
