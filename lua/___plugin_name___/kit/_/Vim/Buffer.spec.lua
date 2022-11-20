@@ -1,4 +1,4 @@
-local Buffer = require('___plugin_name___.kit.Vim.Buffer')
+local Buffer = require('___plugin_name___.kit._.Vim.Buffer')
 
 describe('kit.Vim.Buffer', function()
   before_each(function()

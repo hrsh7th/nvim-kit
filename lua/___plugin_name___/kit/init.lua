@@ -2,12 +2,12 @@ local kit = {}
 
 ---Create unique id.
 ---@return integer
-kit.uuid = setmetatable({
-  uuid = 0,
+kit.unique_id = setmetatable({
+  unique_id = 0,
 }, {
   __call = function(self)
-    self.uuid = self.uuid + 1
-    return self.uuid
+    self.unique_id = self.unique_id + 1
+    return self.unique_id
   end,
 })
 

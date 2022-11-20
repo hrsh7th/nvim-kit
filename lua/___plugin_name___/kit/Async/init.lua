@@ -61,4 +61,34 @@ function Async.await(task)
   return coroutine.yield(AsyncTask.resolve(task))
 end
 
+---Create async function from callback function.
+---@generic T: fun(..., callback: fun(err: any, ...: any))
+---@param runner T
+---@param option? { schedule?: boolean }
+---@return fun(...): ___plugin_name___.kit.Async.AsyncTask
+function Async.promisify(runner, option)
+  option = option or {
+    schedule = true,
+  }
+  return function(...)
+    local schedule = option.schedule and vim.schedule_wrap or function(f)
+      return f
+    end
+    local args = { ... }
+    return AsyncTask.new(function(resolve, reject)
+      table.insert(
+        args,
+        schedule(function(err, ...)
+          if err then
+            reject(err)
+          else
+            resolve(...)
+          end
+        end)
+      )
+      runner(unpack(args))
+    end)
+  end
+end
+
 return Async

@@ -4,7 +4,7 @@ fmt:
 
 .PHONY: lint
 lint:
-	luacheck ./lua
+	luacheck --codes ./lua
 
 .PHONY: test
 test:

@@ -1,4 +1,4 @@
-local Highlight = require('___plugin_name___.kit.Vim.Highlight')
+local Highlight = require('___plugin_name___.kit._.Vim.Highlight')
 
 describe('kit.Vim.Highlight', function()
   it('should not throw error', function()

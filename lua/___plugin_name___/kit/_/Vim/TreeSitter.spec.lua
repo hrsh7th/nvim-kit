@@ -1,5 +1,5 @@
 ---@diagnostic disable: need-check-nil, param-type-mismatch
-local TreeSitter = require('___plugin_name___.kit.Vim.TreeSitter')
+local TreeSitter = require('___plugin_name___.kit._.Vim.TreeSitter')
 
 describe('kit.Lua.TreeSitter', function()
   before_each(function()

@@ -1,6 +1,6 @@
 local TreeSitter = {}
 
----@alias ___plugin_name___.kit.Vim.TreeSitter.VisitStatus 'stop'|'skip'
+---@alias ___plugin_name___.kit._.Vim.TreeSitter.VisitStatus 'stop'|'skip'
 TreeSitter.VisitStatus = {}
 TreeSitter.VisitStatus.Stop = 'stop'
 TreeSitter.VisitStatus.Skip = 'skip'

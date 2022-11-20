@@ -77,7 +77,7 @@ end
 
 ---Create new async task object.
 ---@generic T
----@param runner fun(resolve?: fun(value: T), reject?: fun(err: any))
+---@param runner fun(resolve?: fun(value: T?), reject?: fun(err: any?))
 function AsyncTask.new(runner)
   local self = setmetatable({}, AsyncTask)
 
@@ -132,7 +132,7 @@ function AsyncTask:sync(timeout)
 
   vim.wait(timeout or 24 * 60 * 60 * 1000, function()
     return self.status ~= AsyncTask.Status.Pending
-  end, 10)
+  end, 1, false)
   if self.status == AsyncTask.Status.Rejected then
     error(self.value)
   end

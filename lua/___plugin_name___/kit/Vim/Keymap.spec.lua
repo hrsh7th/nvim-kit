@@ -10,21 +10,19 @@ describe('kit.Vim.Keymap', function()
   end)
 
   it('should work with async-await and exceptions', function()
-    local ok, err = pcall(function()
+    local _, err = pcall(function()
       Keymap.spec(Async.async(function()
         Keymap.send('iinsert', 'n'):await()
         error('error')
       end))
     end)
-    if not ok then
-      assert.are_not.equals(
-        string.match(
-          err--[[@as string]] ,
-          'error$'
-        ),
-        nil
-      )
-    end
+    assert.are_not.equals(
+      string.match(
+        err--[[@as string]],
+        'error$'
+      ),
+      nil
+    )
   end)
 
   it('should insert multiple keys in order', function()
@@ -59,6 +57,12 @@ describe('kit.Vim.Keymap', function()
         Keymap.send(Keymap.termcodes('i<Plug>(kit.Vim.Keymap.send)'), 'i'):await()
       end))
     end)
-    assert.are_not.equals(string.match(err--[[@as string]] , 'Keymap.send:'), nil)
+    assert.are_not.equals(
+      string.match(
+        err--[[@as string]],
+        'Keymap.send:'
+      ),
+      nil
+    )
   end)
 end)
