@@ -2,28 +2,28 @@ local IO = require('___plugin_name___.kit.IO')
 
 local tmpdir = '/tmp/nvim-kit/IO'
 
-describe('kit.Lua.IO', function()
+describe('kit.IO', function()
   describe('.ls', function()
     it('should return entries', function()
-      local entries = IO.ls('./fixture/Lua/IO/a'):sync()
+      local entries = IO.ls('./fixture/IO/a'):sync()
       table.sort(entries, function(a, b)
         return a.path < b.path
       end)
       assert.are.same({
         {
-          path = IO.normalize('./fixture/Lua/IO/a/0'),
+          path = IO.normalize('./fixture/IO/a/0'),
           type = 'directory',
         },
         {
-          path = IO.normalize('./fixture/Lua/IO/a/1'),
+          path = IO.normalize('./fixture/IO/a/1'),
           type = 'file',
         },
         {
-          path = IO.normalize('./fixture/Lua/IO/a/2'),
+          path = IO.normalize('./fixture/IO/a/2'),
           type = 'file',
         },
         {
-          path = IO.normalize('./fixture/Lua/IO/a/3'),
+          path = IO.normalize('./fixture/IO/a/3'),
           type = 'file',
         },
       }, entries)
@@ -32,32 +32,32 @@ describe('kit.Lua.IO', function()
 
   describe('.cp', function()
     it('should copy directory recursively', function()
-      IO.cp('./fixture/Lua/IO/a', './fixture/Lua/IO/b', { recursive = true }):sync()
-      assert.is_true(vim.fn.isdirectory('./fixture/Lua/IO/b') == 1)
+      IO.cp('./fixture/IO/a', './fixture/IO/b', { recursive = true }):sync()
+      assert.is_true(vim.fn.isdirectory('./fixture/IO/b') == 1)
 
-      local entries = IO.ls('./fixture/Lua/IO/b'):sync()
+      local entries = IO.ls('./fixture/IO/b'):sync()
       table.sort(entries, function(a, b)
         return a.path < b.path
       end)
       assert.are.same({
         {
-          path = IO.normalize('./fixture/Lua/IO/b/0'),
+          path = IO.normalize('./fixture/IO/b/0'),
           type = 'directory',
         },
         {
-          path = IO.normalize('./fixture/Lua/IO/b/1'),
+          path = IO.normalize('./fixture/IO/b/1'),
           type = 'file',
         },
         {
-          path = IO.normalize('./fixture/Lua/IO/b/2'),
+          path = IO.normalize('./fixture/IO/b/2'),
           type = 'file',
         },
         {
-          path = IO.normalize('./fixture/Lua/IO/b/3'),
+          path = IO.normalize('./fixture/IO/b/3'),
           type = 'file',
         },
       }, entries)
-      IO.rm('./fixture/Lua/IO/b', { recursive = true }):sync()
+      IO.rm('./fixture/IO/b', { recursive = true }):sync()
     end)
   end)
 
