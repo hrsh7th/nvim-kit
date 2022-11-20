@@ -12,8 +12,8 @@ local fs_readdir = Async.promisify(uv.fs_readdir)
 
 local IO = {}
 
----@enum ___plugin_name___.kit.IO.VisitStatus
-IO.VisitStatus = {
+---@enum ___plugin_name___.kit.IO.WalkStatus
+IO.WalkStatus = {
   Continue = 1,
   Break = 2,
 }
@@ -94,7 +94,7 @@ function IO.cp(from, to, option)
       if not option.recursive then
         error(('IO.cp: `%s` is a directory.'):format(from))
       end
-      IO.visit(from, function(entry)
+      IO.walk(from, function(entry)
         local new_path = entry.path:gsub(vim.pesc(from), to)
         if entry.type == 'directory' then
           IO.mkdir(new_path, tonumber(stat.mode, 10), { recursive = true }):await()
@@ -108,17 +108,17 @@ function IO.cp(from, to, option)
   end)
 end
 
----Visit directory entries recursively.
+---Walk directory entries recursively.
 ---@param start_path string
----@param callback fun(entry: { path: string, type: string }): ___plugin_name___.kit.IO.VisitStatus?
-function IO.visit(start_path, callback)
+---@param callback fun(entry: { path: string, type: string }): ___plugin_name___.kit.IO.WalkStatus?
+function IO.walk(start_path, callback)
   start_path = IO.normalize(start_path)
   return Async.run(function()
-    local function visit(path)
+    local function walk(path)
       for _, entry in ipairs(IO.ls(path):await()) do
         if entry.type == 'directory' then
-          if callback(entry) ~= IO.VisitStatus.Break then
-            visit(entry.path)
+          if callback(entry) ~= IO.WalkStatus.Break then
+            walk(entry.path)
           end
         else
           callback(entry)
@@ -128,9 +128,9 @@ function IO.visit(start_path, callback)
 
     local stat = fs_stat(start_path):await()
     if stat.type ~= 'directory' then
-      error(('IO.visit: `%s` is not a directory.'):format(start_path))
+      error(('IO.walk: `%s` is not a directory.'):format(start_path))
     end
-    visit(start_path)
+    walk(start_path)
   end)
 end
 
