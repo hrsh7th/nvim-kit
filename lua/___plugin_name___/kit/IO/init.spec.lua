@@ -3,6 +3,73 @@ local IO = require('___plugin_name___.kit.IO')
 local tmpdir = '/tmp/nvim-kit/IO'
 
 describe('kit.IO', function()
+  describe('.walk', function()
+    it('should walk directory entires (preorder)', function()
+      local entries = {}
+      IO.walk('./fixture/IO/scandir/a', function(entry)
+        table.insert(entries, entry)
+      end):sync()
+      assert.are.same({
+        {
+          path = IO.normalize('./fixture/IO/scandir/a'),
+          type = 'directory',
+        },
+        {
+          path = IO.normalize('./fixture/IO/scandir/a/0'),
+          type = 'directory',
+        },
+        {
+          path = IO.normalize('./fixture/IO/scandir/a/0/1'),
+          type = 'file',
+        },
+        {
+          path = IO.normalize('./fixture/IO/scandir/a/1'),
+          type = 'file',
+        },
+        {
+          path = IO.normalize('./fixture/IO/scandir/a/3'),
+          type = 'file',
+        },
+        {
+          path = IO.normalize('./fixture/IO/scandir/a/2'),
+          type = 'file',
+        },
+      }, entries)
+    end)
+    it('should walk directory entires (postorder)', function()
+      local entries = {}
+      IO.walk('./fixture/IO/scandir/a', function(entry)
+        table.insert(entries, entry)
+      end, { postorder = true }):sync()
+      assert.are.same({
+        {
+          path = IO.normalize('./fixture/IO/scandir/a/0/1'),
+          type = 'file',
+        },
+        {
+          path = IO.normalize('./fixture/IO/scandir/a/0'),
+          type = 'directory',
+        },
+        {
+          path = IO.normalize('./fixture/IO/scandir/a/1'),
+          type = 'file',
+        },
+        {
+          path = IO.normalize('./fixture/IO/scandir/a/3'),
+          type = 'file',
+        },
+        {
+          path = IO.normalize('./fixture/IO/scandir/a/2'),
+          type = 'file',
+        },
+        {
+          path = IO.normalize('./fixture/IO/scandir/a'),
+          type = 'directory',
+        },
+      }, entries)
+    end)
+  end)
+
   describe('.read_file', function()
     it('should read the file', function()
       assert.are.equals(IO.read_file('./fixture/IO/read_file.txt', 5):sync(), table.concat({
@@ -39,9 +106,6 @@ describe('kit.IO', function()
   describe('.scandir', function()
     it('should return entries', function()
       local entries = IO.scandir('./fixture/IO/scandir/a'):sync()
-      table.sort(entries, function(a, b)
-        return a.path < b.path
-      end)
       assert.are.same({
         {
           path = IO.normalize('./fixture/IO/scandir/a/0'),
@@ -52,11 +116,11 @@ describe('kit.IO', function()
           type = 'file',
         },
         {
-          path = IO.normalize('./fixture/IO/scandir/a/2'),
+          path = IO.normalize('./fixture/IO/scandir/a/3'),
           type = 'file',
         },
         {
-          path = IO.normalize('./fixture/IO/scandir/a/3'),
+          path = IO.normalize('./fixture/IO/scandir/a/2'),
           type = 'file',
         },
       }, entries)

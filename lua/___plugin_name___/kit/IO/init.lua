@@ -46,8 +46,7 @@ IO.AccessMode = {
 
 ---@enum ___plugin_name___.kit.IO.WalkStatus
 IO.WalkStatus = {
-  Continue = 1,
-  Break = 2,
+  SkipDir = 1,
 }
 
 ---@type fun(path: string): ___plugin_name___.kit.Async.AsyncTask
@@ -155,15 +154,18 @@ function IO.mkdir(path, mode, option)
     if not option.recursive then
       IO.fs_mkdir(path, mode):await()
     else
-      local curr = ''
-      for _, dirname in ipairs(vim.split(path, '/', { plain = true })) do
-        if dirname ~= '' then
-          curr = curr .. '/' .. dirname
-          local stat = IO.fs_stat(curr):catch(function() end):await()
-          if not stat then
-            IO.fs_mkdir(curr, mode):await()
-          end
+      local not_exists = {}
+      local current = path
+      while current ~= '/' do
+        local stat = IO.fs_stat(current):catch(function() end):await()
+        if stat then
+          break
         end
+        table.insert(not_exists, 1, current)
+        current = vim.fs.dirname(current)
+      end
+      for _, dir in ipairs(not_exists) do
+        IO.fs_mkdir(dir, mode):await()
       end
     end
   end)
@@ -177,26 +179,22 @@ function IO.rm(start_path, option)
   option = option or {}
   option.recursive = option.recursive or false
   return Async.run(function()
-    local function rm(path)
-      local stat = IO.fs_stat(start_path):await()
-      if stat.type == 'directory' then
-        if not option.recursive then
-          error(('IO.rm: `%s` is a directory.'):format(path))
-        end
-        for _, entry in ipairs(IO.scandir(path):await()) do
-          if entry.type == 'directory' then
-            rm(entry.path)
-          else
-            IO.fs_unlink(entry.path):await()
-          end
-        end
-        IO.fs_rmdir(path):await()
-      else
-        IO.fs_unlink(path):await()
+    local stat = IO.fs_stat(start_path):await()
+    if stat.type == 'directory' then
+      local children = IO.scandir(start_path):await()
+      if not option.recursive and #children > 0 then
+        error(('IO.rm: `%s` is a directory and not empty.'):format(start_path))
       end
+      IO.walk(start_path, function(entry)
+        if entry.type == 'directory' then
+          IO.fs_rmdir(entry.path):await()
+        else
+          IO.fs_unlink(entry.path):await()
+        end
+      end, { postorder = true }):await()
+    else
+      IO.fs_unlink(start_path):await()
     end
-
-    rm(start_path)
   end)
 end
 
@@ -233,14 +231,22 @@ end
 ---Walk directory entries recursively.
 ---@param start_path string
 ---@param callback fun(entry: { path: string, type: string }): ___plugin_name___.kit.IO.WalkStatus?
-function IO.walk(start_path, callback)
+---@param option? { postorder?: boolean }
+function IO.walk(start_path, callback, option)
   start_path = IO.normalize(start_path)
+  option = option or {}
+  option.postorder = option.postorder or false
   return Async.run(function()
     local function walk(path)
       for _, entry in ipairs(IO.scandir(path):await()) do
         if entry.type == 'directory' then
-          if callback(entry) ~= IO.WalkStatus.Break then
+          if not option.postorder then
+            if callback(entry) ~= IO.WalkStatus.SkipDir then
+              walk(entry.path)
+            end
+          else
             walk(entry.path)
+            callback(entry)
           end
         else
           callback(entry)
@@ -252,7 +258,14 @@ function IO.walk(start_path, callback)
     if stat.type ~= 'directory' then
       error(('IO.walk: `%s` is not a directory.'):format(start_path))
     end
-    walk(start_path)
+    if not option.postorder then
+      if callback({ path = start_path, type = 'directory' }) ~= IO.WalkStatus.SkipDir then
+        walk(start_path)
+      end
+    else
+      walk(start_path)
+      callback({ path = start_path, type = 'directory' })
+    end
   end)
 end
 
