@@ -3,27 +3,60 @@ local IO = require('___plugin_name___.kit.IO')
 local tmpdir = '/tmp/nvim-kit/IO'
 
 describe('kit.IO', function()
-  describe('.ls', function()
+  describe('.read_file', function()
+    it('should read the file', function()
+      assert.are.equals(IO.read_file('./fixture/IO/read_file.txt', 5):sync(), table.concat({
+        'read_file',
+        'read_file',
+        'read_file',
+        'read_file',
+        'read_file',
+        'read_file',
+        'read_file',
+        'read_file',
+        'read_file',
+        'read_file',
+      }, '\n'))
+    end)
+  end)
+
+  describe('.write_file', function()
+    it('should write the file', function()
+      pcall(function()
+        IO.rm('./fixture/IO/write_file.txt'):sync()
+      end)
+      IO.write_file(
+        './fixture/IO/write_file.txt',
+        IO.read_file('./fixture/IO/read_file.txt', 5):sync()
+      )
+      local contents1 = IO.read_file('./fixture/IO/read_file.txt', 5):sync()
+      local contents2 = IO.read_file('./fixture/IO/write_file.txt', 5):sync()
+      assert.are.equals(#contents1, #contents2)
+      IO.rm('./fixture/IO/write_file.txt'):sync()
+    end)
+  end)
+
+  describe('.scandir', function()
     it('should return entries', function()
-      local entries = IO.ls('./fixture/IO/a'):sync()
+      local entries = IO.scandir('./fixture/IO/scandir/a'):sync()
       table.sort(entries, function(a, b)
         return a.path < b.path
       end)
       assert.are.same({
         {
-          path = IO.normalize('./fixture/IO/a/0'),
+          path = IO.normalize('./fixture/IO/scandir/a/0'),
           type = 'directory',
         },
         {
-          path = IO.normalize('./fixture/IO/a/1'),
+          path = IO.normalize('./fixture/IO/scandir/a/1'),
           type = 'file',
         },
         {
-          path = IO.normalize('./fixture/IO/a/2'),
+          path = IO.normalize('./fixture/IO/scandir/a/2'),
           type = 'file',
         },
         {
-          path = IO.normalize('./fixture/IO/a/3'),
+          path = IO.normalize('./fixture/IO/scandir/a/3'),
           type = 'file',
         },
       }, entries)
@@ -32,32 +65,9 @@ describe('kit.IO', function()
 
   describe('.cp', function()
     it('should copy directory recursively', function()
-      IO.cp('./fixture/IO/a', './fixture/IO/b', { recursive = true }):sync()
-      assert.is_true(vim.fn.isdirectory('./fixture/IO/b') == 1)
-
-      local entries = IO.ls('./fixture/IO/b'):sync()
-      table.sort(entries, function(a, b)
-        return a.path < b.path
-      end)
-      assert.are.same({
-        {
-          path = IO.normalize('./fixture/IO/b/0'),
-          type = 'directory',
-        },
-        {
-          path = IO.normalize('./fixture/IO/b/1'),
-          type = 'file',
-        },
-        {
-          path = IO.normalize('./fixture/IO/b/2'),
-          type = 'file',
-        },
-        {
-          path = IO.normalize('./fixture/IO/b/3'),
-          type = 'file',
-        },
-      }, entries)
-      IO.rm('./fixture/IO/b', { recursive = true }):sync()
+      IO.cp('./fixture/IO/scandir/a', './fixture/IO/scandir/b', { recursive = true }):sync()
+      assert.is_true(vim.fn.isdirectory('./fixture/IO/scandir/b') == 1)
+      IO.rm('./fixture/IO/scandir/b', { recursive = true }):sync()
     end)
   end)
 

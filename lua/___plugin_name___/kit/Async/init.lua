@@ -38,12 +38,12 @@ function Async.async(runner)
         end
 
         AsyncTask.resolve(v)
-          :next(function(...)
-            next_step(coroutine.resume(thread, ...))
-          end)
-          :catch(function(...)
-            next_step(coroutine.resume(thread, ...))
-          end)
+            :next(function(...)
+              next_step(coroutine.resume(thread, ...))
+            end)
+            :catch(function(...)
+              next_step(coroutine.resume(thread, ...))
+            end)
       end
 
       next_step(coroutine.resume(thread, unpack(args)))
@@ -62,30 +62,31 @@ function Async.await(task)
 end
 
 ---Create async function from callback function.
----@generic T: fun(..., callback: fun(err: any, ...: any))
----@param runner T
+---@generic T: ...
+---@param runner fun(...: T)
 ---@param option? { schedule?: boolean }
----@return fun(...): ___plugin_name___.kit.Async.AsyncTask
+---@return fun(...: T): ___plugin_name___.kit.Async.AsyncTask
 function Async.promisify(runner, option)
   option = option or {
     schedule = true,
   }
   return function(...)
-    local schedule = option.schedule and vim.schedule_wrap or function(f)
-      return f
-    end
     local args = { ... }
     return AsyncTask.new(function(resolve, reject)
-      table.insert(
-        args,
-        schedule(function(err, ...)
+      table.insert(args, function(err, ...)
+        local schedule = function(f) f() end
+        if option.schedule and vim.in_fast_event() then
+          schedule = vim.schedule
+        end
+        local value = { ... }
+        schedule(function()
           if err then
             reject(err)
           else
-            resolve(...)
+            resolve(unpack(value))
           end
         end)
-      )
+      end)
       runner(unpack(args))
     end)
   end
