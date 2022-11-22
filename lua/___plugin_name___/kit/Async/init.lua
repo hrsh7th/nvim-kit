@@ -1,3 +1,4 @@
+local uv = require('luv')
 local AsyncTask = require('___plugin_name___.kit.Async.AsyncTask')
 
 _G.__kit__ = _G.__kit__ or {}
@@ -64,18 +65,20 @@ end
 ---Create async function from callback function.
 ---@generic T: ...
 ---@param runner fun(...: T)
----@param option? { schedule?: boolean }
+---@param option? { schedule?: boolean, callback?: integer }
 ---@return fun(...: T): ___plugin_name___.kit.Async.AsyncTask
 function Async.promisify(runner, option)
-  option = option or {
-    schedule = true,
-  }
+  option = option or {}
+  option.schedule = option.schedule or true
+  option.callback = option.callback or nil
   return function(...)
     local args = { ... }
     return AsyncTask.new(function(resolve, reject)
-      table.insert(args, function(err, ...)
+      local max = #args + 1
+      local pos = math.min(option.callback or max, max)
+      table.insert(args, pos, function(err, ...)
         local schedule = function(f) f() end
-        if option.schedule and vim.in_fast_event() then
+        if option.schedule and not vim.is_thread() and vim.in_fast_event() then
           schedule = vim.schedule
         end
         local value = { ... }

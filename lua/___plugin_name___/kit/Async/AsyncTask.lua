@@ -1,3 +1,4 @@
+local uv = require('luv')
 local Lua = require('___plugin_name___.kit.Lua')
 
 ---@class ___plugin_name___.kit.Async.AsyncTask
@@ -38,14 +39,14 @@ function AsyncTask.all(tasks)
     local count = 0
     for i, task in ipairs(tasks) do
       AsyncTask.resolve(task)
-        :next(function(value)
-          values[i] = value
-          count = count + 1
-          if #tasks == count then
-            resolve(values)
-          end
-        end)
-        :catch(reject)
+          :next(function(value)
+            values[i] = value
+            count = count + 1
+            if #tasks == count then
+              resolve(values)
+            end
+          end)
+          :catch(reject)
     end
   end)
 end
@@ -130,9 +131,18 @@ end
 function AsyncTask:sync(timeout)
   self.synced = true
 
-  vim.wait(timeout or 24 * 60 * 60 * 1000, function()
-    return self.status ~= AsyncTask.Status.Pending
-  end, 1, false)
+  if vim.is_thread() then
+    while true do
+      if self.status ~= AsyncTask.Status.Pending then
+        break
+      end
+      uv.run('nowait')
+    end
+  else
+    vim.wait(timeout or 24 * 60 * 60 * 1000, function()
+      return self.status ~= AsyncTask.Status.Pending
+    end, 1, false)
+  end
   if self.status == AsyncTask.Status.Rejected then
     error(self.value)
   end

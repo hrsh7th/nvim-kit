@@ -79,14 +79,17 @@ IO.fs_write = Async.promisify(uv.fs_write)
 ---@type fun(fd: userdata, offset: integer): ___plugin_name___.kit.Async.AsyncTask
 IO.fs_ftruncate = Async.promisify(uv.fs_ftruncate)
 
----@type fun(path: string): ___plugin_name___.kit.Async.AsyncTask
-IO.fs_opendir = Async.promisify(uv.fs_opendir)
+---@type fun(path: string, chunk_size?: integer): ___plugin_name___.kit.Async.AsyncTask
+IO.fs_opendir = Async.promisify(uv.fs_opendir, { callback = 2 })
 
 ---@type fun(fd: userdata): ___plugin_name___.kit.Async.AsyncTask
 IO.fs_closedir = Async.promisify(uv.fs_closedir)
 
 ---@type fun(fd: userdata): ___plugin_name___.kit.Async.AsyncTask
 IO.fs_readdir = Async.promisify(uv.fs_readdir)
+
+---@type fun(path: string): ___plugin_name___.kit.Async.AsyncTask
+IO.fs_realpath = Async.promisify(uv.fs_realpath)
 
 ---Read file.
 ---@param path string
@@ -271,9 +274,11 @@ end
 
 ---Scan directory entries.
 ---@param path string
+---@param chunk_size? integer
 ---@return ___plugin_name___.kit.Async.AsyncTask
-function IO.scandir(path)
+function IO.scandir(path, chunk_size)
   path = IO.normalize(path)
+  chunk_size = chunk_size or 256
   return Async.run(function()
     -- Check the path is directory. If not, throw error.
     local stat = IO.fs_stat(path):await()
@@ -281,7 +286,7 @@ function IO.scandir(path)
       error(('IO.scandir: `%s` is not a directory.'):format(path))
     end
 
-    local fd = IO.fs_opendir(path):await()
+    local fd = IO.fs_opendir(path, chunk_size):await()
     local entries = {}
     local ok, err = pcall(function()
       while true do
@@ -309,7 +314,22 @@ end
 ---@param path string
 ---@return string
 function IO.normalize(path)
-  return vim.fs.normalize(vim.fn.fnamemodify(path, ':p'):gsub('/$', ''))
+  if path:match('^/') then
+    return path
+  end
+  local up = vim.is_thread() and uv.cwd() or vim.fn.getcwd()
+  up = up:gsub('/$', '')
+  while true do
+    if path:match('^%.%./') then
+      path = path:gsub('^%.%./', '')
+      up = up:gsub('/[^/]+/?$', '')
+    elseif path:match('^%.?/') then
+      path = path:gsub('^%.?/', '')
+    else
+      break
+    end
+  end
+  return up .. '/' .. path
 end
 
 return IO
