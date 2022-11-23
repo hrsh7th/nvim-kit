@@ -6,7 +6,7 @@ describe('kit.IO', function()
   describe('.walk', function()
     it('should walk directory entires (preorder)', function()
       local entries = {}
-      IO.walk('./fixture/IO/scandir/a', function(entry)
+      IO.walk('./fixture/IO/scandir/a', function(_, entry)
         table.insert(entries, entry)
       end):sync()
       assert.are.same({
@@ -27,18 +27,18 @@ describe('kit.IO', function()
           type = 'file',
         },
         {
-          path = IO.normalize('./fixture/IO/scandir/a/3'),
+          path = IO.normalize('./fixture/IO/scandir/a/2'),
           type = 'file',
         },
         {
-          path = IO.normalize('./fixture/IO/scandir/a/2'),
+          path = IO.normalize('./fixture/IO/scandir/a/3'),
           type = 'file',
         },
       }, entries)
     end)
     it('should walk directory entires (postorder)', function()
       local entries = {}
-      IO.walk('./fixture/IO/scandir/a', function(entry)
+      IO.walk('./fixture/IO/scandir/a', function(_, entry)
         table.insert(entries, entry)
       end, { postorder = true }):sync()
       assert.are.same({
@@ -55,11 +55,11 @@ describe('kit.IO', function()
           type = 'file',
         },
         {
-          path = IO.normalize('./fixture/IO/scandir/a/3'),
+          path = IO.normalize('./fixture/IO/scandir/a/2'),
           type = 'file',
         },
         {
-          path = IO.normalize('./fixture/IO/scandir/a/2'),
+          path = IO.normalize('./fixture/IO/scandir/a/3'),
           type = 'file',
         },
         {
@@ -116,11 +116,11 @@ describe('kit.IO', function()
           type = 'file',
         },
         {
-          path = IO.normalize('./fixture/IO/scandir/a/3'),
+          path = IO.normalize('./fixture/IO/scandir/a/2'),
           type = 'file',
         },
         {
-          path = IO.normalize('./fixture/IO/scandir/a/2'),
+          path = IO.normalize('./fixture/IO/scandir/a/3'),
           type = 'file',
         },
       }, entries)

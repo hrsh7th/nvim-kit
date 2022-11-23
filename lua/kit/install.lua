@@ -6,7 +6,7 @@ local RegExp = require('___plugin_name___.kit.Vim.RegExp')
 ---@return string
 local function get_kit_path()
   local script_path = IO.normalize(debug.getinfo(2, 'S').source:sub(2):match('(.*/)'))
-  return vim.fn.fnamemodify(script_path, ':h:h') .. '/lua/___plugin_name___/kit'
+  return vim.fn.fnamemodify(script_path, ':h:h:h') .. '/lua/___plugin_name___/kit'
 end
 
 ---Show confirm prompt.
@@ -75,13 +75,16 @@ return function(bang, plugin_path, plugin_name)
     IO.cp(get_kit_path(), kit_install_path, { recursive = true }):await()
 
     -- Remove `*.spec.lue` files.
-    IO.walk(kit_install_path, function(entry)
+    IO.walk(kit_install_path, function(err, entry)
+      if err then
+        vim.api.nvim_echo({ { ('\n[%s] Convert error... %s\n'):format(plugin_name, err), 'Normal' } }, false, {})
+      end
       if entry.type == 'file' then
         if entry.path:match('%.spec%.lua$') then
           IO.rm(entry.path):await()
         else
           local content = IO.read_file(entry.path):await()
-          content = RegExp.gsub(content, [=[___plugin_name___]=], plugin_name)
+          content = RegExp.gsub(content, [=[\V___plugin_name___\m]=], plugin_name)
           content = RegExp.gsub(content, [=[[^\n]*kit\.macro\.remove[^\n]*[[:space:]]*]=], '')
           IO.write_file(entry.path, content):await()
         end

@@ -78,8 +78,10 @@ function Async.promisify(runner, option)
       local pos = math.min(option.callback or max, max)
       table.insert(args, pos, function(err, ...)
         local schedule = function(f) f() end
-        if option.schedule and not vim.is_thread() and vim.in_fast_event() then
-          schedule = vim.schedule
+        if not vim.is_thread() then
+          if option.schedule and vim.in_fast_event() then
+            schedule = vim.schedule
+          end
         end
         local value = { ... }
         schedule(function()
