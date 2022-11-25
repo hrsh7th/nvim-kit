@@ -1,12 +1,12 @@
-local IO = require('___plugin_name___.kit.IO')
-local Async = require('___plugin_name___.kit.Async')
-local RegExp = require('___plugin_name___.kit.Vim.RegExp')
+local IO = require('___kit___.kit.IO')
+local Async = require('___kit___.kit.Async')
+local RegExp = require('___kit___.kit.Vim.RegExp')
 
 ---Return nvim-kit path.
 ---@return string
 local function get_kit_path()
   local script_path = IO.normalize(debug.getinfo(2, 'S').source:sub(2):match('(.*/)'))
-  return vim.fn.fnamemodify(script_path, ':h:h:h') .. '/lua/___plugin_name___/kit'
+  return vim.fn.fnamemodify(script_path, ':h:h:h') .. '/lua/___kit___/kit'
 end
 
 ---Show confirm prompt.
@@ -50,7 +50,7 @@ return function(bang, plugin_path, plugin_name)
       plugin_name = vim.fn.input('plugin_name: ')
       if plugin_name == '' then
         vim.cmd([[redraw]])
-        return vim.api.nvim_echo({ { 'Cancelled.', 'Normal' } }, false, {})
+        return vim.api.nvim_echo({ { 'Cancelled.', 'Normal' } }, true, {})
       end
     end
 
@@ -61,7 +61,7 @@ return function(bang, plugin_path, plugin_name)
     end
 
     -- Start install process.
-    vim.api.nvim_echo({ { ('\n[%s] Installing...\n'):format(plugin_name), 'Normal' } }, false, {})
+    vim.api.nvim_echo({ { ('\n[%s] Installing...\n'):format(plugin_name), 'Normal' } }, true, {})
 
     -- Remove old kit if need.
     local kit_install_path = ([[%s/lua/%s/kit]]):format(plugin_path, plugin_name)
@@ -77,22 +77,24 @@ return function(bang, plugin_path, plugin_name)
     -- Remove `*.spec.lue` files.
     IO.walk(kit_install_path, function(err, entry)
       if err then
-        vim.api.nvim_echo({ { ('\n[%s] Convert error... %s\n'):format(plugin_name, err), 'Normal' } }, false, {})
+        vim.api.nvim_echo({ { ('\n[%s] Convert error... %s\n'):format(plugin_name, err), 'Normal' } }, true, {})
       end
       if entry.type == 'file' then
         if entry.path:match('%.spec%.lua$') then
           IO.rm(entry.path):await()
         else
           local content = IO.read_file(entry.path):await()
-          content = RegExp.gsub(content, [=[\V___plugin_name___\m]=], plugin_name)
+          content = RegExp.gsub(content, [=[\V___kit___\m]=], plugin_name)
           content = RegExp.gsub(content, [=[[^\n]*kit\.macro\.remove[^\n]*[[:space:]]*]=], '')
           IO.write_file(entry.path, content):await()
         end
       end
     end):await()
-  end):catch(function(err)
-    if err:match('Cancelled$') then
-      vim.api.nvim_echo({ { '\nCancelled.', 'WarningMsg' } }, false, {})
-    end
-  end):sync()
+  end)
+    :catch(function(err)
+      if err:match('Cancelled$') then
+        vim.api.nvim_echo({ { '\nCancelled.', 'WarningMsg' } }, true, {})
+      end
+    end)
+    :sync()
 end

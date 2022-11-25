@@ -11,7 +11,7 @@ import metaModel from '../tmp/language-server-protocol/_specifications/lsp/3.18/
 
     return LSP
   `;;
-  fs.writeFileSync(`${__dirname}/../lua/___plugin_name___/kit/LSP/init.lua`, definitions, 'utf-8');
+  fs.writeFileSync(`${__dirname}/../lua/___kit___/kit/LSP/init.lua`, definitions, 'utf-8');
 })();
 
 /**
@@ -157,7 +157,7 @@ function toTypeNotation(type: MetaModel.Type): string {
  * Get type name with namespace.
  */
 function toPackageName(name: string) {
-  return `___plugin_name___.kit.LSP.${name}`;
+  return `___kit___.kit.LSP.${name}`;
 }
 
 /**
