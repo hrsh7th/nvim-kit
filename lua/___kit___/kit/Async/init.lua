@@ -1,11 +1,9 @@
 local uv = require('luv')
 local AsyncTask = require('___kit___.kit.Async.AsyncTask')
 
-_G.__kit__ = _G.__kit__ or {}
-_G.__kit__.Async = _G.__kit__.Async or {}
-_G.__kit__.Async.threads = _G.__kit__.Async.threads or {}
-
 local Async = {}
+
+Async.___threads___ = {}
 
 ---Run async function immediately.
 ---@generic T: fun(...): ___kit___.kit.Async.AsyncTask
@@ -25,11 +23,11 @@ function Async.async(runner)
     local args = { ... }
     local thread = coroutine.create(runner)
     return AsyncTask.new(function(resolve, reject)
-      _G.__kit__.Async.threads[thread] = true
+      Async.___threads___[thread] = true
 
       local function next_step(ok, v)
         if coroutine.status(thread) == 'dead' then
-          _G.__kit__.Async.threads[thread] = nil
+          Async.___threads___[thread] = nil
           if not ok then
             AsyncTask.reject(v):next(resolve):catch(reject)
           else
@@ -39,12 +37,12 @@ function Async.async(runner)
         end
 
         AsyncTask.resolve(v)
-          :next(function(...)
-            next_step(coroutine.resume(thread, ...))
-          end)
-          :catch(function(...)
-            next_step(coroutine.resume(thread, ...))
-          end)
+            :next(function(...)
+              next_step(coroutine.resume(thread, ...))
+            end)
+            :catch(function(...)
+              next_step(coroutine.resume(thread, ...))
+            end)
       end
 
       next_step(coroutine.resume(thread, unpack(args)))
@@ -56,7 +54,7 @@ end
 ---@param task ___kit___.kit.Async.AsyncTask
 ---@return any
 function Async.await(task)
-  if not _G.__kit__.Async.threads[coroutine.running()] then
+  if not Async.___threads___[coroutine.running()] then
     error('`Async.await` must be called in async function.')
   end
   return coroutine.yield(AsyncTask.resolve(task))

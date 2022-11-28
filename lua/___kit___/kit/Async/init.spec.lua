@@ -10,6 +10,7 @@ describe('kit.Async', function()
       end)
     end)
   end)
+
   it('should work like JavaScript Promise', function()
     local num = Async.async(function()
       local num = 2
@@ -19,6 +20,7 @@ describe('kit.Async', function()
     end)():sync()
     assert.are.equal(num, 16)
   end)
+
   it('should work with exception', function()
     pcall(function()
       Async.run(function()
@@ -34,6 +36,7 @@ describe('kit.Async', function()
           callback(nil, 'timeout')
         end, ms)
       end
+
       local wait_async = Async.promisify(wait)
       assert.equals(wait_async(100):sync(), 'timeout')
     end)
@@ -43,6 +46,7 @@ describe('kit.Async', function()
           callback(nil, result)
         end, ms)
       end
+
       local wait_async = Async.promisify(wait, { callback = 2 })
       assert.equals(wait_async(100, 'timeout'):sync(), 'timeout')
     end)

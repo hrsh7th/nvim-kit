@@ -52,6 +52,7 @@ function Keymap.spec(spec)
   vim.api.nvim_feedkeys('', 'x', true)
   task:sync()
   collectgarbage('collect')
+  vim.wait(200, function() return true end)
 end
 
 ---Resolve running keys.

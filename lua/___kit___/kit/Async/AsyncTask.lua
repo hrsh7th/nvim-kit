@@ -39,14 +39,14 @@ function AsyncTask.all(tasks)
     local count = 0
     for i, task in ipairs(tasks) do
       AsyncTask.resolve(task)
-        :next(function(value)
-          values[i] = value
-          count = count + 1
-          if #tasks == count then
-            resolve(values)
-          end
-        end)
-        :catch(reject)
+          :next(function(value)
+            values[i] = value
+            count = count + 1
+            if #tasks == count then
+              resolve(values)
+            end
+          end)
+          :catch(reject)
     end
   end)
 end
@@ -136,7 +136,7 @@ function AsyncTask:sync(timeout)
       if self.status ~= AsyncTask.Status.Pending then
         break
       end
-      uv.run('nowait')
+      uv.run('once')
     end
   else
     vim.wait(timeout or 24 * 60 * 60 * 1000, function()
