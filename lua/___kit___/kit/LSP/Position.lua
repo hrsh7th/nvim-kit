@@ -11,6 +11,38 @@ function Position.is(v)
   return is
 end
 
+---Create a cursor position.
+---@param encoding? ___kit___.kit.LSP.PositionEncodingKind
+function Position.cursor(encoding)
+  local r, c = unpack(vim.api.nvim_win_get_cursor(0))
+  local utf8 = { line = r - 1, character = c }
+  if encoding == LSP.PositionEncodingKind.UTF8 then
+    return utf8
+  else
+    local text = vim.api.nvim_get_current_line()
+    if encoding == LSP.PositionEncodingKind.UTF32 then
+      return Position.to(text, utf8, LSP.PositionEncodingKind.UTF8, LSP.PositionEncodingKind.UTF32)
+    end
+    return Position.to(text, utf8, LSP.PositionEncodingKind.UTF8, LSP.PositionEncodingKind.UTF16)
+  end
+end
+
+---Convert position to specified encoding from specified encoding.
+---@param text string
+---@param position ___kit___.kit.LSP.Position
+---@param from_encoding ___kit___.kit.LSP.PositionEncodingKind
+---@param to_encoding ___kit___.kit.LSP.PositionEncodingKind
+function Position.to(text, position, from_encoding, to_encoding)
+  if to_encoding == LSP.PositionEncodingKind.UTF8 then
+    return Position.to_utf8(text, position, from_encoding)
+  elseif to_encoding == LSP.PositionEncodingKind.UTF16 then
+    return Position.to_utf16(text, position, from_encoding)
+  elseif to_encoding == LSP.PositionEncodingKind.UTF32 then
+    return Position.to_utf32(text, position, from_encoding)
+  end
+  error('LSP.Position: Unsupported encoding: ' .. to_encoding)
+end
+
 ---Convert position to utf8 from specified encoding.
 ---@param text string
 ---@param position ___kit___.kit.LSP.Position

@@ -1740,6 +1740,134 @@ LSP.TokenFormat = {
 ---@field public version? string The version of the parser.
 ---@field public allowedTags? string[] A list of HTML tags that the client allows / supports in<br>Markdown.<br><br>@since 3.17.0
 
+---@alias ___kit___.kit.LSP.TextDocumentImplementationResponse (___kit___.kit.LSP.Definition | ___kit___.kit.LSP.DefinitionLink[] | nil)
+
+---@alias ___kit___.kit.LSP.TextDocumentTypeDefinitionResponse (___kit___.kit.LSP.Definition | ___kit___.kit.LSP.DefinitionLink[] | nil)
+
+---@alias ___kit___.kit.LSP.WorkspaceWorkspaceFoldersResponse (___kit___.kit.LSP.WorkspaceFolder[] | nil)
+
+---@alias ___kit___.kit.LSP.WorkspaceConfigurationResponse ___kit___.kit.LSP.LSPAny[]
+
+---@alias ___kit___.kit.LSP.TextDocumentDocumentColorResponse ___kit___.kit.LSP.ColorInformation[]
+
+---@alias ___kit___.kit.LSP.TextDocumentColorPresentationResponse ___kit___.kit.LSP.ColorPresentation[]
+
+---@alias ___kit___.kit.LSP.TextDocumentFoldingRangeResponse (___kit___.kit.LSP.FoldingRange[] | nil)
+
+---@alias ___kit___.kit.LSP.TextDocumentDeclarationResponse (___kit___.kit.LSP.Declaration | ___kit___.kit.LSP.DeclarationLink[] | nil)
+
+---@alias ___kit___.kit.LSP.TextDocumentSelectionRangeResponse (___kit___.kit.LSP.SelectionRange[] | nil)
+
+---@alias ___kit___.kit.LSP.WindowWorkDoneProgressCreateResponse nil
+
+---@alias ___kit___.kit.LSP.TextDocumentPrepareCallHierarchyResponse (___kit___.kit.LSP.CallHierarchyItem[] | nil)
+
+---@alias ___kit___.kit.LSP.CallHierarchyIncomingCallsResponse (___kit___.kit.LSP.CallHierarchyIncomingCall[] | nil)
+
+---@alias ___kit___.kit.LSP.CallHierarchyOutgoingCallsResponse (___kit___.kit.LSP.CallHierarchyOutgoingCall[] | nil)
+
+---@alias ___kit___.kit.LSP.TextDocumentSemanticTokensFullResponse (___kit___.kit.LSP.SemanticTokens | nil)
+
+---@alias ___kit___.kit.LSP.TextDocumentSemanticTokensFullDeltaResponse (___kit___.kit.LSP.SemanticTokens | ___kit___.kit.LSP.SemanticTokensDelta | nil)
+
+---@alias ___kit___.kit.LSP.TextDocumentSemanticTokensRangeResponse (___kit___.kit.LSP.SemanticTokens | nil)
+
+---@alias ___kit___.kit.LSP.WorkspaceSemanticTokensRefreshResponse nil
+
+---@alias ___kit___.kit.LSP.WindowShowDocumentResponse ___kit___.kit.LSP.ShowDocumentResult
+
+---@alias ___kit___.kit.LSP.TextDocumentLinkedEditingRangeResponse (___kit___.kit.LSP.LinkedEditingRanges | nil)
+
+---@alias ___kit___.kit.LSP.WorkspaceWillCreateFilesResponse (___kit___.kit.LSP.WorkspaceEdit | nil)
+
+---@alias ___kit___.kit.LSP.WorkspaceWillRenameFilesResponse (___kit___.kit.LSP.WorkspaceEdit | nil)
+
+---@alias ___kit___.kit.LSP.WorkspaceWillDeleteFilesResponse (___kit___.kit.LSP.WorkspaceEdit | nil)
+
+---@alias ___kit___.kit.LSP.TextDocumentMonikerResponse (___kit___.kit.LSP.Moniker[] | nil)
+
+---@alias ___kit___.kit.LSP.TextDocumentPrepareTypeHierarchyResponse (___kit___.kit.LSP.TypeHierarchyItem[] | nil)
+
+---@alias ___kit___.kit.LSP.TypeHierarchySupertypesResponse (___kit___.kit.LSP.TypeHierarchyItem[] | nil)
+
+---@alias ___kit___.kit.LSP.TypeHierarchySubtypesResponse (___kit___.kit.LSP.TypeHierarchyItem[] | nil)
+
+---@alias ___kit___.kit.LSP.TextDocumentInlineValueResponse (___kit___.kit.LSP.InlineValue[] | nil)
+
+---@alias ___kit___.kit.LSP.WorkspaceInlineValueRefreshResponse nil
+
+---@alias ___kit___.kit.LSP.TextDocumentInlayHintResponse (___kit___.kit.LSP.InlayHint[] | nil)
+
+---@alias ___kit___.kit.LSP.InlayHintResolveResponse ___kit___.kit.LSP.InlayHint
+
+---@alias ___kit___.kit.LSP.WorkspaceInlayHintRefreshResponse nil
+
+---@alias ___kit___.kit.LSP.TextDocumentDiagnosticResponse ___kit___.kit.LSP.DocumentDiagnosticReport
+
+---@alias ___kit___.kit.LSP.WorkspaceDiagnosticResponse ___kit___.kit.LSP.WorkspaceDiagnosticReport
+
+---@alias ___kit___.kit.LSP.WorkspaceDiagnosticRefreshResponse nil
+
+---@alias ___kit___.kit.LSP.ClientRegisterCapabilityResponse nil
+
+---@alias ___kit___.kit.LSP.ClientUnregisterCapabilityResponse nil
+
+---@alias ___kit___.kit.LSP.InitializeResponse ___kit___.kit.LSP.InitializeResult
+
+---@alias ___kit___.kit.LSP.ShutdownResponse nil
+
+---@alias ___kit___.kit.LSP.WindowShowMessageRequestResponse (___kit___.kit.LSP.MessageActionItem | nil)
+
+---@alias ___kit___.kit.LSP.TextDocumentWillSaveWaitUntilResponse (___kit___.kit.LSP.TextEdit[] | nil)
+
+---@alias ___kit___.kit.LSP.TextDocumentCompletionResponse (___kit___.kit.LSP.CompletionItem[] | ___kit___.kit.LSP.CompletionList | nil)
+
+---@alias ___kit___.kit.LSP.CompletionItemResolveResponse ___kit___.kit.LSP.CompletionItem
+
+---@alias ___kit___.kit.LSP.TextDocumentHoverResponse (___kit___.kit.LSP.Hover | nil)
+
+---@alias ___kit___.kit.LSP.TextDocumentSignatureHelpResponse (___kit___.kit.LSP.SignatureHelp | nil)
+
+---@alias ___kit___.kit.LSP.TextDocumentDefinitionResponse (___kit___.kit.LSP.Definition | ___kit___.kit.LSP.DefinitionLink[] | nil)
+
+---@alias ___kit___.kit.LSP.TextDocumentReferencesResponse (___kit___.kit.LSP.Location[] | nil)
+
+---@alias ___kit___.kit.LSP.TextDocumentDocumentHighlightResponse (___kit___.kit.LSP.DocumentHighlight[] | nil)
+
+---@alias ___kit___.kit.LSP.TextDocumentDocumentSymbolResponse (___kit___.kit.LSP.SymbolInformation[] | ___kit___.kit.LSP.DocumentSymbol[] | nil)
+
+---@alias ___kit___.kit.LSP.TextDocumentCodeActionResponse ((___kit___.kit.LSP.Command | ___kit___.kit.LSP.CodeAction)[] | nil)
+
+---@alias ___kit___.kit.LSP.CodeActionResolveResponse ___kit___.kit.LSP.CodeAction
+
+---@alias ___kit___.kit.LSP.WorkspaceSymbolResponse (___kit___.kit.LSP.SymbolInformation[] | ___kit___.kit.LSP.WorkspaceSymbol[] | nil)
+
+---@alias ___kit___.kit.LSP.WorkspaceSymbolResolveResponse ___kit___.kit.LSP.WorkspaceSymbol
+
+---@alias ___kit___.kit.LSP.TextDocumentCodeLensResponse (___kit___.kit.LSP.CodeLens[] | nil)
+
+---@alias ___kit___.kit.LSP.CodeLensResolveResponse ___kit___.kit.LSP.CodeLens
+
+---@alias ___kit___.kit.LSP.WorkspaceCodeLensRefreshResponse nil
+
+---@alias ___kit___.kit.LSP.TextDocumentDocumentLinkResponse (___kit___.kit.LSP.DocumentLink[] | nil)
+
+---@alias ___kit___.kit.LSP.DocumentLinkResolveResponse ___kit___.kit.LSP.DocumentLink
+
+---@alias ___kit___.kit.LSP.TextDocumentFormattingResponse (___kit___.kit.LSP.TextEdit[] | nil)
+
+---@alias ___kit___.kit.LSP.TextDocumentRangeFormattingResponse (___kit___.kit.LSP.TextEdit[] | nil)
+
+---@alias ___kit___.kit.LSP.TextDocumentOnTypeFormattingResponse (___kit___.kit.LSP.TextEdit[] | nil)
+
+---@alias ___kit___.kit.LSP.TextDocumentRenameResponse (___kit___.kit.LSP.WorkspaceEdit | nil)
+
+---@alias ___kit___.kit.LSP.TextDocumentPrepareRenameResponse (___kit___.kit.LSP.PrepareRenameResult | nil)
+
+---@alias ___kit___.kit.LSP.WorkspaceExecuteCommandResponse (___kit___.kit.LSP.LSPAny | nil)
+
+---@alias ___kit___.kit.LSP.WorkspaceApplyEditResponse ___kit___.kit.LSP.ApplyWorkspaceEditResult
+
 ---@alias ___kit___.kit.LSP.Definition (___kit___.kit.LSP.Location | ___kit___.kit.LSP.Location[])
 
 ---@alias ___kit___.kit.LSP.DefinitionLink ___kit___.kit.LSP.LocationLink
