@@ -20,16 +20,16 @@ import metaModel from '../tmp/language-server-protocol/_specifications/lsp/3.18/
 function generate(metaModel: MetaModel.MetaModel) {
   return dedent`
     ${metaModel.enumerations.map(enums => {
-      return generateEnum(enums);
-    }).join('\n\n').trim()}
+    return generateEnum(enums);
+  }).join('\n\n').trim()}
 
     ${metaModel.structures.map(struct => {
-      return generateStruct(struct);
-    }).join('\n\n').trim()}
+    return generateStruct(struct);
+  }).join('\n\n').trim()}
 
     ${metaModel.typeAliases.map(alias => {
-      return generateAlias(alias);
-    }).join('\n\n').trim()}
+    return generateAlias(alias);
+  }).join('\n\n').trim()}
   `;
 }
 
@@ -41,16 +41,16 @@ function generateEnum(enums: MetaModel.Enumeration) {
     ---@enum ${toPackageName(enums.name)}
     LSP.${enums.name} = {
       ${enums.values.map((value: typeof enums.values[number]) => {
-        switch (toTypeNotation(enums.type)) {
-          case 'string': {
-            return `${escapeLuaKeyword(value.name)} = ${JSON.stringify(value.value)},`;
-          }
-          case 'integer': {
-            return `${escapeLuaKeyword(value.name)} = ${value.value},`;
-          }
-        }
-        throw new Error(`Invalid enumeration type: ${enums.type.name}`);
-      }).join('\n').trim()}
+    switch (toTypeNotation(enums.type)) {
+      case 'string': {
+        return `${escapeLuaKeyword(value.name)} = ${JSON.stringify(value.value)},`;
+      }
+      case 'integer': {
+        return `${escapeLuaKeyword(value.name)} = ${value.value},`;
+      }
+    }
+    throw new Error(`Invalid enumeration type: ${enums.type.name}`);
+  }).join('\n').trim()}
     }
   `;
 }
@@ -59,13 +59,20 @@ function generateEnum(enums: MetaModel.Enumeration) {
  * Generate struct definitions.
  */
 function generateStruct(struct: MetaModel.Structure): string {
-  const extend = ((extends_: MetaModel.Structure['extends']) => {
-    const extend = extends_?.[0];
-    if (extend?.kind !== 'reference') {
+  const extend = (() => {
+    const parents = [
+      ...(struct.extends?.map(extend => {
+        return extend.kind === 'reference' ? toPackageName(extend.name) : '';
+      }) ?? []),
+      ...(struct.mixins?.map(mixin => {
+        return mixin.kind === 'reference' ? toPackageName(mixin.name) : '';
+      }) ?? [])
+    ].filter(Boolean);
+    if (parents.length === 0) {
       return '';
     }
-    return dedent` : ${toPackageName(extend.name)}`;
-  })(struct.extends);
+    return dedent` : ${parents.join(', ')}`;
+  })();
 
   const mainStruct = dedent`
     ---@class ${toPackageName(struct.name)}${extend}

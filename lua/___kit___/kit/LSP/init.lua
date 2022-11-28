@@ -323,17 +323,17 @@ LSP.TokenFormat = {
   Relative = 'relative',
 }
 
----@class ___kit___.kit.LSP.ImplementationParams : ___kit___.kit.LSP.TextDocumentPositionParams
+---@class ___kit___.kit.LSP.ImplementationParams : ___kit___.kit.LSP.TextDocumentPositionParams, ___kit___.kit.LSP.WorkDoneProgressParams, ___kit___.kit.LSP.PartialResultParams
 
 ---@class ___kit___.kit.LSP.Location
 ---@field public uri string
 ---@field public range ___kit___.kit.LSP.Range
 
----@class ___kit___.kit.LSP.ImplementationRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions
+---@class ___kit___.kit.LSP.ImplementationRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions, ___kit___.kit.LSP.ImplementationOptions, ___kit___.kit.LSP.StaticRegistrationOptions
 
----@class ___kit___.kit.LSP.TypeDefinitionParams : ___kit___.kit.LSP.TextDocumentPositionParams
+---@class ___kit___.kit.LSP.TypeDefinitionParams : ___kit___.kit.LSP.TextDocumentPositionParams, ___kit___.kit.LSP.WorkDoneProgressParams, ___kit___.kit.LSP.PartialResultParams
 
----@class ___kit___.kit.LSP.TypeDefinitionRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions
+---@class ___kit___.kit.LSP.TypeDefinitionRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions, ___kit___.kit.LSP.TypeDefinitionOptions, ___kit___.kit.LSP.StaticRegistrationOptions
 
 ---@class ___kit___.kit.LSP.WorkspaceFolder
 ---@field public uri string The associated URI for this workspace folder.
@@ -348,16 +348,16 @@ LSP.TokenFormat = {
 ---@class ___kit___.kit.LSP.PartialResultParams
 ---@field public partialResultToken? ___kit___.kit.LSP.ProgressToken An optional token that a server can use to report partial results (e.g. streaming) to<br>the client.
 
----@class ___kit___.kit.LSP.DocumentColorParams
+---@class ___kit___.kit.LSP.DocumentColorParams : ___kit___.kit.LSP.WorkDoneProgressParams, ___kit___.kit.LSP.PartialResultParams
 ---@field public textDocument ___kit___.kit.LSP.TextDocumentIdentifier The text document.
 
 ---@class ___kit___.kit.LSP.ColorInformation
 ---@field public range ___kit___.kit.LSP.Range The range in the document where this color appears.
 ---@field public color ___kit___.kit.LSP.Color The actual color value for this color range.
 
----@class ___kit___.kit.LSP.DocumentColorRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions
+---@class ___kit___.kit.LSP.DocumentColorRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions, ___kit___.kit.LSP.DocumentColorOptions, ___kit___.kit.LSP.StaticRegistrationOptions
 
----@class ___kit___.kit.LSP.ColorPresentationParams
+---@class ___kit___.kit.LSP.ColorPresentationParams : ___kit___.kit.LSP.WorkDoneProgressParams, ___kit___.kit.LSP.PartialResultParams
 ---@field public textDocument ___kit___.kit.LSP.TextDocumentIdentifier The text document.
 ---@field public color ___kit___.kit.LSP.Color The color to request presentations for.
 ---@field public range ___kit___.kit.LSP.Range The range where the color would be inserted. Serves as a context.
@@ -373,7 +373,7 @@ LSP.TokenFormat = {
 ---@class ___kit___.kit.LSP.TextDocumentRegistrationOptions
 ---@field public documentSelector (___kit___.kit.LSP.DocumentSelector | nil) A document selector to identify the scope of the registration. If set to null<br>the document selector provided on the client side will be used.
 
----@class ___kit___.kit.LSP.FoldingRangeParams
+---@class ___kit___.kit.LSP.FoldingRangeParams : ___kit___.kit.LSP.WorkDoneProgressParams, ___kit___.kit.LSP.PartialResultParams
 ---@field public textDocument ___kit___.kit.LSP.TextDocumentIdentifier The text document.
 
 ---@class ___kit___.kit.LSP.FoldingRange
@@ -384,13 +384,13 @@ LSP.TokenFormat = {
 ---@field public kind? ___kit___.kit.LSP.FoldingRangeKind Describes the kind of the folding range such as `comment' or 'region'. The kind<br>is used to categorize folding ranges and used by commands like 'Fold all comments'.<br>See [FoldingRangeKind](#FoldingRangeKind) for an enumeration of standardized kinds.
 ---@field public collapsedText? string The text that the client should show when the specified range is<br>collapsed. If not defined or not supported by the client, a default<br>will be chosen by the client.<br><br>@since 3.17.0
 
----@class ___kit___.kit.LSP.FoldingRangeRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions
+---@class ___kit___.kit.LSP.FoldingRangeRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions, ___kit___.kit.LSP.FoldingRangeOptions, ___kit___.kit.LSP.StaticRegistrationOptions
 
----@class ___kit___.kit.LSP.DeclarationParams : ___kit___.kit.LSP.TextDocumentPositionParams
+---@class ___kit___.kit.LSP.DeclarationParams : ___kit___.kit.LSP.TextDocumentPositionParams, ___kit___.kit.LSP.WorkDoneProgressParams, ___kit___.kit.LSP.PartialResultParams
 
----@class ___kit___.kit.LSP.DeclarationRegistrationOptions : ___kit___.kit.LSP.DeclarationOptions
+---@class ___kit___.kit.LSP.DeclarationRegistrationOptions : ___kit___.kit.LSP.DeclarationOptions, ___kit___.kit.LSP.TextDocumentRegistrationOptions, ___kit___.kit.LSP.StaticRegistrationOptions
 
----@class ___kit___.kit.LSP.SelectionRangeParams
+---@class ___kit___.kit.LSP.SelectionRangeParams : ___kit___.kit.LSP.WorkDoneProgressParams, ___kit___.kit.LSP.PartialResultParams
 ---@field public textDocument ___kit___.kit.LSP.TextDocumentIdentifier The text document.
 ---@field public positions ___kit___.kit.LSP.Position[] The positions inside the text document.
 
@@ -398,7 +398,7 @@ LSP.TokenFormat = {
 ---@field public range ___kit___.kit.LSP.Range The [range](#Range) of this selection range.
 ---@field public parent? ___kit___.kit.LSP.SelectionRange The parent selection range containing this range. Therefore `parent.range` must contain `this.range`.
 
----@class ___kit___.kit.LSP.SelectionRangeRegistrationOptions : ___kit___.kit.LSP.SelectionRangeOptions
+---@class ___kit___.kit.LSP.SelectionRangeRegistrationOptions : ___kit___.kit.LSP.SelectionRangeOptions, ___kit___.kit.LSP.TextDocumentRegistrationOptions, ___kit___.kit.LSP.StaticRegistrationOptions
 
 ---@class ___kit___.kit.LSP.WorkDoneProgressCreateParams
 ---@field public token ___kit___.kit.LSP.ProgressToken The token to be used to report progress.
@@ -406,7 +406,7 @@ LSP.TokenFormat = {
 ---@class ___kit___.kit.LSP.WorkDoneProgressCancelParams
 ---@field public token ___kit___.kit.LSP.ProgressToken The token to be used to report progress.
 
----@class ___kit___.kit.LSP.CallHierarchyPrepareParams : ___kit___.kit.LSP.TextDocumentPositionParams
+---@class ___kit___.kit.LSP.CallHierarchyPrepareParams : ___kit___.kit.LSP.TextDocumentPositionParams, ___kit___.kit.LSP.WorkDoneProgressParams
 
 ---@class ___kit___.kit.LSP.CallHierarchyItem
 ---@field public name string The name of this item.
@@ -418,23 +418,23 @@ LSP.TokenFormat = {
 ---@field public selectionRange ___kit___.kit.LSP.Range The range that should be selected and revealed when this symbol is being picked, e.g. the name of a function.<br>Must be contained by the [`range`](#CallHierarchyItem.range).
 ---@field public data? ___kit___.kit.LSP.LSPAny A data entry field that is preserved between a call hierarchy prepare and<br>incoming calls or outgoing calls requests.
 
----@class ___kit___.kit.LSP.CallHierarchyRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions
+---@class ___kit___.kit.LSP.CallHierarchyRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions, ___kit___.kit.LSP.CallHierarchyOptions, ___kit___.kit.LSP.StaticRegistrationOptions
 
----@class ___kit___.kit.LSP.CallHierarchyIncomingCallsParams
+---@class ___kit___.kit.LSP.CallHierarchyIncomingCallsParams : ___kit___.kit.LSP.WorkDoneProgressParams, ___kit___.kit.LSP.PartialResultParams
 ---@field public item ___kit___.kit.LSP.CallHierarchyItem
 
 ---@class ___kit___.kit.LSP.CallHierarchyIncomingCall
 ---@field public from ___kit___.kit.LSP.CallHierarchyItem The item that makes the call.
 ---@field public fromRanges ___kit___.kit.LSP.Range[] The ranges at which the calls appear. This is relative to the caller<br>denoted by [`this.from`](#CallHierarchyIncomingCall.from).
 
----@class ___kit___.kit.LSP.CallHierarchyOutgoingCallsParams
+---@class ___kit___.kit.LSP.CallHierarchyOutgoingCallsParams : ___kit___.kit.LSP.WorkDoneProgressParams, ___kit___.kit.LSP.PartialResultParams
 ---@field public item ___kit___.kit.LSP.CallHierarchyItem
 
 ---@class ___kit___.kit.LSP.CallHierarchyOutgoingCall
 ---@field public to ___kit___.kit.LSP.CallHierarchyItem The item that is called.
 ---@field public fromRanges ___kit___.kit.LSP.Range[] The range at which this item is called. This is the range relative to the caller, e.g the item<br>passed to [`provideCallHierarchyOutgoingCalls`](#CallHierarchyItemProvider.provideCallHierarchyOutgoingCalls)<br>and not [`this.to`](#CallHierarchyOutgoingCall.to).
 
----@class ___kit___.kit.LSP.SemanticTokensParams
+---@class ___kit___.kit.LSP.SemanticTokensParams : ___kit___.kit.LSP.WorkDoneProgressParams, ___kit___.kit.LSP.PartialResultParams
 ---@field public textDocument ___kit___.kit.LSP.TextDocumentIdentifier The text document.
 
 ---@class ___kit___.kit.LSP.SemanticTokens
@@ -444,9 +444,9 @@ LSP.TokenFormat = {
 ---@class ___kit___.kit.LSP.SemanticTokensPartialResult
 ---@field public data integer[]
 
----@class ___kit___.kit.LSP.SemanticTokensRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions
+---@class ___kit___.kit.LSP.SemanticTokensRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions, ___kit___.kit.LSP.SemanticTokensOptions, ___kit___.kit.LSP.StaticRegistrationOptions
 
----@class ___kit___.kit.LSP.SemanticTokensDeltaParams
+---@class ___kit___.kit.LSP.SemanticTokensDeltaParams : ___kit___.kit.LSP.WorkDoneProgressParams, ___kit___.kit.LSP.PartialResultParams
 ---@field public textDocument ___kit___.kit.LSP.TextDocumentIdentifier The text document.
 ---@field public previousResultId string The result id of a previous response. The result Id can either point to a full response<br>or a delta response depending on what was received last.
 
@@ -457,7 +457,7 @@ LSP.TokenFormat = {
 ---@class ___kit___.kit.LSP.SemanticTokensDeltaPartialResult
 ---@field public edits ___kit___.kit.LSP.SemanticTokensEdit[]
 
----@class ___kit___.kit.LSP.SemanticTokensRangeParams
+---@class ___kit___.kit.LSP.SemanticTokensRangeParams : ___kit___.kit.LSP.WorkDoneProgressParams, ___kit___.kit.LSP.PartialResultParams
 ---@field public textDocument ___kit___.kit.LSP.TextDocumentIdentifier The text document.
 ---@field public range ___kit___.kit.LSP.Range The range the semantic tokens are requested for.
 
@@ -470,13 +470,13 @@ LSP.TokenFormat = {
 ---@class ___kit___.kit.LSP.ShowDocumentResult
 ---@field public success boolean A boolean indicating if the show was successful.
 
----@class ___kit___.kit.LSP.LinkedEditingRangeParams : ___kit___.kit.LSP.TextDocumentPositionParams
+---@class ___kit___.kit.LSP.LinkedEditingRangeParams : ___kit___.kit.LSP.TextDocumentPositionParams, ___kit___.kit.LSP.WorkDoneProgressParams
 
 ---@class ___kit___.kit.LSP.LinkedEditingRanges
 ---@field public ranges ___kit___.kit.LSP.Range[] A list of ranges that can be edited together. The ranges must have<br>identical length and contain identical text content. The ranges cannot overlap.
 ---@field public wordPattern? string An optional word pattern (regular expression) that describes valid contents for<br>the given ranges. If no pattern is provided, the client configuration's word<br>pattern will be used.
 
----@class ___kit___.kit.LSP.LinkedEditingRangeRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions
+---@class ___kit___.kit.LSP.LinkedEditingRangeRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions, ___kit___.kit.LSP.LinkedEditingRangeOptions, ___kit___.kit.LSP.StaticRegistrationOptions
 
 ---@class ___kit___.kit.LSP.CreateFilesParams
 ---@field public files ___kit___.kit.LSP.FileCreate[] An array of all files/folders created in this operation.
@@ -495,7 +495,7 @@ LSP.TokenFormat = {
 ---@class ___kit___.kit.LSP.DeleteFilesParams
 ---@field public files ___kit___.kit.LSP.FileDelete[] An array of all files/folders deleted in this operation.
 
----@class ___kit___.kit.LSP.MonikerParams : ___kit___.kit.LSP.TextDocumentPositionParams
+---@class ___kit___.kit.LSP.MonikerParams : ___kit___.kit.LSP.TextDocumentPositionParams, ___kit___.kit.LSP.WorkDoneProgressParams, ___kit___.kit.LSP.PartialResultParams
 
 ---@class ___kit___.kit.LSP.Moniker
 ---@field public scheme string The scheme of the moniker. For example tsc or .Net
@@ -503,9 +503,9 @@ LSP.TokenFormat = {
 ---@field public unique ___kit___.kit.LSP.UniquenessLevel The scope in which the moniker is unique
 ---@field public kind? ___kit___.kit.LSP.MonikerKind The moniker kind if known.
 
----@class ___kit___.kit.LSP.MonikerRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions
+---@class ___kit___.kit.LSP.MonikerRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions, ___kit___.kit.LSP.MonikerOptions
 
----@class ___kit___.kit.LSP.TypeHierarchyPrepareParams : ___kit___.kit.LSP.TextDocumentPositionParams
+---@class ___kit___.kit.LSP.TypeHierarchyPrepareParams : ___kit___.kit.LSP.TextDocumentPositionParams, ___kit___.kit.LSP.WorkDoneProgressParams
 
 ---@class ___kit___.kit.LSP.TypeHierarchyItem
 ---@field public name string The name of this item.
@@ -517,22 +517,22 @@ LSP.TokenFormat = {
 ---@field public selectionRange ___kit___.kit.LSP.Range The range that should be selected and revealed when this symbol is being<br>picked, e.g. the name of a function. Must be contained by the<br>[`range`](#TypeHierarchyItem.range).
 ---@field public data? ___kit___.kit.LSP.LSPAny A data entry field that is preserved between a type hierarchy prepare and<br>supertypes or subtypes requests. It could also be used to identify the<br>type hierarchy in the server, helping improve the performance on<br>resolving supertypes and subtypes.
 
----@class ___kit___.kit.LSP.TypeHierarchyRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions
+---@class ___kit___.kit.LSP.TypeHierarchyRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions, ___kit___.kit.LSP.TypeHierarchyOptions, ___kit___.kit.LSP.StaticRegistrationOptions
 
----@class ___kit___.kit.LSP.TypeHierarchySupertypesParams
+---@class ___kit___.kit.LSP.TypeHierarchySupertypesParams : ___kit___.kit.LSP.WorkDoneProgressParams, ___kit___.kit.LSP.PartialResultParams
 ---@field public item ___kit___.kit.LSP.TypeHierarchyItem
 
----@class ___kit___.kit.LSP.TypeHierarchySubtypesParams
+---@class ___kit___.kit.LSP.TypeHierarchySubtypesParams : ___kit___.kit.LSP.WorkDoneProgressParams, ___kit___.kit.LSP.PartialResultParams
 ---@field public item ___kit___.kit.LSP.TypeHierarchyItem
 
----@class ___kit___.kit.LSP.InlineValueParams
+---@class ___kit___.kit.LSP.InlineValueParams : ___kit___.kit.LSP.WorkDoneProgressParams
 ---@field public textDocument ___kit___.kit.LSP.TextDocumentIdentifier The text document.
 ---@field public range ___kit___.kit.LSP.Range The document range for which inline values should be computed.
 ---@field public context ___kit___.kit.LSP.InlineValueContext Additional information about the context in which inline values were<br>requested.
 
----@class ___kit___.kit.LSP.InlineValueRegistrationOptions : ___kit___.kit.LSP.InlineValueOptions
+---@class ___kit___.kit.LSP.InlineValueRegistrationOptions : ___kit___.kit.LSP.InlineValueOptions, ___kit___.kit.LSP.TextDocumentRegistrationOptions, ___kit___.kit.LSP.StaticRegistrationOptions
 
----@class ___kit___.kit.LSP.InlayHintParams
+---@class ___kit___.kit.LSP.InlayHintParams : ___kit___.kit.LSP.WorkDoneProgressParams
 ---@field public textDocument ___kit___.kit.LSP.TextDocumentIdentifier The text document.
 ---@field public range ___kit___.kit.LSP.Range The document range for which inlay hints should be computed.
 
@@ -546,9 +546,9 @@ LSP.TokenFormat = {
 ---@field public paddingRight? boolean Render padding after the hint.<br><br>Note: Padding should use the editor's background color, not the<br>background color of the hint itself. That means padding can be used<br>to visually align/separate an inlay hint.
 ---@field public data? ___kit___.kit.LSP.LSPAny A data entry field that is preserved on an inlay hint between<br>a `textDocument/inlayHint` and a `inlayHint/resolve` request.
 
----@class ___kit___.kit.LSP.InlayHintRegistrationOptions : ___kit___.kit.LSP.InlayHintOptions
+---@class ___kit___.kit.LSP.InlayHintRegistrationOptions : ___kit___.kit.LSP.InlayHintOptions, ___kit___.kit.LSP.TextDocumentRegistrationOptions, ___kit___.kit.LSP.StaticRegistrationOptions
 
----@class ___kit___.kit.LSP.DocumentDiagnosticParams
+---@class ___kit___.kit.LSP.DocumentDiagnosticParams : ___kit___.kit.LSP.WorkDoneProgressParams, ___kit___.kit.LSP.PartialResultParams
 ---@field public textDocument ___kit___.kit.LSP.TextDocumentIdentifier The text document.
 ---@field public identifier? string The additional identifier  provided during registration.
 ---@field public previousResultId? string The result id of a previous response if provided.
@@ -559,9 +559,9 @@ LSP.TokenFormat = {
 ---@class ___kit___.kit.LSP.DiagnosticServerCancellationData
 ---@field public retriggerRequest boolean
 
----@class ___kit___.kit.LSP.DiagnosticRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions
+---@class ___kit___.kit.LSP.DiagnosticRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions, ___kit___.kit.LSP.DiagnosticOptions, ___kit___.kit.LSP.StaticRegistrationOptions
 
----@class ___kit___.kit.LSP.WorkspaceDiagnosticParams
+---@class ___kit___.kit.LSP.WorkspaceDiagnosticParams : ___kit___.kit.LSP.WorkDoneProgressParams, ___kit___.kit.LSP.PartialResultParams
 ---@field public identifier? string The additional identifier provided during registration.
 ---@field public previousResultIds ___kit___.kit.LSP.PreviousResultId[] The currently known diagnostic reports with their<br>previous result ids.
 
@@ -592,7 +592,7 @@ LSP.TokenFormat = {
 ---@class ___kit___.kit.LSP.UnregistrationParams
 ---@field public unregisterations ___kit___.kit.LSP.Unregistration[]
 
----@class ___kit___.kit.LSP.InitializeParams : ___kit___.kit.LSP._InitializeParams
+---@class ___kit___.kit.LSP.InitializeParams : ___kit___.kit.LSP._InitializeParams, ___kit___.kit.LSP.WorkspaceFoldersInitializeParams
 
 ---@class ___kit___.kit.LSP.InitializeResult
 ---@field public capabilities ___kit___.kit.LSP.ServerCapabilities The capabilities the language server provides.
@@ -646,7 +646,7 @@ LSP.TokenFormat = {
 ---@field public textDocument ___kit___.kit.LSP.TextDocumentIdentifier The document that was saved.
 ---@field public text? string Optional the content when saved. Depends on the includeText value<br>when the save notification was requested.
 
----@class ___kit___.kit.LSP.TextDocumentSaveRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions
+---@class ___kit___.kit.LSP.TextDocumentSaveRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions, ___kit___.kit.LSP.SaveOptions
 
 ---@class ___kit___.kit.LSP.WillSaveTextDocumentParams
 ---@field public textDocument ___kit___.kit.LSP.TextDocumentIdentifier The document that will be saved.
@@ -667,7 +667,7 @@ LSP.TokenFormat = {
 ---@field public version? integer Optional the version number of the document the diagnostics are published for.<br><br>@since 3.15.0
 ---@field public diagnostics ___kit___.kit.LSP.Diagnostic[] An array of diagnostic information items.
 
----@class ___kit___.kit.LSP.CompletionParams : ___kit___.kit.LSP.TextDocumentPositionParams
+---@class ___kit___.kit.LSP.CompletionParams : ___kit___.kit.LSP.TextDocumentPositionParams, ___kit___.kit.LSP.WorkDoneProgressParams, ___kit___.kit.LSP.PartialResultParams
 ---@field public context? ___kit___.kit.LSP.CompletionContext The completion context. This is only available it the client specifies<br>to send this using the client capability `textDocument.completion.contextSupport === true`
 
 ---@class ___kit___.kit.LSP.CompletionItem
@@ -703,17 +703,17 @@ LSP.TokenFormat = {
 ---@field public insertTextMode? ___kit___.kit.LSP.InsertTextMode A default insert text mode.<br><br>@since 3.17.0
 ---@field public data? ___kit___.kit.LSP.LSPAny A default data value.<br><br>@since 3.17.0
 
----@class ___kit___.kit.LSP.CompletionRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions
+---@class ___kit___.kit.LSP.CompletionRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions, ___kit___.kit.LSP.CompletionOptions
 
----@class ___kit___.kit.LSP.HoverParams : ___kit___.kit.LSP.TextDocumentPositionParams
+---@class ___kit___.kit.LSP.HoverParams : ___kit___.kit.LSP.TextDocumentPositionParams, ___kit___.kit.LSP.WorkDoneProgressParams
 
 ---@class ___kit___.kit.LSP.Hover
 ---@field public contents (___kit___.kit.LSP.MarkupContent | ___kit___.kit.LSP.MarkedString | ___kit___.kit.LSP.MarkedString[]) The hover's content
 ---@field public range? ___kit___.kit.LSP.Range An optional range inside the text document that is used to<br>visualize the hover, e.g. by changing the background color.
 
----@class ___kit___.kit.LSP.HoverRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions
+---@class ___kit___.kit.LSP.HoverRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions, ___kit___.kit.LSP.HoverOptions
 
----@class ___kit___.kit.LSP.SignatureHelpParams : ___kit___.kit.LSP.TextDocumentPositionParams
+---@class ___kit___.kit.LSP.SignatureHelpParams : ___kit___.kit.LSP.TextDocumentPositionParams, ___kit___.kit.LSP.WorkDoneProgressParams
 ---@field public context? ___kit___.kit.LSP.SignatureHelpContext The signature help context. This is only available if the client specifies<br>to send this using the client capability `textDocument.signatureHelp.contextSupport === true`<br><br>@since 3.15.0
 
 ---@class ___kit___.kit.LSP.SignatureHelp
@@ -721,26 +721,26 @@ LSP.TokenFormat = {
 ---@field public activeSignature? integer The active signature. If omitted or the value lies outside the<br>range of `signatures` the value defaults to zero or is ignored if<br>the `SignatureHelp` has no signatures.<br><br>Whenever possible implementors should make an active decision about<br>the active signature and shouldn't rely on a default value.<br><br>In future version of the protocol this property might become<br>mandatory to better express this.
 ---@field public activeParameter? integer The active parameter of the active signature. If omitted or the value<br>lies outside the range of `signatures[activeSignature].parameters`<br>defaults to 0 if the active signature has parameters. If<br>the active signature has no parameters it is ignored.<br>In future version of the protocol this property might become<br>mandatory to better express the active parameter if the<br>active signature does have any.
 
----@class ___kit___.kit.LSP.SignatureHelpRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions
+---@class ___kit___.kit.LSP.SignatureHelpRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions, ___kit___.kit.LSP.SignatureHelpOptions
 
----@class ___kit___.kit.LSP.DefinitionParams : ___kit___.kit.LSP.TextDocumentPositionParams
+---@class ___kit___.kit.LSP.DefinitionParams : ___kit___.kit.LSP.TextDocumentPositionParams, ___kit___.kit.LSP.WorkDoneProgressParams, ___kit___.kit.LSP.PartialResultParams
 
----@class ___kit___.kit.LSP.DefinitionRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions
+---@class ___kit___.kit.LSP.DefinitionRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions, ___kit___.kit.LSP.DefinitionOptions
 
----@class ___kit___.kit.LSP.ReferenceParams : ___kit___.kit.LSP.TextDocumentPositionParams
+---@class ___kit___.kit.LSP.ReferenceParams : ___kit___.kit.LSP.TextDocumentPositionParams, ___kit___.kit.LSP.WorkDoneProgressParams, ___kit___.kit.LSP.PartialResultParams
 ---@field public context ___kit___.kit.LSP.ReferenceContext
 
----@class ___kit___.kit.LSP.ReferenceRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions
+---@class ___kit___.kit.LSP.ReferenceRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions, ___kit___.kit.LSP.ReferenceOptions
 
----@class ___kit___.kit.LSP.DocumentHighlightParams : ___kit___.kit.LSP.TextDocumentPositionParams
+---@class ___kit___.kit.LSP.DocumentHighlightParams : ___kit___.kit.LSP.TextDocumentPositionParams, ___kit___.kit.LSP.WorkDoneProgressParams, ___kit___.kit.LSP.PartialResultParams
 
 ---@class ___kit___.kit.LSP.DocumentHighlight
 ---@field public range ___kit___.kit.LSP.Range The range this highlight applies to.
 ---@field public kind? ___kit___.kit.LSP.DocumentHighlightKind The highlight kind, default is [text](#DocumentHighlightKind.Text).
 
----@class ___kit___.kit.LSP.DocumentHighlightRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions
+---@class ___kit___.kit.LSP.DocumentHighlightRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions, ___kit___.kit.LSP.DocumentHighlightOptions
 
----@class ___kit___.kit.LSP.DocumentSymbolParams
+---@class ___kit___.kit.LSP.DocumentSymbolParams : ___kit___.kit.LSP.WorkDoneProgressParams, ___kit___.kit.LSP.PartialResultParams
 ---@field public textDocument ___kit___.kit.LSP.TextDocumentIdentifier The text document.
 
 ---@class ___kit___.kit.LSP.SymbolInformation : ___kit___.kit.LSP.BaseSymbolInformation
@@ -757,9 +757,9 @@ LSP.TokenFormat = {
 ---@field public selectionRange ___kit___.kit.LSP.Range The range that should be selected and revealed when this symbol is being picked, e.g the name of a function.<br>Must be contained by the `range`.
 ---@field public children? ___kit___.kit.LSP.DocumentSymbol[] Children of this symbol, e.g. properties of a class.
 
----@class ___kit___.kit.LSP.DocumentSymbolRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions
+---@class ___kit___.kit.LSP.DocumentSymbolRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions, ___kit___.kit.LSP.DocumentSymbolOptions
 
----@class ___kit___.kit.LSP.CodeActionParams
+---@class ___kit___.kit.LSP.CodeActionParams : ___kit___.kit.LSP.WorkDoneProgressParams, ___kit___.kit.LSP.PartialResultParams
 ---@field public textDocument ___kit___.kit.LSP.TextDocumentIdentifier The document in which the command was invoked.
 ---@field public range ___kit___.kit.LSP.Range The range for which the command was invoked.
 ---@field public context ___kit___.kit.LSP.CodeActionContext Context carrying additional information.
@@ -782,9 +782,9 @@ LSP.TokenFormat = {
 ---@class ___kit___.kit.LSP.CodeAction.disabled
 ---@field public reason string Human readable description of why the code action is currently disabled.<br><br>This is displayed in the code actions UI.
 
----@class ___kit___.kit.LSP.CodeActionRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions
+---@class ___kit___.kit.LSP.CodeActionRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions, ___kit___.kit.LSP.CodeActionOptions
 
----@class ___kit___.kit.LSP.WorkspaceSymbolParams
+---@class ___kit___.kit.LSP.WorkspaceSymbolParams : ___kit___.kit.LSP.WorkDoneProgressParams, ___kit___.kit.LSP.PartialResultParams
 ---@field public query string A query string to filter symbols by. Clients may send an empty<br>string here to request all symbols.
 
 ---@class ___kit___.kit.LSP.WorkspaceSymbol : ___kit___.kit.LSP.BaseSymbolInformation
@@ -793,7 +793,7 @@ LSP.TokenFormat = {
 
 ---@class ___kit___.kit.LSP.WorkspaceSymbolRegistrationOptions : ___kit___.kit.LSP.WorkspaceSymbolOptions
 
----@class ___kit___.kit.LSP.CodeLensParams
+---@class ___kit___.kit.LSP.CodeLensParams : ___kit___.kit.LSP.WorkDoneProgressParams, ___kit___.kit.LSP.PartialResultParams
 ---@field public textDocument ___kit___.kit.LSP.TextDocumentIdentifier The document to request code lens for.
 
 ---@class ___kit___.kit.LSP.CodeLens
@@ -801,9 +801,9 @@ LSP.TokenFormat = {
 ---@field public command? ___kit___.kit.LSP.Command The command this code lens represents.
 ---@field public data? ___kit___.kit.LSP.LSPAny A data entry field that is preserved on a code lens item between<br>a [CodeLensRequest](#CodeLensRequest) and a [CodeLensResolveRequest]<br>(#CodeLensResolveRequest)
 
----@class ___kit___.kit.LSP.CodeLensRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions
+---@class ___kit___.kit.LSP.CodeLensRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions, ___kit___.kit.LSP.CodeLensOptions
 
----@class ___kit___.kit.LSP.DocumentLinkParams
+---@class ___kit___.kit.LSP.DocumentLinkParams : ___kit___.kit.LSP.WorkDoneProgressParams, ___kit___.kit.LSP.PartialResultParams
 ---@field public textDocument ___kit___.kit.LSP.TextDocumentIdentifier The document to provide document links for.
 
 ---@class ___kit___.kit.LSP.DocumentLink
@@ -812,20 +812,20 @@ LSP.TokenFormat = {
 ---@field public tooltip? string The tooltip text when you hover over this link.<br><br>If a tooltip is provided, is will be displayed in a string that includes instructions on how to<br>trigger the link, such as `{0} (ctrl + click)`. The specific instructions vary depending on OS,<br>user settings, and localization.<br><br>@since 3.15.0
 ---@field public data? ___kit___.kit.LSP.LSPAny A data entry field that is preserved on a document link between a<br>DocumentLinkRequest and a DocumentLinkResolveRequest.
 
----@class ___kit___.kit.LSP.DocumentLinkRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions
+---@class ___kit___.kit.LSP.DocumentLinkRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions, ___kit___.kit.LSP.DocumentLinkOptions
 
----@class ___kit___.kit.LSP.DocumentFormattingParams
+---@class ___kit___.kit.LSP.DocumentFormattingParams : ___kit___.kit.LSP.WorkDoneProgressParams
 ---@field public textDocument ___kit___.kit.LSP.TextDocumentIdentifier The document to format.
 ---@field public options ___kit___.kit.LSP.FormattingOptions The format options.
 
----@class ___kit___.kit.LSP.DocumentFormattingRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions
+---@class ___kit___.kit.LSP.DocumentFormattingRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions, ___kit___.kit.LSP.DocumentFormattingOptions
 
----@class ___kit___.kit.LSP.DocumentRangeFormattingParams
+---@class ___kit___.kit.LSP.DocumentRangeFormattingParams : ___kit___.kit.LSP.WorkDoneProgressParams
 ---@field public textDocument ___kit___.kit.LSP.TextDocumentIdentifier The document to format.
 ---@field public range ___kit___.kit.LSP.Range The range to format
 ---@field public options ___kit___.kit.LSP.FormattingOptions The format options
 
----@class ___kit___.kit.LSP.DocumentRangeFormattingRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions
+---@class ___kit___.kit.LSP.DocumentRangeFormattingRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions, ___kit___.kit.LSP.DocumentRangeFormattingOptions
 
 ---@class ___kit___.kit.LSP.DocumentOnTypeFormattingParams
 ---@field public textDocument ___kit___.kit.LSP.TextDocumentIdentifier The document to format.
@@ -833,18 +833,18 @@ LSP.TokenFormat = {
 ---@field public ch string The character that has been typed that triggered the formatting<br>on type request. That is not necessarily the last character that<br>got inserted into the document since the client could auto insert<br>characters as well (e.g. like automatic brace completion).
 ---@field public options ___kit___.kit.LSP.FormattingOptions The formatting options.
 
----@class ___kit___.kit.LSP.DocumentOnTypeFormattingRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions
+---@class ___kit___.kit.LSP.DocumentOnTypeFormattingRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions, ___kit___.kit.LSP.DocumentOnTypeFormattingOptions
 
----@class ___kit___.kit.LSP.RenameParams
+---@class ___kit___.kit.LSP.RenameParams : ___kit___.kit.LSP.WorkDoneProgressParams
 ---@field public textDocument ___kit___.kit.LSP.TextDocumentIdentifier The document to rename.
 ---@field public position ___kit___.kit.LSP.Position The position at which this request was sent.
 ---@field public newName string The new name of the symbol. If the given name is not valid the<br>request must return a [ResponseError](#ResponseError) with an<br>appropriate message set.
 
----@class ___kit___.kit.LSP.RenameRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions
+---@class ___kit___.kit.LSP.RenameRegistrationOptions : ___kit___.kit.LSP.TextDocumentRegistrationOptions, ___kit___.kit.LSP.RenameOptions
 
----@class ___kit___.kit.LSP.PrepareRenameParams : ___kit___.kit.LSP.TextDocumentPositionParams
+---@class ___kit___.kit.LSP.PrepareRenameParams : ___kit___.kit.LSP.TextDocumentPositionParams, ___kit___.kit.LSP.WorkDoneProgressParams
 
----@class ___kit___.kit.LSP.ExecuteCommandParams
+---@class ___kit___.kit.LSP.ExecuteCommandParams : ___kit___.kit.LSP.WorkDoneProgressParams
 ---@field public command string The identifier of the actual command handler.
 ---@field public arguments? ___kit___.kit.LSP.LSPAny[] Arguments that the command should be invoked with.
 
@@ -907,12 +907,12 @@ LSP.TokenFormat = {
 ---@field public start ___kit___.kit.LSP.Position The range's start position.
 ---@field public end ___kit___.kit.LSP.Position The range's end position.
 
----@class ___kit___.kit.LSP.ImplementationOptions
+---@class ___kit___.kit.LSP.ImplementationOptions : ___kit___.kit.LSP.WorkDoneProgressOptions
 
 ---@class ___kit___.kit.LSP.StaticRegistrationOptions
 ---@field public id? string The id used to register the request. The id can be used to deregister<br>the request again. See also Registration#id.
 
----@class ___kit___.kit.LSP.TypeDefinitionOptions
+---@class ___kit___.kit.LSP.TypeDefinitionOptions : ___kit___.kit.LSP.WorkDoneProgressOptions
 
 ---@class ___kit___.kit.LSP.WorkspaceFoldersChangeEvent
 ---@field public added ___kit___.kit.LSP.WorkspaceFolder[] The array of added workspace folders
@@ -931,21 +931,21 @@ LSP.TokenFormat = {
 ---@field public blue integer The blue component of this color in the range [0-1].
 ---@field public alpha integer The alpha component of this color in the range [0-1].
 
----@class ___kit___.kit.LSP.DocumentColorOptions
+---@class ___kit___.kit.LSP.DocumentColorOptions : ___kit___.kit.LSP.WorkDoneProgressOptions
 
----@class ___kit___.kit.LSP.FoldingRangeOptions
+---@class ___kit___.kit.LSP.FoldingRangeOptions : ___kit___.kit.LSP.WorkDoneProgressOptions
 
----@class ___kit___.kit.LSP.DeclarationOptions
+---@class ___kit___.kit.LSP.DeclarationOptions : ___kit___.kit.LSP.WorkDoneProgressOptions
 
 ---@class ___kit___.kit.LSP.Position
 ---@field public line integer Line position in a document (zero-based).<br><br>If a line number is greater than the number of lines in a document, it defaults back to the number of lines in the document.<br>If a line number is negative, it defaults to 0.
 ---@field public character integer Character offset on a line in a document (zero-based).<br><br>The meaning of this offset is determined by the negotiated<br>`PositionEncodingKind`.<br><br>If the character value is greater than the line length it defaults back to the<br>line length.
 
----@class ___kit___.kit.LSP.SelectionRangeOptions
+---@class ___kit___.kit.LSP.SelectionRangeOptions : ___kit___.kit.LSP.WorkDoneProgressOptions
 
----@class ___kit___.kit.LSP.CallHierarchyOptions
+---@class ___kit___.kit.LSP.CallHierarchyOptions : ___kit___.kit.LSP.WorkDoneProgressOptions
 
----@class ___kit___.kit.LSP.SemanticTokensOptions
+---@class ___kit___.kit.LSP.SemanticTokensOptions : ___kit___.kit.LSP.WorkDoneProgressOptions
 ---@field public legend ___kit___.kit.LSP.SemanticTokensLegend The legend used by the server
 ---@field public range? (boolean | {  }) Server supports providing semantic tokens for a specific range<br>of a document.
 ---@field public full? (boolean | { delta?: boolean }) Server supports providing semantic tokens for a full document.
@@ -955,7 +955,7 @@ LSP.TokenFormat = {
 ---@field public deleteCount integer The count of elements to remove.
 ---@field public data? integer[] The elements to insert.
 
----@class ___kit___.kit.LSP.LinkedEditingRangeOptions
+---@class ___kit___.kit.LSP.LinkedEditingRangeOptions : ___kit___.kit.LSP.WorkDoneProgressOptions
 
 ---@class ___kit___.kit.LSP.FileCreate
 ---@field public uri string A file:// URI for the location of the file/folder being created.
@@ -996,9 +996,9 @@ LSP.TokenFormat = {
 ---@class ___kit___.kit.LSP.FileDelete
 ---@field public uri string A file:// URI for the location of the file/folder being deleted.
 
----@class ___kit___.kit.LSP.MonikerOptions
+---@class ___kit___.kit.LSP.MonikerOptions : ___kit___.kit.LSP.WorkDoneProgressOptions
 
----@class ___kit___.kit.LSP.TypeHierarchyOptions
+---@class ___kit___.kit.LSP.TypeHierarchyOptions : ___kit___.kit.LSP.WorkDoneProgressOptions
 
 ---@class ___kit___.kit.LSP.InlineValueContext
 ---@field public frameId integer The stack frame (as a DAP Id) where the execution has stopped.
@@ -1017,7 +1017,7 @@ LSP.TokenFormat = {
 ---@field public range ___kit___.kit.LSP.Range The document range for which the inline value applies.<br>The range is used to extract the evaluatable expression from the underlying document.
 ---@field public expression? string If specified the expression overrides the extracted expression.
 
----@class ___kit___.kit.LSP.InlineValueOptions
+---@class ___kit___.kit.LSP.InlineValueOptions : ___kit___.kit.LSP.WorkDoneProgressOptions
 
 ---@class ___kit___.kit.LSP.InlayHintLabelPart
 ---@field public value string The value of this label part.
@@ -1029,7 +1029,7 @@ LSP.TokenFormat = {
 ---@field public kind ___kit___.kit.LSP.MarkupKind The type of the Markup
 ---@field public value string The content itself
 
----@class ___kit___.kit.LSP.InlayHintOptions
+---@class ___kit___.kit.LSP.InlayHintOptions : ___kit___.kit.LSP.WorkDoneProgressOptions
 ---@field public resolveProvider? boolean The server provides support to resolve additional<br>information for an inlay hint item.
 
 ---@class ___kit___.kit.LSP.RelatedFullDocumentDiagnosticReport : ___kit___.kit.LSP.FullDocumentDiagnosticReport
@@ -1047,7 +1047,7 @@ LSP.TokenFormat = {
 ---@field public kind "unchanged" A document diagnostic report indicating<br>no changes to the last result. A server can<br>only return `unchanged` if result ids are<br>provided.
 ---@field public resultId string A result id which will be sent on the next<br>diagnostic request for the same document.
 
----@class ___kit___.kit.LSP.DiagnosticOptions
+---@class ___kit___.kit.LSP.DiagnosticOptions : ___kit___.kit.LSP.WorkDoneProgressOptions
 ---@field public identifier? string An optional identifier under which the diagnostics are<br>managed by the client.
 ---@field public interFileDependencies boolean Whether the language has inter file dependencies meaning that<br>editing code in one file can result in a different diagnostic<br>set in another file. Inter file dependencies are common for<br>most programming languages and typically uncommon for linters.
 ---@field public workspaceDiagnostics boolean The server provides support for workspace diagnostics as well.
@@ -1099,7 +1099,7 @@ LSP.TokenFormat = {
 ---@field public id string The id used to unregister the request or notification. Usually an id<br>provided during the register request.
 ---@field public method string The method to unregister for.
 
----@class ___kit___.kit.LSP._InitializeParams
+---@class ___kit___.kit.LSP._InitializeParams : ___kit___.kit.LSP.WorkDoneProgressParams
 ---@field public processId (integer | nil) The process Id of the parent process that started<br>the server.<br><br>Is `null` if the process has not been started by another process.<br>If the parent process is not alive then the server should exit.
 ---@field public clientInfo? ___kit___.kit.LSP._InitializeParams.clientInfo Information about the client<br><br>@since 3.15.0
 ---@field public locale? string The locale the client is currently showing the user interface<br>in. This must not necessarily be the locale of the operating<br>system.<br><br>Uses IETF language tags as the value's syntax<br>(See https://en.wikipedia.org/wiki/IETF_language_tag)<br><br>@since 3.16.0
@@ -1195,7 +1195,7 @@ LSP.TokenFormat = {
 ---@field public insert ___kit___.kit.LSP.Range The range if the insert is requested
 ---@field public replace ___kit___.kit.LSP.Range The range if the replace is requested.
 
----@class ___kit___.kit.LSP.CompletionOptions
+---@class ___kit___.kit.LSP.CompletionOptions : ___kit___.kit.LSP.WorkDoneProgressOptions
 ---@field public triggerCharacters? string[] Most tools trigger completion request automatically without explicitly requesting<br>it using a keyboard shortcut (e.g. Ctrl+Space). Typically they do so when the user<br>starts to type an identifier. For example if the user types `c` in a JavaScript file<br>code complete will automatically pop up present `console` besides others as a<br>completion item. Characters that make up identifiers don't need to be listed here.<br><br>If code complete should automatically be trigger on characters not being valid inside<br>an identifier (for example `.` in JavaScript) list them in `triggerCharacters`.
 ---@field public allCommitCharacters? string[] The list of all possible characters that commit a completion. This field can be used<br>if clients don't support individual commit characters per completion item. See<br>`ClientCapabilities.textDocument.completion.completionItem.commitCharactersSupport`<br><br>If a server provides both `allCommitCharacters` and commit characters on an individual<br>completion item the ones on the completion item win.<br><br>@since 3.2.0
 ---@field public resolveProvider? boolean The server provides support to resolve additional<br>information for a completion item.
@@ -1204,7 +1204,7 @@ LSP.TokenFormat = {
 ---@class ___kit___.kit.LSP.CompletionOptions.completionItem
 ---@field public labelDetailsSupport? boolean The server has support for completion item label<br>details (see also `CompletionItemLabelDetails`) when<br>receiving a completion item in a resolve call.<br><br>@since 3.17.0
 
----@class ___kit___.kit.LSP.HoverOptions
+---@class ___kit___.kit.LSP.HoverOptions : ___kit___.kit.LSP.WorkDoneProgressOptions
 
 ---@class ___kit___.kit.LSP.SignatureHelpContext
 ---@field public triggerKind ___kit___.kit.LSP.SignatureHelpTriggerKind Action that caused signature help to be triggered.
@@ -1218,18 +1218,18 @@ LSP.TokenFormat = {
 ---@field public parameters? ___kit___.kit.LSP.ParameterInformation[] The parameters of this signature.
 ---@field public activeParameter? integer The index of the active parameter.<br><br>If provided, this is used in place of `SignatureHelp.activeParameter`.<br><br>@since 3.16.0
 
----@class ___kit___.kit.LSP.SignatureHelpOptions
+---@class ___kit___.kit.LSP.SignatureHelpOptions : ___kit___.kit.LSP.WorkDoneProgressOptions
 ---@field public triggerCharacters? string[] List of characters that trigger signature help automatically.
 ---@field public retriggerCharacters? string[] List of characters that re-trigger signature help.<br><br>These trigger characters are only active when signature help is already showing. All trigger characters<br>are also counted as re-trigger characters.<br><br>@since 3.15.0
 
----@class ___kit___.kit.LSP.DefinitionOptions
+---@class ___kit___.kit.LSP.DefinitionOptions : ___kit___.kit.LSP.WorkDoneProgressOptions
 
 ---@class ___kit___.kit.LSP.ReferenceContext
 ---@field public includeDeclaration boolean Include the declaration of the current symbol.
 
----@class ___kit___.kit.LSP.ReferenceOptions
+---@class ___kit___.kit.LSP.ReferenceOptions : ___kit___.kit.LSP.WorkDoneProgressOptions
 
----@class ___kit___.kit.LSP.DocumentHighlightOptions
+---@class ___kit___.kit.LSP.DocumentHighlightOptions : ___kit___.kit.LSP.WorkDoneProgressOptions
 
 ---@class ___kit___.kit.LSP.BaseSymbolInformation
 ---@field public name string The name of this symbol.
@@ -1237,7 +1237,7 @@ LSP.TokenFormat = {
 ---@field public tags? ___kit___.kit.LSP.SymbolTag[] Tags for this symbol.<br><br>@since 3.16.0
 ---@field public containerName? string The name of the symbol containing this symbol. This information is for<br>user interface purposes (e.g. to render a qualifier in the user interface<br>if necessary). It can't be used to re-infer a hierarchy for the document<br>symbols.
 
----@class ___kit___.kit.LSP.DocumentSymbolOptions
+---@class ___kit___.kit.LSP.DocumentSymbolOptions : ___kit___.kit.LSP.WorkDoneProgressOptions
 ---@field public label? string A human-readable string that is shown when multiple outlines trees<br>are shown for the same document.<br><br>@since 3.16.0
 
 ---@class ___kit___.kit.LSP.CodeActionContext
@@ -1245,17 +1245,17 @@ LSP.TokenFormat = {
 ---@field public only? ___kit___.kit.LSP.CodeActionKind[] Requested kind of actions to return.<br><br>Actions not of this kind are filtered out by the client before being shown. So servers<br>can omit computing them.
 ---@field public triggerKind? ___kit___.kit.LSP.CodeActionTriggerKind The reason why code actions were requested.<br><br>@since 3.17.0
 
----@class ___kit___.kit.LSP.CodeActionOptions
+---@class ___kit___.kit.LSP.CodeActionOptions : ___kit___.kit.LSP.WorkDoneProgressOptions
 ---@field public codeActionKinds? ___kit___.kit.LSP.CodeActionKind[] CodeActionKinds that this server may return.<br><br>The list of kinds may be generic, such as `CodeActionKind.Refactor`, or the server<br>may list out every specific kind they provide.
 ---@field public resolveProvider? boolean The server provides support to resolve additional<br>information for a code action.<br><br>@since 3.16.0
 
----@class ___kit___.kit.LSP.WorkspaceSymbolOptions
+---@class ___kit___.kit.LSP.WorkspaceSymbolOptions : ___kit___.kit.LSP.WorkDoneProgressOptions
 ---@field public resolveProvider? boolean The server provides support to resolve additional<br>information for a workspace symbol.<br><br>@since 3.17.0
 
----@class ___kit___.kit.LSP.CodeLensOptions
+---@class ___kit___.kit.LSP.CodeLensOptions : ___kit___.kit.LSP.WorkDoneProgressOptions
 ---@field public resolveProvider? boolean Code lens has a resolve provider as well.
 
----@class ___kit___.kit.LSP.DocumentLinkOptions
+---@class ___kit___.kit.LSP.DocumentLinkOptions : ___kit___.kit.LSP.WorkDoneProgressOptions
 ---@field public resolveProvider? boolean Document links have a resolve provider as well.
 
 ---@class ___kit___.kit.LSP.FormattingOptions
@@ -1265,18 +1265,18 @@ LSP.TokenFormat = {
 ---@field public insertFinalNewline? boolean Insert a newline character at the end of the file if one does not exist.<br><br>@since 3.15.0
 ---@field public trimFinalNewlines? boolean Trim all newlines after the final newline at the end of the file.<br><br>@since 3.15.0
 
----@class ___kit___.kit.LSP.DocumentFormattingOptions
+---@class ___kit___.kit.LSP.DocumentFormattingOptions : ___kit___.kit.LSP.WorkDoneProgressOptions
 
----@class ___kit___.kit.LSP.DocumentRangeFormattingOptions
+---@class ___kit___.kit.LSP.DocumentRangeFormattingOptions : ___kit___.kit.LSP.WorkDoneProgressOptions
 
 ---@class ___kit___.kit.LSP.DocumentOnTypeFormattingOptions
 ---@field public firstTriggerCharacter string A character on which formatting should be triggered, like `{`.
 ---@field public moreTriggerCharacter? string[] More trigger characters.
 
----@class ___kit___.kit.LSP.RenameOptions
+---@class ___kit___.kit.LSP.RenameOptions : ___kit___.kit.LSP.WorkDoneProgressOptions
 ---@field public prepareProvider? boolean Renames should be checked and tested before being executed.<br><br>@since version 3.12.0
 
----@class ___kit___.kit.LSP.ExecuteCommandOptions
+---@class ___kit___.kit.LSP.ExecuteCommandOptions : ___kit___.kit.LSP.WorkDoneProgressOptions
 ---@field public commands string[] The commands to be executed on the server
 
 ---@class ___kit___.kit.LSP.SemanticTokensLegend
@@ -1350,7 +1350,7 @@ LSP.TokenFormat = {
 ---@field public notebookSelector ({ notebook: (string | ___kit___.kit.LSP.NotebookDocumentFilter), cells?: { language: string }[] } | { notebook?: (string | ___kit___.kit.LSP.NotebookDocumentFilter), cells: { language: string }[] })[] The notebooks to be synced
 ---@field public save? boolean Whether save notification should be forwarded to<br>the server. Will only be honored if mode === `notebook`.
 
----@class ___kit___.kit.LSP.NotebookDocumentSyncRegistrationOptions : ___kit___.kit.LSP.NotebookDocumentSyncOptions
+---@class ___kit___.kit.LSP.NotebookDocumentSyncRegistrationOptions : ___kit___.kit.LSP.NotebookDocumentSyncOptions, ___kit___.kit.LSP.StaticRegistrationOptions
 
 ---@class ___kit___.kit.LSP.WorkspaceFoldersServerCapabilities
 ---@field public supported? boolean The server has support for workspace folders
