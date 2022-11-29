@@ -14,6 +14,7 @@ end
 ---@param prompt string
 local function confirm(force, prompt)
   if force then
+    print(prompt)
     return
   end
   local answer = vim.fn.input(prompt .. ' [y/N]: ')
@@ -65,7 +66,7 @@ return function(bang, plugin_path, plugin_name)
 
     -- Remove old kit if need.
     local kit_install_path = ([[%s/lua/%s/kit]]):format(plugin_path, plugin_name)
-    if vim.fn.isdirectory(kit_install_path) then
+    if vim.fn.isdirectory(kit_install_path) == 1 then
       confirm(bang, ('[%s] rm -rf %s'):format(plugin_name, kit_install_path))
       IO.rm(kit_install_path, { recursive = true }):await()
     end
@@ -94,6 +95,8 @@ return function(bang, plugin_path, plugin_name)
     :catch(function(err)
       if err:match('Cancelled$') then
         vim.api.nvim_echo({ { '\nCancelled.', 'WarningMsg' } }, true, {})
+      else
+        vim.api.nvim_echo({ { err, 'ErrorMsg' } }, true, {})
       end
     end)
     :sync()

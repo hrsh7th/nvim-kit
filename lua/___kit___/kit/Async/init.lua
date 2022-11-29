@@ -50,6 +50,14 @@ function Async.async(runner)
   end
 end
 
+---Create vim.schedule task.
+---@return ___kit___.kit.Async.AsyncTask
+function Async.schedule()
+  return AsyncTask.new(function(resolve)
+    vim.schedule(resolve)
+  end)
+end
+
 ---Await async task.
 ---@param task ___kit___.kit.Async.AsyncTask
 ---@return any
