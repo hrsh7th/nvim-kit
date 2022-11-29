@@ -12,7 +12,7 @@ Client.__index = Client
 function Client.new(client)
   local self = setmetatable({}, Client)
   self.client = client
-  return client
+  return self
 end
 
 ---@param params ___kit___.kit.LSP.ImplementationParams

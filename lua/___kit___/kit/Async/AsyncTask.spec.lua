@@ -66,6 +66,21 @@ describe('kit.Async', function()
     assert.are.equals(catch_task:sync(), 'catch')
   end)
 
+  it('should reject if resolve called with rejected task', function()
+    local task = AsyncTask.new(function(_, reject)
+      vim.defer_fn(reject, 10)
+    end)
+    local ok
+    ok = pcall(function()
+      AsyncTask.resolve(task):sync()
+    end)
+    assert.is_false(ok)
+    ok = pcall(function()
+      AsyncTask.resolve(task):sync()
+    end)
+    assert.is_false(ok)
+  end)
+
   it('should throw timeout error', function()
     local task = AsyncTask.new(function(resolve)
       vim.defer_fn(resolve, 500)
@@ -113,7 +128,9 @@ describe('kit.Async', function()
     object = nil
     called = false
     collectgarbage('collect')
-    vim.wait(200, function() return object end)
+    vim.wait(200, function()
+      return object
+    end)
     assert.are.equals(object, nil)
     assert.are.equals(called, true)
 
@@ -126,7 +143,9 @@ describe('kit.Async', function()
     object = nil
     called = false
     collectgarbage('collect')
-    vim.wait(200, function() return object end)
+    vim.wait(200, function()
+      return object
+    end)
     assert.are.equals(object, nil)
     assert.are.equals(called, true)
 
@@ -139,7 +158,9 @@ describe('kit.Async', function()
     object = nil
     called = false
     collectgarbage('collect')
-    vim.wait(200, function() return object end)
+    vim.wait(200, function()
+      return object
+    end)
     assert.are.equals(object, nil)
     assert.are.equals(called, true)
 
@@ -152,7 +173,9 @@ describe('kit.Async', function()
     object = nil
     called = false
     collectgarbage('collect')
-    vim.wait(200, function() return object end)
+    vim.wait(200, function()
+      return object
+    end)
     assert.are.equals(object, nil)
     assert.are.equals(called, true)
 
@@ -165,7 +188,9 @@ describe('kit.Async', function()
     object = nil
     called = false
     collectgarbage('collect')
-    vim.wait(200, function() return object end)
+    vim.wait(200, function()
+      return object
+    end)
     assert.are.equals(object, nil)
     assert.are.equals(called, false)
 
@@ -179,7 +204,9 @@ describe('kit.Async', function()
     object = nil
     called = false
     collectgarbage('collect')
-    vim.wait(200, function() return object end)
+    vim.wait(200, function()
+      return object
+    end)
     assert.are.equals(object, nil)
     assert.are.equals(called, false)
   end)

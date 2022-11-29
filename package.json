@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "My personal Lua utilities for neovim.",
   "scripts": {
-    "test": "vusted --output=gtest --pattern=.spec ./lua",
+    "test": "NODE_ENV=test vusted --output=gtest --pattern=.spec ./lua",
     "lint": "luacheck --codes ./lua",
     "format": "stylua --config-path stylua.toml --glob 'lua/**/*.lua' -- lua",
     "generate": "run-s generate:*",

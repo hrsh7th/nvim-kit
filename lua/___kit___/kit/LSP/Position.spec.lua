@@ -73,12 +73,7 @@ describe('kit.LSP.Position', function()
         local converted1 = Position[to.method](text, { line = 1, character = from.character }, from.encoding)
         assert.are.same(to.character, converted1.character)
         assert.is_true(Position.is(converted1))
-        local converted2 = Position.to(
-          text,
-          { line = 1, character = from.character },
-          from.encoding,
-          to.encoding
-        )
+        local converted2 = Position.to(text, { line = 1, character = from.character }, from.encoding, to.encoding)
         assert.are.same(to.character, converted2.character)
         assert.is_true(Position.is(converted2))
       end)

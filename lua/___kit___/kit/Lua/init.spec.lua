@@ -10,7 +10,9 @@ describe('kit.Lua', function()
     }
     object = nil
     collectgarbage('collect')
-    vim.wait(200, function() return object end)
+    vim.wait(200, function()
+      return object
+    end)
     assert.are.equals(object, nil)
     assert.are.equals(called, true)
   end)

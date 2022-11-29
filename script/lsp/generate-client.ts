@@ -19,7 +19,7 @@ import metaModel from '../../tmp/language-server-protocol/_specifications/lsp/3.
     function Client.new(client)
       local self = setmetatable({}, Client)
       self.client = client
-      return client
+      return self
     end
 
     ${metaModel.requests.map(request => {
