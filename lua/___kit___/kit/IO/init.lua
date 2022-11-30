@@ -95,6 +95,18 @@ IO.fs_scandir = Async.promisify(uv.fs_scandir)
 ---@type fun(path: string): ___kit___.kit.Async.AsyncTask
 IO.fs_realpath = Async.promisify(uv.fs_realpath)
 
+---Return if the path is directory.
+---@param path string
+---@return ___kit___.kit.Async.AsyncTask
+function IO.is_directory(path)
+  path = IO.normalize(path)
+  return Async.run(function()
+    return IO.fs_stat(path):catch(function()
+      return {}
+    end):await().type == 'directory'
+  end)
+end
+
 ---Read file.
 ---@param path string
 ---@param chunk_size? integer
@@ -169,7 +181,7 @@ function IO.mkdir(path, mode, option)
           break
         end
         table.insert(not_exists, 1, current)
-        current = vim.fs.dirname(current)
+        current = IO.dirname(current)
       end
       for _, dir in ipairs(not_exists) do
         IO.fs_mkdir(dir, mode):await()
@@ -326,7 +338,7 @@ function IO.normalize(path)
 
   -- homedir.
   if path:sub(1, 1) == '~' then
-    path = uv.os_homedir() .. path:sub(2)
+    path = IO.join(uv.os_homedir(), path:sub(2))
   end
 
   -- absolute.
@@ -335,19 +347,19 @@ function IO.normalize(path)
   end
 
   -- resolve relative path.
-  local up = vim.is_thread() and uv.cwd() or vim.fn.getcwd()
-  up = up:gsub('/$', '')
+  local up = uv.cwd()
+  up = up:sub(-1) == '/' and up:sub(1, -2) or up
   while true do
     if path:sub(1, 3) == '../' then
-      path = path:sub(3)
-      up = up:gsub('/[^/]+/?$', '')
+      path = path:sub(4)
+      up = IO.dirname(up)
     elseif path:sub(1, 2) == './' then
-      path = path:sub(2)
+      path = path:sub(3)
     else
       break
     end
   end
-  return up .. '/' .. path
+  return IO.join(up, path)
 end
 
 ---Join the paths.
@@ -355,7 +367,20 @@ end
 ---@param path string
 ---@return string
 function IO.join(base, path)
-  return base:gsub('/$', '') .. '/' .. path:gsub('^/', '')
+  if base:sub(-1) == '/' then
+    base = base:sub(1, -2)
+  end
+  if path:sub(1, 1) == '/' then
+    path = path:sub(2)
+  end
+  return base .. '/' .. path
+end
+
+---Return the path of the current working directory.
+---@param path string
+---@return string
+function IO.dirname(path)
+  return (path:gsub('/[^/]+/?$', ''))
 end
 
 return IO

@@ -92,9 +92,9 @@ describe('kit.IO', function()
 
   describe('.write_file', function()
     it('should write the file', function()
-      pcall(function()
+      if IO.fs_stat('./fixture/IO/write_file.txt'):catch(function() end):sync() then
         IO.rm('./fixture/IO/write_file.txt'):sync()
-      end)
+      end
       IO.write_file('./fixture/IO/write_file.txt', IO.read_file('./fixture/IO/read_file.txt', 5):sync())
       local contents1 = IO.read_file('./fixture/IO/read_file.txt', 5):sync()
       local contents2 = IO.read_file('./fixture/IO/write_file.txt', 5):sync()
@@ -130,30 +130,32 @@ describe('kit.IO', function()
   describe('.cp', function()
     it('should copy directory recursively', function()
       IO.cp('./fixture/IO/scandir/a', './fixture/IO/scandir/b', { recursive = true }):sync()
-      assert.is_true(vim.fn.isdirectory('./fixture/IO/scandir/b') == 1)
+      assert.is_true(IO.is_directory('./fixture/IO/scandir/b'):sync())
       IO.rm('./fixture/IO/scandir/b', { recursive = true }):sync()
     end)
   end)
 
   describe('.rm', function()
     it('should remove dir or file', function()
-      pcall(function()
-        IO.mkdir(tmpdir .. '/mkdir', tonumber('777', 8), { recursive = true }):sync()
-      end)
-      assert.is_true(vim.fn.isdirectory(tmpdir) == 1)
-      IO.rm(tmpdir, { recursive = true }):sync()
-      assert.is_true(vim.fn.isdirectory(tmpdir) == 0)
+      local target_dir = tmpdir .. '/rm'
+      if not IO.is_directory(target_dir):sync() then
+        IO.mkdir(target_dir, tonumber('777', 8), { recursive = true }):sync()
+      end
+      assert.is_true(IO.is_directory(target_dir):sync())
+      IO.rm(target_dir, { recursive = true }):sync()
+      assert.is_false(IO.is_directory(target_dir):sync())
     end)
   end)
 
   describe('.mkdir', function()
     it('should create dir', function()
-      pcall(function()
-        IO.rm(tmpdir, { recursive = true }):sync()
-      end)
-      assert.is_true(vim.fn.isdirectory(tmpdir) == 0)
-      IO.mkdir(tmpdir, tonumber('777', 8), { recursive = true }):sync()
-      assert.is_true(vim.fn.isdirectory(tmpdir) == 1)
+      local target_dir = tmpdir .. '/mkdir'
+      if IO.is_directory(target_dir):sync() then
+        IO.rm(target_dir, { recursive = true }):sync()
+      end
+      assert.is_false(IO.is_directory(target_dir):sync())
+      IO.mkdir(target_dir, tonumber('777', 8), { recursive = true }):sync()
+      assert.is_true(IO.is_directory(target_dir):sync())
     end)
   end)
 end)

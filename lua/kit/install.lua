@@ -6,7 +6,7 @@ local RegExp = require('___kit___.kit.Vim.RegExp')
 ---@return string
 local function get_kit_path()
   local script_path = IO.normalize(debug.getinfo(2, 'S').source:sub(2):match('(.*/)'))
-  return vim.fn.fnamemodify(script_path, ':h:h:h') .. '/lua/___kit___/kit'
+  return vim.fn.fnamemodify(script_path, ':h:h') .. '/lua/___kit___/kit'
 end
 
 ---Show confirm prompt.
@@ -40,7 +40,7 @@ return function(bang, plugin_path, plugin_name)
     end
 
     -- Check `plugin_path` is a directory.
-    if vim.fn.isdirectory(plugin_path) ~= 1 then
+    if not IO.is_directory(plugin_path):await(true) then
       vim.cmd([[redraw]])
       return vim.api.nvim_echo({ { '`plugin_path` is not a directory.', 'ErrorMsg' } }, true, {})
     end
@@ -66,14 +66,14 @@ return function(bang, plugin_path, plugin_name)
 
     -- Remove old kit if need.
     local kit_install_path = ([[%s/lua/%s/kit]]):format(plugin_path, plugin_name)
-    if vim.fn.isdirectory(kit_install_path) == 1 then
+    if IO.is_directory(kit_install_path):await(true) then
       confirm(bang, ('[%s] rm -rf %s'):format(plugin_name, kit_install_path))
-      IO.rm(kit_install_path, { recursive = true }):await()
+      IO.rm(kit_install_path, { recursive = true }):await(true)
     end
 
     -- Copy new kit.
     confirm(bang, ('[%s] cp -r %s %s'):format(plugin_name, get_kit_path(), kit_install_path))
-    IO.cp(get_kit_path(), kit_install_path, { recursive = true }):await()
+    IO.cp(get_kit_path(), kit_install_path, { recursive = true }):await(true)
 
     -- Remove `*.spec.lue` files.
     IO.walk(kit_install_path, function(err, entry)
@@ -82,22 +82,22 @@ return function(bang, plugin_path, plugin_name)
       end
       if entry.type == 'file' then
         if entry.path:match('%.spec%.lua$') then
-          IO.rm(entry.path):await()
+          IO.rm(entry.path):await(true)
         else
-          local content = IO.read_file(entry.path):await()
+          local content = IO.read_file(entry.path):await(true)
           content = RegExp.gsub(content, [=[\V___kit___\m]=], plugin_name)
           content = RegExp.gsub(content, [=[[^\n]*kit\.macro\.remove[^\n]*[[:space:]]*]=], '')
-          IO.write_file(entry.path, content):await()
+          IO.write_file(entry.path, content):await(true)
         end
       end
-    end):await()
+    end):await(true)
   end)
-    :catch(function(err)
-      if err:match('Cancelled$') then
-        vim.api.nvim_echo({ { '\nCancelled.', 'WarningMsg' } }, true, {})
-      else
-        vim.api.nvim_echo({ { err, 'ErrorMsg' } }, true, {})
-      end
-    end)
-    :sync()
+      :catch(function(err)
+        if err:match('Cancelled$') then
+          vim.api.nvim_echo({ { '\nCancelled.', 'WarningMsg' } }, true, {})
+        else
+          vim.api.nvim_echo({ { err, 'ErrorMsg' } }, true, {})
+        end
+      end)
+      :sync()
 end

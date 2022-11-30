@@ -84,7 +84,7 @@ function Async.promisify(runner, option)
     return AsyncTask.new(function(resolve, reject)
       local max = #args + 1
       local pos = math.min(option.callback or max, max)
-      local callback = function(err, ...)
+      table.insert(args, pos, function(err, ...)
         if option.schedule and vim.in_fast_event() then
           resolve = vim.schedule_wrap(resolve)
           reject = vim.schedule_wrap(reject)
@@ -94,12 +94,7 @@ function Async.promisify(runner, option)
         else
           resolve(...)
         end
-      end
-      if pos == max then
-        args[pos] = callback
-      else
-        table.insert(args, pos, callback)
-      end
+      end)
       runner(unpack(args))
     end)
   end

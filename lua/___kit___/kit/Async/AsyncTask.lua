@@ -153,9 +153,15 @@ function AsyncTask:sync(timeout)
 end
 
 ---Await async task.
+---@param schedule? boolean
 ---@return any
-function AsyncTask:await()
-  return require('___kit___.kit.Async').await(self)
+function AsyncTask:await(schedule)
+  local Async = require('___kit___.kit.Async')
+  local res = Async.await(self)
+  if schedule then
+    Async.await(Async.schedule())
+  end
+  return res
 end
 
 ---Register next step.
