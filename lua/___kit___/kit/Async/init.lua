@@ -1,4 +1,3 @@
-local uv = require('luv')
 local AsyncTask = require('___kit___.kit.Async.AsyncTask')
 
 local Async = {}
@@ -29,20 +28,19 @@ function Async.async(runner)
         if coroutine.status(thread) == 'dead' then
           Async.___threads___[thread] = nil
           if not ok then
-            AsyncTask.reject(v):next(resolve):catch(reject)
+            v = AsyncTask.reject(v)
           else
-            AsyncTask.resolve(v):next(resolve):catch(reject)
+            v = AsyncTask.resolve(v)
           end
+          v:dispatch(resolve, reject)
           return
         end
 
-        AsyncTask.resolve(v)
-            :next(function(...)
-              next_step(coroutine.resume(thread, true, ...))
-            end)
-            :catch(function(...)
-              next_step(coroutine.resume(thread, false, ...))
-            end)
+        AsyncTask.resolve(v):dispatch(function(...)
+          next_step(coroutine.resume(thread, true, ...))
+        end, function(...)
+          next_step(coroutine.resume(thread, false, ...))
+        end)
       end
 
       next_step(coroutine.resume(thread, unpack(args)))
@@ -79,26 +77,29 @@ end
 ---@return fun(...: T): ___kit___.kit.Async.AsyncTask
 function Async.promisify(runner, option)
   option = option or {}
-  option.schedule = option.schedule or true
+  option.schedule = not vim.is_thread() and (option.schedule or false)
   option.callback = option.callback or nil
   return function(...)
     local args = { ... }
     return AsyncTask.new(function(resolve, reject)
       local max = #args + 1
       local pos = math.min(option.callback or max, max)
-      table.insert(args, pos, function(err, ...)
-        if not vim.is_thread() then
-          if option.schedule and vim.in_fast_event() then
-            resolve = vim.schedule_wrap(resolve)
-            reject = vim.schedule_wrap(reject)
-          end
+      local callback = function(err, ...)
+        if option.schedule and vim.in_fast_event() then
+          resolve = vim.schedule_wrap(resolve)
+          reject = vim.schedule_wrap(reject)
         end
         if err then
           reject(err)
         else
           resolve(...)
         end
-      end)
+      end
+      if pos == max then
+        args[pos] = callback
+      else
+        table.insert(args, pos, callback)
+      end
       runner(unpack(args))
     end)
   end

@@ -194,7 +194,7 @@ function IO.rm(start_path, option)
       end
       IO.walk(start_path, function(err, entry)
         if err then
-          error('IO.rm: '.. tostring(err))
+          error('IO.rm: ' .. tostring(err))
         end
         if entry.type == 'directory' then
           IO.fs_rmdir(entry.path):await()
@@ -226,7 +226,7 @@ function IO.cp(from, to, option)
       end
       IO.walk(from, function(err, entry)
         if err then
-          error('IO.cp: '.. tostring(err))
+          error('IO.cp: ' .. tostring(err))
         end
         local new_path = entry.path:gsub(vim.pesc(from), to)
         if entry.type == 'directory' then
@@ -324,25 +324,25 @@ function IO.normalize(path)
     return path
   end
 
-  -- absolute path.
-  if path:match('^/') then
-    return path
+  -- homedir.
+  if path:sub(1, 1) == '~' then
+    path = uv.os_homedir() .. path:sub(2)
   end
 
-  -- homedir.
-  if path:match('^~') then
-    return (path:gsub('^~', uv.os_homedir()))
+  -- absolute.
+  if path:sub(1, 1) == '/' then
+    return path:sub(-1) == '/' and path:sub(1, -2) or path
   end
 
   -- resolve relative path.
   local up = vim.is_thread() and uv.cwd() or vim.fn.getcwd()
   up = up:gsub('/$', '')
   while true do
-    if path:match('^%.%./') then
-      path = path:gsub('^%.%./', '')
+    if path:sub(1, 3) == '../' then
+      path = path:sub(3)
       up = up:gsub('/[^/]+/?$', '')
-    elseif path:match('^%.?/') then
-      path = path:gsub('^%.?/', '')
+    elseif path:sub(1, 2) == './' then
+      path = path:sub(2)
     else
       break
     end

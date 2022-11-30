@@ -6,4 +6,8 @@ IO.walk('~/', function(_, _)
   if count % 10000 == 0 then
     print(count)
   end
+end):next(function(res)
+  vim.pretty_print(res)
+end):catch(function(err)
+  vim.pretty_print(err)
 end)

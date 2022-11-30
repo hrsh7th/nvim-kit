@@ -39,14 +39,14 @@ function AsyncTask.all(tasks)
     local count = 0
     for i, task in ipairs(tasks) do
       AsyncTask.resolve(task)
-        :next(function(value)
-          values[i] = value
-          count = count + 1
-          if #tasks == count then
-            resolve(values)
-          end
-        end)
-        :catch(reject)
+          :next(function(value)
+            values[i] = value
+            count = count + 1
+            if #tasks == count then
+              resolve(values)
+            end
+          end)
+          :catch(reject)
     end
   end)
 end
@@ -161,7 +161,7 @@ end
 ---Register next step.
 ---@param on_fulfilled fun(value: any): any
 function AsyncTask:next(on_fulfilled)
-  return self:_dispatch(on_fulfilled, function(err)
+  return self:dispatch(on_fulfilled, function(err)
     error(err)
   end)
 end
@@ -170,7 +170,7 @@ end
 ---@param on_rejected fun(value: any): any
 ---@return ___kit___.kit.Async.AsyncTask
 function AsyncTask:catch(on_rejected)
-  return self:_dispatch(function(value)
+  return self:dispatch(function(value)
     return value
   end, on_rejected)
 end
@@ -179,7 +179,7 @@ end
 ---@param on_fulfilled fun(value: any): any
 ---@param on_rejected fun(err: any): any
 ---@return ___kit___.kit.Async.AsyncTask
-function AsyncTask:_dispatch(on_fulfilled, on_rejected)
+function AsyncTask:dispatch(on_fulfilled, on_rejected)
   self.chained = true
 
   local function dispatch(resolve, reject)
