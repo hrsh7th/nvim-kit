@@ -45,7 +45,7 @@ import metaModel from '../../tmp/language-server-protocol/_specifications/lsp/3.
           end)
           reject_ = reject
         end)
-        function task:cancel()
+        function task.cancel()
           that.client.cancel_request(request_id)
           reject_(LSP.ErrorCodes.RequestCancelled)
         end

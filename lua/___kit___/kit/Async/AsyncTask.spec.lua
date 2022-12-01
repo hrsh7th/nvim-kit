@@ -49,19 +49,19 @@ describe('kit.Async', function()
     -- skip rejected task's next.
     local steps = {}
     local catch_task = err_task
-        :next(once(function()
-          table.insert(steps, 1)
-        end))
-        :next(once(function()
-          table.insert(steps, 2)
-        end))
-        :catch(function()
-          return 'catch'
-        end)
-        :next(function(value)
-          table.insert(steps, 3)
-          return value
-        end)
+      :next(once(function()
+        table.insert(steps, 1)
+      end))
+      :next(once(function()
+        table.insert(steps, 2)
+      end))
+      :catch(function()
+        return 'catch'
+      end)
+      :next(function(value)
+        table.insert(steps, 3)
+        return value
+      end)
     assert.are.same(steps, { 3 })
     assert.are.equals(catch_task:sync(), 'catch')
   end)

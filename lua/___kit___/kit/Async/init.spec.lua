@@ -1,4 +1,3 @@
-local IO = require('___kit___.kit.IO')
 local Async = require('___kit___.kit.Async')
 local AsyncTask = require('___kit___.kit.Async.AsyncTask')
 
