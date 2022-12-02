@@ -68,6 +68,26 @@ describe('kit.IO', function()
         },
       }, entries)
     end)
+    it('should break if found specified path (pre)', function()
+      local count = 0
+      IO.walk('./fixture/IO/scandir/a', function(_, entry)
+        count = count + 1
+        if IO.normalize('./fixture/IO/scandir/a/1') == entry.path then
+          return IO.WalkStatus.Break
+        end
+      end):sync()
+      assert.equals(count, 4)
+    end)
+    it('should break if found specified path (post)', function()
+      local count = 0
+      IO.walk('./fixture/IO/scandir/a', function(_, entry)
+        count = count + 1
+        if IO.normalize('./fixture/IO/scandir/a/1') == entry.path then
+          return IO.WalkStatus.Break
+        end
+      end, { postorder = true }):sync()
+      assert.equals(count, 3)
+    end)
   end)
 
   describe('.read_file', function()
