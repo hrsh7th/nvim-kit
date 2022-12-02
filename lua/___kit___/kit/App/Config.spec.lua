@@ -1,6 +1,6 @@
 local Config = require('___kit___.kit.App.Config')
 
-describe('kit.Config', function()
+describe('kit.App.Config', function()
   before_each(function()
     vim.cmd([[enew]])
   end)
