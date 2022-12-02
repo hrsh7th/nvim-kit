@@ -41,14 +41,14 @@ function AsyncTask.all(tasks)
     local count = 0
     for i, task in ipairs(tasks) do
       AsyncTask.resolve(task)
-        :next(function(value)
-          values[i] = value
-          count = count + 1
-          if #tasks == count then
-            resolve(values)
-          end
-        end)
-        :catch(reject)
+          :next(function(value)
+            values[i] = value
+            count = count + 1
+            if #tasks == count then
+              resolve(values)
+            end
+          end)
+          :catch(reject)
     end
   end)
 end
@@ -146,10 +146,10 @@ function AsyncTask:sync(timeout)
     end, 1, false)
   end
   if self.status == AsyncTask.Status.Rejected then
-    error(self.value)
+    error(self.value, 2)
   end
   if self.status ~= AsyncTask.Status.Fulfilled then
-    error('AsyncTask:sync is timeout.')
+    error('AsyncTask:sync is timeout.', 2)
   end
   return self.value
 end
@@ -170,7 +170,7 @@ end
 ---@param on_fulfilled fun(value: any): any
 function AsyncTask:next(on_fulfilled)
   return self:dispatch(on_fulfilled, function(err)
-    error(err)
+    error(err, 2)
   end)
 end
 

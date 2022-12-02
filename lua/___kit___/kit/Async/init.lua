@@ -53,11 +53,11 @@ end
 ---@return any
 function Async.await(task)
   if not Async.___threads___[coroutine.running()] then
-    error('`Async.await` must be called in async context.')
+    error('`Async.await` must be called in async context.', 2)
   end
   local ok, res = coroutine.yield(AsyncTask.resolve(task))
   if not ok then
-    error(res)
+    error(res, 2)
   end
   return res
 end
