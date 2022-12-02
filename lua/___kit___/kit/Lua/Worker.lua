@@ -21,8 +21,8 @@ function Worker:__call(...)
   local args_ = { ... }
   return AsyncTask.new(function(resolve, reject)
     uv.new_work(function(runner, args, option)
-      args = vim.json.decode(args)
-      option = vim.json.decode(option)
+      args = vim.mpack.decode(args)
+      option = vim.mpack.decode(option)
 
       --Initialize cwd.
       require('luv').chdir(option.cwd)
@@ -35,7 +35,7 @@ function Worker:__call(...)
         return require('___kit___.kit.Async.AsyncTask').resolve(assert(loadstring(runner))(unpack(args))):sync()
       end)
 
-      res = vim.json.encode(res)
+      res = vim.mpack.encode({ res })
 
       --Return error or result.
       if not ok then
@@ -45,15 +45,15 @@ function Worker:__call(...)
       end
     end, function(err, res)
       if err then
-        reject(vim.json.decode(err))
+        reject(vim.mpack.decode(err)[1])
       else
-        resolve(vim.json.decode(res))
+        resolve(vim.mpack.decode(res)[1])
       end
     end):queue(
       self.runner,
-      vim.json.encode(args_),
-      vim.json.encode({
-        cwd = vim.fn.getcwd(),
+      vim.mpack.encode(args_),
+      vim.mpack.encode({
+        cwd = uv.cwd(),
       })
     )
   end)
