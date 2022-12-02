@@ -12,9 +12,11 @@
     "generate:language-server-protocol": "ts-node ./script/lsp/generate-protocol.ts && npm run format",
     "generate:language-server-client": "ts-node ./script/lsp/generate-client.ts && npm run format",
     "update": "run-s update:**",
-    "update:nvim-treesitter:clone": "if [ ! -e './tmp/nvim-treesitter' ]; then git clone git@github.com:nvim-treesitter/nvim-treesitter ./tmp/nvim-treesitter; fi",
+    "update:nvim-treesitter:clean": "rimraf ./tmp/nvim-treesitter",
+    "update:nvim-treesitter:clone": "git clone https://github.com/nvim-treesitter/nvim-treesitter ./tmp/nvim-treesitter",
     "update:nvim-treesitter:pull": "git -C ./tmp/nvim-treesitter pull --rebase",
-    "update:language-server-protocol:clone": "if [ ! -e './tmp/language-server-protocol' ]; then git clone git@github.com:microsoft/language-server-protocol ./tmp/language-server-protocol; fi",
+    "update:language-server-protocol:clean": "rimraf ./tmp/language-server-protocol",
+    "update:language-server-protocol:clone": "git clone https://github.com/microsoft/language-server-protocol ./tmp/language-server-protocol",
     "update:language-server-protocol:pull": "git -C ./tmp/language-server-protocol pull --rebase"
   },
   "repository": {
@@ -25,6 +27,7 @@
   "license": "MIT",
   "devDependencies": {
     "npm-run-all": "^4.1.5",
+    "rimraf": "^3.0.2",
     "ts-dedent": "^2.2.0",
     "ts-node": "^10.9.1",
     "tslib": "^2.4.1",

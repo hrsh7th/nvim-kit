@@ -3,10 +3,10 @@ name: test
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     branches:
-      - master
+      - main
 
 jobs:
   build:
@@ -21,13 +21,17 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install neovim
-        uses: rhysd/action-setup-vim
+        uses: rhysd/action-setup-vim@v1
         with:
           neovim: true
           version: nightly
 
+      - uses: leafo/gh-actions-lua@v9.1.0
+        with:
+          luaVersion: "5.1"
+
       - name: Install luarocks
-        uses: leafo/gh-actions-luarocks
+        uses: leafo/gh-actions-luarocks@v4
 
       - name: Install node.js
         uses: actions/setup-node@v2
@@ -36,11 +40,12 @@ jobs:
           cache: npm
 
       - name: Setup tools
-        shell: bash
         run: |
           luarocks install vusted
 
       - name: Run tests
-        shell: bash
-        run: npm run test
+        run: |
+          npm ci
+          npm run update
+          npm run test
 
