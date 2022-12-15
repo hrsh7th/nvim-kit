@@ -1,6 +1,23 @@
 local kit = require('___kit___.kit')
 
 describe('kit', function()
+  describe('.gc', function()
+    it('should detect gc timing.', function()
+      local called = false
+      local object = {
+        marker = kit.gc(function()
+          called = true
+        end),
+      }
+      object = nil
+      collectgarbage('collect')
+      vim.wait(200, function()
+        return object
+      end)
+      assert.are.equals(object, nil)
+      assert.are.equals(called, true)
+    end)
+  end)
   describe('.merge', function()
     it('should merge two dict', function()
       assert.are.same(

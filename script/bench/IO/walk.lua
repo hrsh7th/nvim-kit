@@ -1,4 +1,4 @@
-local Worker = require('___kit___.kit.Lua.Worker')
+local Worker = require('___kit___.kit.Thread.Worker')
 
 Worker.new(function()
   local count = 0

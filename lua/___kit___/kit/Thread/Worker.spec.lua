@@ -1,6 +1,6 @@
-local Worker = require('___kit___.kit.Lua.Worker')
+local Worker = require('___kit___.kit.Thread.Worker')
 
-describe('kit.Lua.Worker', function()
+describe('kit.Thread.Worker', function()
   it('should work basic usage', function()
     vim.pretty_print('start')
     local worker = Worker.new(function(path)

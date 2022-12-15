@@ -1,7 +1,7 @@
 local uv = require('luv')
 local AsyncTask = require('___kit___.kit.Async.AsyncTask')
 
----@class ___kit___.kit.Lua.WorkerOption
+---@class ___kit___.kit.Thread.WorkerOption
 ---@field public runtimepath string[]
 
 local Worker = {}
@@ -18,7 +18,7 @@ end
 ---Call worker function.
 ---@return ___kit___.kit.Async.AsyncTask
 function Worker:__call(...)
-  local args_ = { ... }
+  local args = { ... }
   return AsyncTask.new(function(resolve, reject)
     uv.new_work(function(runner, args, option)
       args = vim.mpack.decode(args)
@@ -51,7 +51,7 @@ function Worker:__call(...)
       end
     end):queue(
       self.runner,
-      vim.mpack.encode(args_),
+      vim.mpack.encode(args),
       vim.mpack.encode({
         cwd = uv.cwd(),
       })

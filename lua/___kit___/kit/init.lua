@@ -1,5 +1,18 @@
 local kit = {}
 
+---Create gabage collection detector.
+---@param callback fun(...: any): any
+---@return userdata
+function kit.gc(callback)
+  local gc = newproxy(true)
+  if vim.is_thread() or os.getenv('NODE_ENV') == 'test' then
+    getmetatable(gc).__gc = callback
+  else
+    getmetatable(gc).__gc = vim.schedule_wrap(callback)
+  end
+  return gc
+end
+
 ---Create unique id.
 ---@return integer
 kit.unique_id = setmetatable({

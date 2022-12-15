@@ -1,5 +1,5 @@
 local uv = require('luv')
-local Lua = require('___kit___.kit.Lua')
+local kit = require('___kit___.kit')
 
 local is_thread = vim.is_thread()
 
@@ -84,7 +84,7 @@ end
 function AsyncTask.new(runner)
   local self = setmetatable({}, AsyncTask)
 
-  self.gc = Lua.gc(function()
+  self.gc = kit.gc(function()
     if self.status == AsyncTask.Status.Rejected then
       if not self.chained and not self.synced then
         AsyncTask.on_unhandled_rejection(self.value)
