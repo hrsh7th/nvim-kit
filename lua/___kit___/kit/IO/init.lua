@@ -372,6 +372,12 @@ function IO.normalize(path)
     path = path:gsub('\\', '/')
   end
 
+  -- remove trailing slash.
+  if path:sub(-1) == '/' then
+    path = path:sub(1, -2)
+  end
+
+  -- skip if the path already absolute.
   if IO.is_absolute(path) then
     return path
   end

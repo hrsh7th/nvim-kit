@@ -158,7 +158,10 @@ end
 ---@return any
 function AsyncTask:await(schedule)
   local Async = require('___kit___.kit.Async')
-  local res = Async.await(self)
+  local ok, res = pcall(Async.await, self)
+  if not ok then
+    error(res, 2)
+  end
   if schedule then
     Async.await(Async.schedule())
   end

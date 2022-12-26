@@ -92,12 +92,12 @@ return function(bang, plugin_path, plugin_name)
       end
     end):await(true)
   end)
-    :catch(function(err)
-      if err:match('Cancelled$') then
-        vim.api.nvim_echo({ { '\nCancelled.', 'WarningMsg' } }, true, {})
-      else
-        vim.api.nvim_echo({ { err, 'ErrorMsg' } }, true, {})
-      end
-    end)
-    :sync()
+      :catch(vim.schedule_wrap(function(err)
+        if err:match('Cancelled$') then
+          vim.api.nvim_echo({ { '\nCancelled.', 'WarningMsg' } }, true, {})
+        else
+          vim.api.nvim_echo({ { err, 'ErrorMsg' } }, true, {})
+        end
+      end))
+      :sync()
 end
