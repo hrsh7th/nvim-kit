@@ -1,5 +1,7 @@
 local kit = {}
 
+local is_thread = vim.is_thread()
+
 ---Create gabage collection detector.
 ---@param callback fun(...: any): any
 ---@return userdata
@@ -11,6 +13,26 @@ function kit.gc(callback)
     getmetatable(gc).__gc = vim.schedule_wrap(callback)
   end
   return gc
+end
+
+---Safe version of vim.schedule.
+---@param fn fun(...: any): any
+function kit.safe_schedule(fn)
+  if is_thread then
+    fn()
+  else
+    vim.schedule(fn)
+  end
+end
+
+---Safe version of vim.schedule_wrap.
+---@param fn fun(...: any): any
+function kit.safe_schedule_wrap(fn)
+  if is_thread then
+    return fn
+  else
+    return vim.schedule_wrap(fn)
+  end
 end
 
 ---Create unique id.

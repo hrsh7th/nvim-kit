@@ -1,4 +1,5 @@
 local uv = require('luv')
+local kit = require('___kit___.kit')
 
 local is_thread = vim.is_thread()
 
@@ -25,7 +26,7 @@ local function settle(task, status, value)
   if status == AsyncTask.Status.Rejected then
     if not task.chained and not task.synced then
       local timer = uv.new_timer()
-      timer:start(0, 0, vim.schedule_wrap(function()
+      timer:start(0, 0, kit.safe_schedule_wrap(function()
         timer:stop()
         timer:close()
         if not task.chained and not task.synced then
