@@ -20,6 +20,22 @@ describe('kit.Async', function()
     assert.are.equal(num, 16)
   end)
 
+  it('should work without stack overflow', function()
+    local ok, res = pcall(function()
+      local function fib(n)
+        return Async.run(function()
+          if n < 2 then
+            return n
+          end
+          return fib(n - 1):await() + fib(n - 2):await()
+        end)
+      end
+      return fib(17):sync()
+    end)
+    vim.pretty_print(res)
+    assert.equals(type(res), 'number')
+  end)
+
   it('should work with exception', function()
     pcall(function()
       Async.run(function()

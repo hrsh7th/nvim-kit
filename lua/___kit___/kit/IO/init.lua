@@ -1,6 +1,8 @@
 local uv = require('luv')
 local Async = require('___kit___.kit.Async')
 
+local is_windows = uv.os_uname().sysname:lower() == 'windows'
+
 ---@see https://github.com/luvit/luvit/blob/master/deps/fs.lua
 local IO = {}
 
@@ -366,7 +368,11 @@ end
 ---@param path string
 ---@return string
 function IO.normalize(path)
-  if path == '/' then
+  if is_windows then
+    path = path:gsub('\\', '/')
+  end
+
+  if IO.is_absolute(path) then
     return path
   end
 
@@ -415,6 +421,22 @@ function IO.dirname(path)
     path = path:sub(1, -2)
   end
   return (path:gsub('/[^/]+$', ''))
+end
+
+if is_windows then
+  ---Return the path is absolute or not.
+  ---@param path string
+  ---@return boolean
+  function IO.is_absolute(path)
+    return path:sub(1, 1) == '/' or path:match('^%a://')
+  end
+else
+  ---Return the path is absolute or not.
+  ---@param path string
+  ---@return boolean
+  function IO.is_absolute(path)
+    return path:sub(1, 1) == '/'
+  end
 end
 
 return IO

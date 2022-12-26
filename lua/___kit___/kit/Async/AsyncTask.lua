@@ -4,6 +4,7 @@ local kit = require('___kit___.kit')
 local is_thread = vim.is_thread()
 
 ---@class ___kit___.kit.Async.AsyncTask
+---@field private gc? userdata
 ---@field private value any
 ---@field private status ___kit___.kit.Async.AsyncTask.Status
 ---@field private synced boolean
@@ -11,6 +12,28 @@ local is_thread = vim.is_thread()
 ---@field private children (fun(): any)[]
 local AsyncTask = {}
 AsyncTask.__index = AsyncTask
+
+---Settle the specified task.
+---@param task ___kit___.kit.Async.AsyncTask
+---@param status ___kit___.kit.Async.AsyncTask.Status
+---@param value any
+local function settle(task, status, value)
+  task.status = status
+  task.value = value
+  for _, c in ipairs(task.children) do
+    c()
+  end
+
+  if status == AsyncTask.Status.Rejected then
+    if not task.chained and not task.synced then
+      task.gc = kit.gc(function()
+        if not task.chained and not task.synced then
+          AsyncTask.on_unhandled_rejection(value)
+        end
+      end)
+    end
+  end
+end
 
 ---@enum ___kit___.kit.Async.AsyncTask.Status
 AsyncTask.Status = {
@@ -40,15 +63,13 @@ function AsyncTask.all(tasks)
     local values = {}
     local count = 0
     for i, task in ipairs(tasks) do
-      AsyncTask.resolve(task)
-          :next(function(value)
-            values[i] = value
-            count = count + 1
-            if #tasks == count then
-              resolve(values)
-            end
-          end)
-          :catch(reject)
+      task:dispatch(function(value)
+        values[i] = value
+        count = count + 1
+        if #tasks == count then
+          resolve(values)
+        end
+      end, reject)
     end
   end)
 end
@@ -84,44 +105,22 @@ end
 function AsyncTask.new(runner)
   local self = setmetatable({}, AsyncTask)
 
-  self.gc = kit.gc(function()
-    if self.status == AsyncTask.Status.Rejected then
-      if not self.chained and not self.synced then
-        AsyncTask.on_unhandled_rejection(self.value)
-      end
-    end
-  end)
-
   self.value = nil
   self.status = AsyncTask.Status.Pending
   self.synced = false
   self.chained = false
   self.children = {}
   local ok, err = pcall(runner, function(res)
-    if self.status ~= AsyncTask.Status.Pending then
-      return
-    end
-    self.status = AsyncTask.Status.Fulfilled
-    self.value = res
-    for _, c in ipairs(self.children) do
-      c()
+    if self.status == AsyncTask.Status.Pending then
+      settle(self, AsyncTask.Status.Fulfilled, res)
     end
   end, function(err)
-    if self.status ~= AsyncTask.Status.Pending then
-      return
-    end
-    self.status = AsyncTask.Status.Rejected
-    self.value = err
-    for _, c in ipairs(self.children) do
-      c()
+    if self.status == AsyncTask.Status.Pending then
+      settle(self, AsyncTask.Status.Rejected, err)
     end
   end)
   if not ok then
-    self.status = AsyncTask.Status.Rejected
-    self.value = err
-    for _, c in ipairs(self.children) do
-      c()
-    end
+    settle(self, AsyncTask.Status.Rejected, err)
   end
   return self
 end
@@ -194,7 +193,7 @@ function AsyncTask:dispatch(on_fulfilled, on_rejected)
     local on_next = self.status == AsyncTask.Status.Fulfilled and on_fulfilled or on_rejected
     local res = on_next(self.value)
     if AsyncTask.is(res) then
-      res:next(resolve):catch(reject)
+      res:dispatch(resolve, reject)
     else
       resolve(res)
     end
