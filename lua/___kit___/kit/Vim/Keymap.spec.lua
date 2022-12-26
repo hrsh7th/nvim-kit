@@ -24,45 +24,4 @@ describe('kit.Vim.Keymap', function()
       nil
     )
   end)
-
-  it('should insert multiple keys in order', function()
-    vim.keymap.set(
-      'i',
-      '<Plug>(kit.Vim.Keymap.send)',
-      Async.async(function()
-        Keymap.send('foo', 'in'):await()
-        assert.are.equals(vim.api.nvim_get_current_line(), '{foo')
-        Keymap.send('bar', 'in'):await()
-        assert.are.equals(vim.api.nvim_get_current_line(), '{foobar')
-        Keymap.send('baz', 'in'):await()
-        assert.are.equals(vim.api.nvim_get_current_line(), '{foobarbaz')
-      end)
-    )
-    Keymap.spec(Async.async(function()
-      Keymap.send(Keymap.termcodes('i{<Plug>(kit.Vim.Keymap.send)}'), 'i'):await()
-    end))
-    assert.are.equals(vim.api.nvim_get_current_line(), '{foobarbaz}')
-  end)
-
-  it('should treat flags as separated', function()
-    vim.keymap.set(
-      'i',
-      '<Plug>(kit.Vim.Keymap.send)',
-      Async.async(function()
-        Keymap.send('foo', 'nt'):await()
-      end)
-    )
-    local _, err = pcall(function()
-      Keymap.spec(Async.async(function()
-        Keymap.send(Keymap.termcodes('i<Plug>(kit.Vim.Keymap.send)'), 'i'):await()
-      end))
-    end)
-    assert.are_not.equals(
-      string.match(
-        err--[[@as string]],
-        'Keymap.send:'
-      ),
-      nil
-    )
-  end)
 end)

@@ -49,19 +49,19 @@ describe('kit.Async', function()
     -- skip rejected task's next.
     local steps = {}
     local catch_task = err_task
-      :next(once(function()
-        table.insert(steps, 1)
-      end))
-      :next(once(function()
-        table.insert(steps, 2)
-      end))
-      :catch(function()
-        return 'catch'
-      end)
-      :next(function(value)
-        table.insert(steps, 3)
-        return value
-      end)
+        :next(once(function()
+          table.insert(steps, 1)
+        end))
+        :next(once(function()
+          table.insert(steps, 2)
+        end))
+        :catch(function()
+          return 'catch'
+        end)
+        :next(function(value)
+          table.insert(steps, 3)
+          return value
+        end)
     assert.are.same(steps, { 3 })
     assert.are.equals(catch_task:sync(), 'catch')
   end)
@@ -115,99 +115,68 @@ describe('kit.Async', function()
   end)
 
   it('should work AsyncTask.on_unhandled_rejection', function()
-    local object
     local called = false
     AsyncTask.on_unhandled_rejection = function()
       called = true
     end
 
     -- has no catched.
-    object = AsyncTask.new(function()
+    AsyncTask.new(function()
       error('error')
     end)
-    object = nil
     called = false
-    collectgarbage('collect')
-    vim.wait(200, function()
-      return object
-    end)
-    assert.are.equals(object, nil)
+    vim.wait(1)
     assert.are.equals(called, true)
 
     -- has no catched.
-    object = AsyncTask.new(function()
+    AsyncTask.new(function()
       error('error')
     end):next(function()
       -- ignore
     end)
-    object = nil
     called = false
-    collectgarbage('collect')
-    vim.wait(200, function()
-      return object
-    end)
-    assert.are.equals(object, nil)
+    vim.wait(1)
     assert.are.equals(called, true)
 
     -- has no catched.
-    object = AsyncTask.new(function(resolve)
+    AsyncTask.new(function(resolve)
       resolve(nil)
     end):next(function()
       error('error')
     end)
-    object = nil
     called = false
-    collectgarbage('collect')
-    vim.wait(200, function()
-      return object
-    end)
-    assert.are.equals(object, nil)
+    vim.wait(1)
     assert.are.equals(called, true)
 
     -- has no catched.
-    object = AsyncTask.new(function(_, reject)
+    AsyncTask.new(function(_, reject)
       reject('error')
     end):catch(function(err)
       error(err)
     end)
-    object = nil
     called = false
-    collectgarbage('collect')
-    vim.wait(200, function()
-      return object
-    end)
-    assert.are.equals(object, nil)
+    vim.wait(1)
     assert.are.equals(called, true)
 
     -- catched.
-    object = AsyncTask.new(function()
+    AsyncTask.new(function()
       error('error')
     end):catch(function()
       -- ignore
     end)
-    object = nil
     called = false
-    collectgarbage('collect')
-    vim.wait(200, function()
-      return object
-    end)
-    assert.are.equals(object, nil)
+    vim.wait(1)
     assert.are.equals(called, false)
 
     -- has no catched task but synced.
-    object = AsyncTask.new(function()
+    local task = AsyncTask.new(function()
       error('error')
     end)
     pcall(function()
-      object:sync()
+      task:sync()
     end)
-    object = nil
     called = false
-    collectgarbage('collect')
-    vim.wait(200, function()
-      return object
-    end)
-    assert.are.equals(object, nil)
+    vim.wait(1)
     assert.are.equals(called, false)
   end)
 end)

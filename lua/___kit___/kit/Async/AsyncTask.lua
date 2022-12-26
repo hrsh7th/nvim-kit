@@ -1,10 +1,8 @@
 local uv = require('luv')
-local kit = require('___kit___.kit')
 
 local is_thread = vim.is_thread()
 
 ---@class ___kit___.kit.Async.AsyncTask
----@field private gc? userdata
 ---@field private value any
 ---@field private status ___kit___.kit.Async.AsyncTask.Status
 ---@field private synced boolean
@@ -26,11 +24,14 @@ local function settle(task, status, value)
 
   if status == AsyncTask.Status.Rejected then
     if not task.chained and not task.synced then
-      task.gc = kit.gc(function()
+      local timer = uv.new_timer()
+      timer:start(0, 0, vim.schedule_wrap(function()
+        timer:stop()
+        timer:close()
         if not task.chained and not task.synced then
           AsyncTask.on_unhandled_rejection(value)
         end
-      end)
+      end))
     end
   end
 end
