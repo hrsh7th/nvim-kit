@@ -5,7 +5,7 @@ local step = setmetatable({
 }, {
   __call = function(self, ...)
     table.insert(self.steps, { ... })
-  end
+  end,
 }) --[[@as function]]
 
 describe('kit.App.Event', function()
@@ -15,11 +15,21 @@ describe('kit.App.Event', function()
 
   it('should work', function()
     local event = Event.new()
-    event:on('e', function(...) step(1, ...) end)
-    event:on('e', function(...) step(2, ...) end)
-    event:on('e', function(...) step(3, ...) end)
-    event:once('e', function(...) step(4, ...) end)
-    event:on('e', function(...) step(5, ...) end)()
+    event:on('e', function(...)
+      step(1, ...)
+    end)
+    event:on('e', function(...)
+      step(2, ...)
+    end)
+    event:on('e', function(...)
+      step(3, ...)
+    end)
+    event:once('e', function(...)
+      step(4, ...)
+    end)
+    event:on('e', function(...)
+      step(5, ...)
+    end)()
 
     event:emit('e', 'payload1')
     event:emit('e', 'payload2')
@@ -33,5 +43,4 @@ describe('kit.App.Event', function()
       { 3, 'payload2' },
     })
   end)
-
 end)
