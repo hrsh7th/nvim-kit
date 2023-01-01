@@ -10,6 +10,13 @@ describe('kit.Async', function()
     end)
   end)
 
+  it('should detect async context', function()
+    assert.are.equal(Async.in_context(), false)
+    Async.run(function()
+      assert.are.equal(Async.in_context(), true)
+    end)
+  end)
+
   it('should work like JavaScript Promise', function()
     local num = Async.async(function()
       local num = 2
