@@ -5,6 +5,34 @@ local Async = {}
 ---@type table<thread, integer>
 Async.___threads___ = {}
 
+---Alias of AsyncTask.resolve(v).
+---@param v any
+---@return ___kit___.kit.Async.AsyncTask
+function Async.resolve(v)
+  return AsyncTask.resolve(v)
+end
+
+---Alias of AsyncTask.reject(v).
+---@param v any
+---@return ___kit___.kit.Async.AsyncTask
+function Async.reject(v)
+  return AsyncTask.reject(v)
+end
+
+---Alias of AsyncTask.all(v).
+---@param tasks ___kit___.kit.Async.AsyncTask[]
+---@return ___kit___.kit.Async.AsyncTask
+function Async.all(tasks)
+  return AsyncTask.all(tasks)
+end
+
+---Alias of AsyncTask.new(...).
+---@param runner fun(resolve: fun(value: any), reject: fun(err: any))
+---@return ___kit___.kit.Async.AsyncTask
+function Async.new(runner)
+  return AsyncTask.new(runner)
+end
+
 ---Run async function immediately.
 ---@generic T: fun(...): ___kit___.kit.Async.AsyncTask
 ---@param runner T

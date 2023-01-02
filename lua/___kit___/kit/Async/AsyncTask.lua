@@ -106,8 +106,7 @@ function AsyncTask.reject(v)
 end
 
 ---Create new async task object.
----@generic T
----@param runner fun(resolve?: fun(value: T?), reject?: fun(err: any?))
+---@param runner fun(resolve?: fun(value: any?), reject?: fun(err: any?))
 function AsyncTask.new(runner)
   local self = setmetatable({}, AsyncTask)
 
