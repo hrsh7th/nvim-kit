@@ -1,5 +1,5 @@
 local kit = require('___kit___.kit')
-local AsyncTask = require('___kit___.kit.Async.AsyncTask')
+local Async = require('___kit___.kit.Async')
 
 local Keymap = {}
 
@@ -29,7 +29,7 @@ function Keymap.send(keys, mode)
   end
 
   local unique_id = kit.unique_id()
-  return AsyncTask.new(function(resolve)
+  return Async.new(function(resolve)
     Keymap._callbacks[unique_id] = resolve
 
     local callback = Keymap.termcodes(('<Cmd>lua require("___kit___.kit.Vim.Keymap")._resolve(%s)<CR>'):format(unique_id))
@@ -48,7 +48,7 @@ end
 ---Test spec helper.
 ---@param spec fun(): any
 function Keymap.spec(spec)
-  local task = AsyncTask.resolve():next(spec)
+  local task = Async.resolve():next(Async.async(spec))
   vim.api.nvim_feedkeys('', 'x', true)
   task:sync()
   collectgarbage('collect')

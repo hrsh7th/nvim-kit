@@ -1,4 +1,3 @@
-local Async = require('___kit___.kit.Async')
 local Keymap = require('___kit___.kit.Vim.Keymap')
 
 describe('kit.Vim.Keymap', function()
@@ -11,10 +10,10 @@ describe('kit.Vim.Keymap', function()
 
   it('should work with async-await and exceptions', function()
     local _, err = pcall(function()
-      Keymap.spec(Async.async(function()
+      Keymap.spec(function()
         Keymap.send('iinsert', 'n'):await()
         error('error')
-      end))
+      end)
     end)
     assert.are_not.equals(
       string.match(
