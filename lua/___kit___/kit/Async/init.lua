@@ -5,6 +5,20 @@ local Async = {}
 ---@type table<thread, integer>
 Async.___threads___ = {}
 
+---Alias of AsyncTask.all.
+---@param tasks ___kit___.kit.Async.AsyncTask[]
+---@return ___kit___.kit.Async.AsyncTask
+function Async.all(tasks)
+  return AsyncTask.all(tasks)
+end
+
+---Alias of AsyncTask.race.
+---@param tasks ___kit___.kit.Async.AsyncTask[]
+---@return ___kit___.kit.Async.AsyncTask
+function Async.all(tasks)
+  return AsyncTask.race(tasks)
+end
+
 ---Alias of AsyncTask.resolve(v).
 ---@param v any
 ---@return ___kit___.kit.Async.AsyncTask
@@ -19,13 +33,6 @@ function Async.reject(v)
   return AsyncTask.reject(v)
 end
 
----Alias of AsyncTask.all(v).
----@param tasks ___kit___.kit.Async.AsyncTask[]
----@return ___kit___.kit.Async.AsyncTask
-function Async.all(tasks)
-  return AsyncTask.all(tasks)
-end
-
 ---Alias of AsyncTask.new(...).
 ---@param runner fun(resolve: fun(value: any), reject: fun(err: any))
 ---@return ___kit___.kit.Async.AsyncTask
@@ -34,12 +41,11 @@ function Async.new(runner)
 end
 
 ---Run async function immediately.
----@generic T: fun(...): ___kit___.kit.Async.AsyncTask
+---@generic T: fun(): ___kit___.kit.Async.AsyncTask
 ---@param runner T
----@param ... any
 ---@return ___kit___.kit.Async.AsyncTask
-function Async.run(runner, ...)
-  return Async.async(runner)(...)
+function Async.run(runner)
+  return Async.async(runner)()
 end
 
 ---Return current context is async coroutine or not.

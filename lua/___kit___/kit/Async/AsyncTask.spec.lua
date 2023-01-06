@@ -114,6 +114,29 @@ describe('kit.Async', function()
     assert.is_true((vim.loop.now() - now) - 300 < 10)
   end)
 
+  it('should work AsyncTask.race', function()
+    local now = vim.loop.now()
+    local value = AsyncTask.race({
+      AsyncTask.new(function(resolve)
+        vim.defer_fn(function()
+          resolve(1)
+        end, 300)
+      end),
+      AsyncTask.new(function(resolve)
+        vim.defer_fn(function()
+          resolve(2)
+        end, 200)
+      end),
+      AsyncTask.new(function(resolve)
+        vim.defer_fn(function()
+          resolve(3)
+        end, 100)
+      end),
+    }):sync()
+    assert.are.same(value, 3)
+    assert.is_true((vim.loop.now() - now) - 100 < 10)
+  end)
+
   it('should return current state of task', function()
     local success = AsyncTask.new(function(resolve)
       vim.defer_fn(function()
