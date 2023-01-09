@@ -1,6 +1,18 @@
 local kit = require('___kit___.kit')
 local Async = require('___kit___.kit.Async')
 
+---@alias ___kit___.kit.Vim.Keymap.Keys { keys: string, remap: boolean }
+---@alias ___kit___.kit.Vim.Keymap.KeysSpecifier string|{ keys: string, remap: boolean }
+
+---@param keys ___kit___.kit.Vim.Keymap.KeysSpecifier
+---@return ___kit___.kit.Vim.Keymap.Keys
+local function to_keys(keys)
+  if type(keys) == 'table' then
+    return keys
+  end
+  return { keys = keys, remap = false }
+end
+
 local Keymap = {}
 
 Keymap._callbacks = {}
@@ -16,29 +28,31 @@ end
 ---@param callback fun()
 ---@return ___kit___.kit.Async.AsyncTask
 function Keymap.next(callback)
-  return Keymap.send('', 'in'):next(callback)
+  return Keymap.send(''):next(callback)
 end
 
 ---Send keys.
----@param keys string
----@param mode string
+---@param keys ___kit___.kit.Vim.Keymap.KeysSpecifier|___kit___.kit.Vim.Keymap.KeysSpecifier[]
+---@param no_insert? boolean
 ---@return ___kit___.kit.Async.AsyncTask
-function Keymap.send(keys, mode)
-  if mode:find('t', 1, true) ~= nil then
-    error('Keymap.send: mode must not contain "t"')
-  end
-
+function Keymap.send(keys, no_insert)
   local unique_id = kit.unique_id()
-  return Async.new(function(resolve)
+  return Async.new(function(resolve, _)
     Keymap._callbacks[unique_id] = resolve
 
     local callback = Keymap.termcodes(('<Cmd>lua require("___kit___.kit.Vim.Keymap")._resolve(%s)<CR>'):format(unique_id))
-    if string.match(mode, 'i') then
-      vim.api.nvim_feedkeys(callback, 'in', true)
-      vim.api.nvim_feedkeys(keys, mode, true)
-    else
-      vim.api.nvim_feedkeys(keys, mode, true)
+    if no_insert then
+      for _, keys in ipairs(kit.to_array(keys)) do
+        keys = to_keys(keys)
+        vim.api.nvim_feedkeys(keys.keys, keys.remap and 'm' or 'n', true)
+      end
       vim.api.nvim_feedkeys(callback, 'n', true)
+    else
+      vim.api.nvim_feedkeys(callback, 'in', true)
+      for _, keys in ipairs(kit.reverse(kit.to_array(keys))) do
+        keys = to_keys(keys)
+        vim.api.nvim_feedkeys(keys.keys, 'i' .. (keys.remap and 'm' or 'n'), true)
+      end
     end
   end):catch(function()
     Keymap._callbacks[unique_id] = nil
@@ -52,9 +66,7 @@ function Keymap.spec(spec)
   vim.api.nvim_feedkeys('', 'x', true)
   task:sync()
   collectgarbage('collect')
-  vim.wait(200, function()
-    return true
-  end)
+  vim.wait(200)
 end
 
 ---Resolve running keys.
