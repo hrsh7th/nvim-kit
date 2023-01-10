@@ -10,19 +10,23 @@ describe('kit.Vim.Keymap', function()
   end)
 
   it('should send multiple keys in sequence', function()
-    vim.keymap.set('i', '(', Async.async(function()
-      Keymap.send('('):await()
-      assert.equals('[(', vim.api.nvim_get_current_line())
+    vim.keymap.set(
+      'i',
+      '(',
+      Async.async(function()
+        Keymap.send('('):await()
+        assert.equals('[(', vim.api.nvim_get_current_line())
 
-      Keymap.send(')'):await()
-      assert.equals('[()', vim.api.nvim_get_current_line())
+        Keymap.send(')'):await()
+        assert.equals('[()', vim.api.nvim_get_current_line())
 
-      Keymap.send(Keymap.termcodes('<Left>a<Right>')):await()
-      assert.equals('[(a)', vim.api.nvim_get_current_line())
-    end))
+        Keymap.send(Keymap.termcodes('<Left>a<Right>')):await()
+        assert.equals('[(a)', vim.api.nvim_get_current_line())
+      end)
+    )
     Keymap.spec(function()
       Keymap.send('i'):await()
-      Keymap.send({ '[', { keys = '(', remap = true },  ']' }):await()
+      Keymap.send({ '[', { keys = '(', remap = true }, ']' }):await()
       assert.equals('[(a)]', vim.api.nvim_get_current_line())
     end)
   end)
@@ -36,7 +40,7 @@ describe('kit.Vim.Keymap', function()
     end)
     assert.are_not.equals(
       string.match(
-        err--[[@as string]] ,
+        err--[[@as string]],
         'error$'
       ),
       nil
