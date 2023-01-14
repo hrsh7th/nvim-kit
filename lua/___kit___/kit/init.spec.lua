@@ -29,6 +29,7 @@ describe('kit', function()
           d = {
             e = 3,
           },
+          h = false,
         }, {
           a = false,
           b = {
@@ -47,6 +48,7 @@ describe('kit', function()
             e = 3,
             f = {},
           },
+          h = false,
         }
       )
     end)
