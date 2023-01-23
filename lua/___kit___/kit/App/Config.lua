@@ -1,7 +1,7 @@
 local kit = require('___kit___.kit')
 local Cache = require('___kit___.kit.App.Cache')
 
----@class ___kit___.kit.App.Config.Schema # kit.macro.remove
+---@class ___kit___.kit.App.Config.Schema
 
 ---@alias ___kit___.kit.App.Config.SchemaInternal ___kit___.kit.App.Config.Schema|{ revision: integer }
 
@@ -15,21 +15,15 @@ local Config = {}
 Config.__index = Config
 
 ---Create new config instance.
----@param default? ___kit___.kit.App.Config.Schema
+---@param default ___kit___.kit.App.Config.Schema
 function Config.new(default)
   local self = setmetatable({}, Config)
   self._cache = Cache.new()
-  self._default = default or {}
+  self._default = default
   self._global = {}
   self._filetype = {}
   self._buffer = {}
   return self
-end
-
----Set default configuration.
----@param default ___kit___.kit.App.Config.Schema
-function Config:default(default)
-  self._default = default
 end
 
 ---Update global config.
@@ -83,20 +77,21 @@ end
 ---Create setup interface.
 ---@return fun(config: ___kit___.kit.App.Config.Schema)|{ filetype: fun(filetypes: string|string[], config: ___kit___.kit.App.Config.Schema), buffer: fun(bufnr: integer, config: ___kit___.kit.App.Config.Schema) }
 function Config:create_setup_interface()
-  return setmetatable({}, {
-    ---@param config ___kit___.kit.App.Config.Schema
-    __call = function(_, config)
-      self:global(config)
-    end,
+  return setmetatable({
     ---@param filetypes string|string[]
     ---@param config ___kit___.kit.App.Config.Schema
-    filetype = function(_, filetypes, config)
+    filetype = function(filetypes, config)
       self:filetype(filetypes, config)
     end,
     ---@param bufnr integer
     ---@param config ___kit___.kit.App.Config.Schema
-    buffer = function(_, bufnr, config)
+    buffer = function(bufnr, config)
       self:buffer(bufnr, config)
+    end,
+  }, {
+    ---@param config ___kit___.kit.App.Config.Schema
+    __call = function(_, config)
+      self:global(config)
     end,
   })
 end
