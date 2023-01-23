@@ -15,7 +15,7 @@ end
 ---Alias of AsyncTask.race.
 ---@param tasks ___kit___.kit.Async.AsyncTask[]
 ---@return ___kit___.kit.Async.AsyncTask
-function Async.all(tasks)
+function Async.race(tasks)
   return AsyncTask.race(tasks)
 end
 
