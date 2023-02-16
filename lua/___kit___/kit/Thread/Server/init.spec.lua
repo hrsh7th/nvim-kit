@@ -11,6 +11,7 @@ describe('kit.Thread.Server', function()
         error('error')
       end
     end)
+    server:connect():sync()
 
     local res = server:request('res', { message = 'aiueo' }):sync()
     assert.are.same({ message = 'aiueo' }, res)
@@ -19,6 +20,7 @@ describe('kit.Thread.Server', function()
       server:request('err', { message = 'aiueo' }):sync()
     end)
     assert.are.same(false, ok)
-    vim.wait(500)
+
+    server:kill()
   end)
 end)
