@@ -11,34 +11,32 @@ Server.__index = Server
 
 function Server.new(dispatcher)
   local self = setmetatable({}, Server)
+  self.dispatcher = dispatcher
   self.stdin = uv.new_pipe()
   self.stdout = uv.new_pipe()
   self.stderr = uv.new_pipe()
-  self.dispatcher = dispatcher
-  self.session = Session.new(self.stdout, self.stdin)
-  return self
-end
-
-function Server:connect()
-  if self.process then
-    error('server is already started.')
-  end
-
   self.process = uv.spawn('nvim', {
     cwd = uv.cwd(),
-    args = { '--headless', '-l', ('%s/Bootstrap.lua'):format(get_script_path())  },
+    args = { '-u', 'NONE', '--headless', '--noplugin', '-l', ('%s/Bootstrap.lua'):format(get_script_path()), vim.o.runtimepath },
     stdio = { self.stdin, self.stdout, self.stderr }
   })
-  self.session:connect()
+  self.session = Session.new(self.stdout, self.stdin)
   self.session:request('initialize', {
     dispatcher = string.dump(self.dispatcher)
-  })
+  }):sync()
+  return self
 end
 
 ---@param method string
 ---@param params table
 function Server:request(method, params)
   return self.session:request(method, params)
+end
+
+---@param method string
+---@param params table
+function Server:notify(method, params)
+  self.session:notify(method, params)
 end
 
 function Server:kill()

@@ -1,97 +1,133 @@
 local mpack = require('mpack')
-
+local kit = require('___kit___.kit')
 local Async = require('___kit___.kit.Async')
+
+local function log(...)
+  if _G.f then
+    _G.f:write('[server]\t')
+    _G.f:flush()
+  else
+    io.write('[client]\t')
+    io.flush()
+  end
+  for _, v in ipairs({ ... }) do
+    if _G.f then
+      _G.f:write(vim.inspect(v) .. '\t')
+      _G.f:flush()
+    else
+      io.write(vim.inspect(v) .. '\t')
+      io.flush()
+    end
+  end
+  if _G.f then
+    _G.f:write('\n')
+    _G.f:flush()
+  else
+    io.write('\n')
+    io.flush()
+  end
+end
+
+local function serialize(tbl)
+  return kit.convert(tbl, function(v)
+    if v == nil then
+      return mpack.NIL
+    else
+      return v
+    end
+  end)
+end
 
 local Session = {}
 Session.__index = Session
-
-Session.Request = 0
-Session.Response = 1
-Session.Notification = 2
 
 function Session.new(reader, writer)
   local self = setmetatable({}, Session)
   self.reader = reader
   self.writer = writer
-  self.buffer = ''
-  self.request_id = 0
+  self.session = mpack.Session({
+    unpack = mpack.Unpacker()
+  })
   self.on_request = {}
   self.on_notification = {}
-  self.pending_requests = {}
+  Async.on_unhandled_rejection = function(err)
+    log('on_unhandled_rejection', err)
+  end
+  self.reader:read_start(function(err, data)
+    local ok, err = pcall(function()
+      if err then
+        log('read error: ', err)
+        error(err)
+      end
+      if not data then
+        return
+      end
+
+      local offset = 1
+      local length = #data
+      local type, id_or_cb, method_or_error, params_or_result
+      while offset <= length do
+        type, id_or_cb, method_or_error, params_or_result, offset = self.session:receive(data, offset)
+        if type == 'request' then
+          local request_id, method, params = id_or_cb, method_or_error, params_or_result
+          log('<-', 'request', method, params)
+          Async.resolve():next(function()
+            return Async.run(function()
+              return self.on_request[method](params)
+            end)
+          end):next(function(res)
+            log('->', 'response(res)', res)
+            self:_write(self.session:reply(request_id) .. mpack.encode(mpack.NIL) .. mpack.encode(serialize(res)))
+          end):catch(function(err)
+            log('->', 'response(err)', err)
+            self:_write(self.session:reply(request_id) .. mpack.encode(serialize(err)) .. mpack.encode(mpack.NIL))
+          end)
+        elseif type == 'notification' then
+          local method, params = method_or_error, params_or_result
+          log('<-', 'notification', method, params)
+          self.on_notification[method](params)
+        elseif type == 'response' then
+          local callback, err, res = id_or_cb, method_or_error, params_or_result
+          log('<-', 'response', callback, err, res)
+          if err == mpack.NIL then
+            err = nil
+          else
+            res = nil
+          end
+          callback(err, res)
+        end
+      end
+    end)
+    if not ok then
+      log('error', err)
+    end
+  end)
   return self
 end
 
-function Session:connect()
-  self.reader:read_start(function(err, data)
-    vim.pretty_print(data)
-    if err then
-      error(err)
-    end
-    data = data or ''
-    if self.buffer == '' then
-      self.buffer = data
-      self:consume()
-    else
-      self.buffer = self.buffer .. data
-    end
-  end)
-end
-
 function Session:request(method, params)
-  self.request_id = self.request_id + 1
-  self:_write({ Session.Request, self.request_id, method, params })
-
   return Async.new(function(resolve, reject)
-    self.pending_requests[self.request_id] = function(err, res)
+    local request = self.session:request(function(err, res)
       if err then
         reject(err)
       else
         resolve(res)
       end
-    end
+    end)
+    self:_write(request .. mpack.encode(method) .. mpack.encode(serialize(params)))
   end)
 end
 
 function Session:notify(method, params)
-  self:_write({ Session.Notification, method, params })
+  self:_write(self.session:notify() .. mpack.encode(method) .. mpack.encode(serialize(params)))
 end
 
-function Session:consume()
-  while self.buffer ~= '' do
-    local res, off = mpack.Unpacker()(self.buffer)
-    if not res then
-      return
+function Session:_write(data)
+  self.writer:write(data, function(err)
+    if err then
+      log('write error', err)
     end
-    self.buffer = string.sub(self.buffer, off)
-
-    if res[1] == Session.Request then
-      if self.on_request[res[3]] then
-        local ok, err = pcall(function()
-          self.on_request[res[3]](res[4], function(result)
-            self:_write({ Session.Response, res[2], nil, result })
-          end)
-        end)
-        if not ok then
-          self:_write({ Session.Response, res[2], err, nil })
-        end
-      end
-    elseif res[1] == Session.Response then
-      if self.pending_requests[res[2]] then
-        self.pending_requests[res[2]](res[3], res[4])
-        self.pending_requests[res[2]] = nil
-      end
-    elseif res[1] == Session.Notification then
-      if self.on_notification[res[2]] then
-        pcall(function()
-          self.on_notification[res[2]](res[3])
-        end)
-      end
-    end
-  end
-end
-
-function Session:_write(msg)
-  self.writer:write(mpack.Packer()(msg))
+  end)
 end
 
 return Session

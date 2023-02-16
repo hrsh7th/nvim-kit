@@ -1,27 +1,21 @@
-local uv = requrie('luv')
+_G.f = io.open('/Users/hiroshi_shichita/Develop/hoge.txt', 'w')
+assert(f)
+
+vim.o.runtimepath = _G.arg[1]
+
+local uv = require('luv')
 local Session = require('___kit___.kit.Thread.Server.Session')
 
-local running = true
-
-local reader = uv.new_pipe()
-local writer = uv.new_pipe()
-local session = Session.new(reader, writer)
-
-function session.on_request.initialize(params, callback)
+local stdin = uv.new_pipe()
+stdin:open(0)
+local stdout = uv.new_pipe()
+stdout:open(1)
+local session = Session.new(stdin, stdout)
+function session.on_request.initialize(params)
   loadstring(params.dispatcher)(session)
-  callback(true)
 end
 
-local ch = vim.fn.stdioopen({
-  on_stdin = function(_, data)
-    vim.pretty_print(data)
-    uv.write(reader, data)
-  end,
-})
-uv.read_start(writer, vim.schedule_wrap(function(_, data)
-  vim.fn.chansend(ch, data)
-end))
-
-while running do
-  vim.wait(0)
+while true do
+  uv.run('once')
+  f:flush()
 end
