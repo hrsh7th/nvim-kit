@@ -54,6 +54,37 @@ describe('kit', function()
     end)
   end)
 
+  describe('.convert', function()
+    it('should convert nested table\'s value', function()
+      local function safe(v)
+        if v == vim.NIL then
+          return false
+        end
+        return v
+      end
+      assert.are.same(kit.convert({
+        a = {
+          b = vim.NIL,
+          c = 1,
+        }
+      }, safe), {
+        a = {
+          b = false,
+          c = 1,
+        }
+      })
+    end)
+  end)
+
+  describe('.map', function()
+    it('should map values', function()
+      local function to_index(_, i)
+        return i
+      end
+      assert.are.same(kit.map({ 0, 0, 0 }, to_index), { 1, 2, 3 })
+    end)
+  end)
+
   describe('.concat', function()
     it('should concat two list', function()
       assert.are.same(kit.concat({ 1, 2, 3 }, { 4, 5, 6 }), { 1, 2, 3, 4, 5, 6 })
@@ -74,7 +105,18 @@ describe('kit', function()
       assert.are.equal(kit.is_array({}), true)
       assert.are.equal(kit.is_array({ 1 }), true)
       assert.are.equal(kit.is_array({ a = 1 }), false)
+      assert.are.equal(kit.is_array({ 1, a = 1 }), false)
       assert.are.equal(kit.is_array(1), false)
+    end)
+  end)
+
+  describe('.is_dict', function ()
+    it('should check array or not', function()
+      assert.are.equal(kit.is_dict({}), true)
+      assert.are.equal(kit.is_dict({ 1 }), false)
+      assert.are.equal(kit.is_dict({ a = 1 }), true)
+      assert.are.equal(kit.is_dict({ 1, a = 1 }), true)
+      assert.are.equal(kit.is_dict(1), false)
     end)
   end)
 

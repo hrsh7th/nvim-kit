@@ -20,7 +20,7 @@ describe('kit.App.Cache', function()
       __call = function(self)
         self.count = self.count + 1
       end,
-    })
+    }) --[[@as function]]
     local cache = Cache.new()
 
     -- Ensure the value.

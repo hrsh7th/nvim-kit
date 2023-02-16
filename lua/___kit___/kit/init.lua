@@ -35,21 +35,6 @@ function kit.safe_schedule_wrap(fn)
   end
 end
 
----Create specific data with map.
----@param tbl table
----@param map fun(value: any): any
----@return table
-function kit.convert(tbl, map)
-  if kit.is_dict(tbl) then
-    local new_tbl = {}
-    for k, v in pairs(tbl) do
-      new_tbl[k] = kit.convert(v, map)
-    end
-    return new_tbl
-  end
-  return map(tbl)
-end
-
 ---Create unique id.
 ---@return integer
 kit.unique_id = setmetatable({
@@ -102,8 +87,22 @@ function kit.merge(tbl1, tbl2)
   end
 end
 
----Concatenate two tables.
----NOTE: This doesn't concatenate dict-like table.
+---Recursive convert value via callback function.
+---@param tbl table
+---@param callback fun(value: any): any
+---@return table
+function kit.convert(tbl, callback)
+  if kit.is_dict(tbl) then
+    local new_tbl = {}
+    for k, v in pairs(tbl) do
+      new_tbl[k] = kit.convert(v, callback)
+    end
+    return new_tbl
+  end
+  return callback(tbl)
+end
+
+---Map array.
 ---@param array table
 ---@param fn fun(item: unknown, index: integer): unknown
 ---@return unknown[]

@@ -49,19 +49,19 @@ describe('kit.Async', function()
     -- skip rejected task's next.
     local steps = {}
     local catch_task = err_task
-      :next(once(function()
-        table.insert(steps, 1)
-      end))
-      :next(once(function()
-        table.insert(steps, 2)
-      end))
-      :catch(function()
-        return 'catch'
-      end)
-      :next(function(value)
-        table.insert(steps, 3)
-        return value
-      end)
+        :next(once(function()
+          table.insert(steps, 1)
+        end))
+        :next(once(function()
+          table.insert(steps, 2)
+        end))
+        :catch(function()
+          return 'catch'
+        end)
+        :next(function(value)
+          table.insert(steps, 3)
+          return value
+        end)
     assert.are.same(steps, { 3 })
     assert.are.equals(catch_task:sync(), 'catch')
   end)
@@ -94,22 +94,22 @@ describe('kit.Async', function()
   it('should work AsyncTask.all', function()
     local now = vim.loop.now()
     local values = AsyncTask.all({
-      AsyncTask.new(function(resolve)
-        vim.defer_fn(function()
-          resolve(1)
-        end, 300)
-      end),
-      AsyncTask.new(function(resolve)
-        vim.defer_fn(function()
-          resolve(2)
-        end, 200)
-      end),
-      AsyncTask.new(function(resolve)
-        vim.defer_fn(function()
-          resolve(3)
-        end, 100)
-      end),
-    }):sync()
+          AsyncTask.new(function(resolve)
+            vim.defer_fn(function()
+              resolve(1)
+            end, 300)
+          end),
+          AsyncTask.new(function(resolve)
+            vim.defer_fn(function()
+              resolve(2)
+            end, 200)
+          end),
+          AsyncTask.new(function(resolve)
+            vim.defer_fn(function()
+              resolve(3)
+            end, 100)
+          end),
+        }):sync()
     assert.are.same(values, { 1, 2, 3 })
     assert.is_true((vim.loop.now() - now) - 300 < 10)
   end)
@@ -117,22 +117,22 @@ describe('kit.Async', function()
   it('should work AsyncTask.race', function()
     local now = vim.loop.now()
     local value = AsyncTask.race({
-      AsyncTask.new(function(resolve)
-        vim.defer_fn(function()
-          resolve(1)
-        end, 300)
-      end),
-      AsyncTask.new(function(resolve)
-        vim.defer_fn(function()
-          resolve(2)
-        end, 200)
-      end),
-      AsyncTask.new(function(resolve)
-        vim.defer_fn(function()
-          resolve(3)
-        end, 100)
-      end),
-    }):sync()
+          AsyncTask.new(function(resolve)
+            vim.defer_fn(function()
+              resolve(1)
+            end, 300)
+          end),
+          AsyncTask.new(function(resolve)
+            vim.defer_fn(function()
+              resolve(2)
+            end, 200)
+          end),
+          AsyncTask.new(function(resolve)
+            vim.defer_fn(function()
+              resolve(3)
+            end, 100)
+          end),
+        }):sync()
     assert.are.same(value, 3)
     assert.is_true((vim.loop.now() - now) - 100 < 10)
   end)
@@ -161,7 +161,9 @@ describe('kit.Async', function()
 
   it('should work AsyncTask.on_unhandled_rejection', function()
     local called = false
-    AsyncTask.on_unhandled_rejection = function()
+
+    ---@diagnostic disable-next-line: duplicate-set-field
+    function AsyncTask.on_unhandled_rejection()
       called = true
     end
 

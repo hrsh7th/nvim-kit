@@ -46,18 +46,18 @@ function Session.new(reader, writer)
           end)
         end):next(function(res)
           self.writer:write(self.mpack_session:reply(request_id) .. encode(mpack.NIL) .. encode(res))
-        end):catch(function(err)
-          self.writer:write(self.mpack_session:reply(request_id) .. encode(err) .. encode(mpack.NIL))
+        end):catch(function(err_)
+          self.writer:write(self.mpack_session:reply(request_id) .. encode(err_) .. encode(mpack.NIL))
         end)
       elseif type == 'notification' then
         local method, params = method_or_error, params_or_result
         self.on_notification[method](params)
       elseif type == 'response' then
-        local callback, err, res = id_or_cb, method_or_error, params_or_result
-        if err == mpack.NIL then
+        local callback, err_, res = id_or_cb, method_or_error, params_or_result
+        if err_ == mpack.NIL then
           callback(nil, res)
         else
-          callback(err, nil)
+          callback(err_, nil)
         end
       end
       offset = new_offset
