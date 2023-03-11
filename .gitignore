@@ -1,5 +1,4 @@
 tmp/*
 fixture/**/*.ignore
 node_modules
-.luarc.json
 !.gitkeep

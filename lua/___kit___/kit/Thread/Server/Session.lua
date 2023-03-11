@@ -1,3 +1,4 @@
+---@diagnostic disable: invisible
 local mpack = require('mpack')
 local Async = require('___kit___.kit.Async')
 
