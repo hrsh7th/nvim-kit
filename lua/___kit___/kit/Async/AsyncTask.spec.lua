@@ -1,3 +1,5 @@
+-- luacheck: ignore 311
+
 local AsyncTask = require('___kit___.kit.Async.AsyncTask')
 
 describe('kit.Async', function()

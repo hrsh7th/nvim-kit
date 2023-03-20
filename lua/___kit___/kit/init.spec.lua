@@ -1,3 +1,4 @@
+-- luacheck: ignore 311
 local kit = require('___kit___.kit')
 
 describe('kit', function()
