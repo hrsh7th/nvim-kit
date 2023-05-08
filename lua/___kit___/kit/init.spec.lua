@@ -31,6 +31,10 @@ describe('kit', function()
             e = 3,
           },
           h = false,
+          i = { 1, 2, 3 },
+          j = {
+            k = vim.NIL
+          }
         }, {
           a = false,
           b = {
@@ -41,6 +45,7 @@ describe('kit', function()
               g = vim.NIL,
             },
           },
+          i = { 2, 3, 4 },
         }),
         {
           a = true,
@@ -50,6 +55,8 @@ describe('kit', function()
             f = {},
           },
           h = false,
+          i = { 1, 2, 3 },
+          j = {}
         }
       )
     end)
@@ -111,7 +118,7 @@ describe('kit', function()
     end)
   end)
 
-  describe('.is_dict', function ()
+  describe('.is_dict', function()
     it('should check array or not', function()
       assert.are.equal(kit.is_dict({}), true)
       assert.are.equal(kit.is_dict({ 1 }), false)
