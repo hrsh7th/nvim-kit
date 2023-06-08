@@ -52,7 +52,7 @@ function Server:connect()
 
     self.stderr:read_start(function(err, data)
       if err then
-        error(err)
+        return self:notify('$/error', { error = err })
       end
       print(data)
     end)
@@ -108,7 +108,7 @@ end
 ---Kill server process.
 function Server:kill()
   if self.process then
-    local ok, err = self.process:kill('SIGINT')
+    local ok, err = self.process:kill(15)
     if not ok then
       error(err)
     end
