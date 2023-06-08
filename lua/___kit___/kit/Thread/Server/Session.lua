@@ -44,6 +44,9 @@ function Session:connect(reader, writer)
     if err then
       error(err)
     end
+    if not data then
+      return
+    end
 
     local offset = 1
     local length = #data
@@ -62,14 +65,18 @@ function Session:connect(reader, writer)
         end)
       elseif type == 'notification' then
         local method, params = method_or_error, params_or_result
-        self._on_notification[method](params)
+        Async.run(function()
+          self._on_notification[method](params)
+        end)
       elseif type == 'response' then
         local callback, err_, res = id_or_cb, method_or_error, params_or_result
-        if err_ == mpack.NIL then
-          callback(nil, res)
-        else
-          callback(err_, nil)
-        end
+        Async.run(function()
+          if err_ == mpack.NIL then
+            callback(nil, res)
+          else
+            callback(err_, nil)
+          end
+        end)
       end
       offset = new_offset
     end
