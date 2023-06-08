@@ -220,11 +220,15 @@ function AsyncTask:dispatch(on_fulfilled, on_rejected)
 
   local function dispatch(resolve, reject)
     local on_next = self.status == AsyncTask.Status.Fulfilled and on_fulfilled or on_rejected
-    local res = on_next(self.value)
+    local ok, res = pcall(on_next, self.value)
     if AsyncTask.is(res) then
       res:dispatch(resolve, reject)
     else
-      resolve(res)
+      if ok then
+        resolve(res)
+      else
+        reject(res)
+      end
     end
   end
 
