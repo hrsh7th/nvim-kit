@@ -144,6 +144,7 @@ describe('kit', function()
 
   describe('.get', function()
     it('should return value of the paths', function()
+      assert.are.equal(kit.get({ a = false }, { 'a' }, true), false)
       assert.are.equal(kit.get({ a = { b = 1 } }, { 'a', 'b' }), 1)
       assert.are.equal(kit.get({ a = { b = 1 } }, { 'a', 'c' }), nil)
       assert.are.equal(kit.get({ a = { b = 1 } }, { 'a', 'c' }, 2), 2)
