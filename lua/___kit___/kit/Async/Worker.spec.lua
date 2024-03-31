@@ -1,4 +1,4 @@
-local Worker = require('___kit___.kit.Thread.Worker')
+local Worker = require('___kit___.kit.Async.Worker')
 
 describe('kit.Thread.Worker', function()
   it('should work basic usage', function()

@@ -19,6 +19,23 @@ describe('kit', function()
       assert.are.equals(called, true)
     end)
   end)
+  describe('.{pack,unpack}', function()
+    it('should pack and unpack', function()
+      local source = {
+        call_count = 0,
+      }
+      function source:call()
+        self.call_count = self.call_count + 1
+        return self.call_count
+      end
+
+      local unpacked = kit.unpack(kit.pack(source))
+      assert.are.equals(unpacked.call_count, 0)
+      assert.are.equals(unpacked:call(), 1)
+      assert.are.equals(unpacked:call(), 2)
+      assert.are.equals(unpacked.call_count, 2)
+    end)
+  end)
   describe('.merge', function()
     it('should merge two dict', function()
       assert.are.same(

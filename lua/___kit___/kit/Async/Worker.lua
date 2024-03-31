@@ -1,13 +1,14 @@
 local uv = require('luv')
 local AsyncTask = require('___kit___.kit.Async.AsyncTask')
 
----@class ___kit___.kit.Thread.WorkerOption
+---@class ___kit___.kit.Async.WorkerOption
 ---@field public runtimepath string[]
 
+---@class ___kit___.kit.Async.Worker
 local Worker = {}
 Worker.__index = Worker
 
----Create a new thread.
+---Create a new worker.
 ---@param runner function
 function Worker.new(runner)
   local self = setmetatable({}, Worker)
