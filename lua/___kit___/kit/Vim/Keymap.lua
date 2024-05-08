@@ -1,8 +1,8 @@
 local kit = require('___kit___.kit')
 local Async = require('___kit___.kit.Async')
 
----@alias ___kit___.kit.Vim.Keymap.Keys { keys: string, remap: boolean }
----@alias ___kit___.kit.Vim.Keymap.KeysSpecifier string|{ keys: string, remap: boolean }
+---@alias ___kit___.kit.Vim.Keymap.Keys { keys: string, remap?: boolean }
+---@alias ___kit___.kit.Vim.Keymap.KeysSpecifier string|___kit___.kit.Vim.Keymap.Keys
 
 ---@param keys ___kit___.kit.Vim.Keymap.KeysSpecifier
 ---@return ___kit___.kit.Vim.Keymap.Keys
@@ -22,6 +22,11 @@ Keymap._callbacks = {}
 ---@return string
 function Keymap.termcodes(keys)
   return vim.api.nvim_replace_termcodes(keys, true, true, true)
+end
+
+---Normalize keycode.
+function Keymap.normalize(s)
+  return vim.fn.keytrans(Keymap.termcodes(s))
 end
 
 ---Set callback for consuming next typeahead.

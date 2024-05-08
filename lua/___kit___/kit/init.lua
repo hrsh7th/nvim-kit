@@ -126,8 +126,17 @@ kit.unique_id = setmetatable({
 })
 
 ---Clone object.
+---@generic T
+---@param target T
+---@return T
 function kit.clone(target)
-  if type(target) == 'table' then
+  if kit.is_array(target) then
+    local new_tbl = {}
+    for k, v in ipairs(target) do
+      new_tbl[k] = kit.clone(v)
+    end
+    return new_tbl
+  elseif kit.is_dict(target) then
     local new_tbl = {}
     for k, v in pairs(target) do
       new_tbl[k] = kit.clone(v)
@@ -138,7 +147,7 @@ function kit.clone(target)
 end
 
 ---Merge two tables.
----@generic T
+---@generic T: any[]
 ---NOTE: This doesn't merge array-like table.
 ---@param tbl1 T
 ---@param tbl2 T
@@ -174,21 +183,6 @@ function kit.merge(tbl1, tbl2)
   end
 end
 
----Recursive convert value via callback function.
----@param tbl table
----@param callback fun(value: any): any
----@return table
-function kit.convert(tbl, callback)
-  if kit.is_dict(tbl) then
-    local new_tbl = {}
-    for k, v in pairs(tbl) do
-      new_tbl[k] = kit.convert(v, callback)
-    end
-    return new_tbl
-  end
-  return callback(tbl)
-end
-
 ---Map array.
 ---@param array table
 ---@param fn fun(item: unknown, index: integer): unknown
@@ -215,6 +209,36 @@ function kit.concat(tbl1, tbl2)
     table.insert(new_tbl, item)
   end
   return new_tbl
+end
+
+---Return true if v is contained in array.
+---@param array any[]
+---@param v any
+---@return boolean
+function kit.contains(array, v)
+  for _, item in ipairs(array) do
+    if item == v then
+      return true
+    end
+  end
+  return false
+end
+
+---Slice the array.
+---@generic T: any[]
+---@param array T
+---@param s integer
+---@param e integer
+---@return T
+function kit.slice(array, s, e)
+  if not kit.is_array(array) then
+    error('[kit] specified value is not an array.')
+  end
+  local new_array = {}
+  for i = s, e do
+    table.insert(new_array, array[i])
+  end
+  return new_array
 end
 
 ---The value to array.
