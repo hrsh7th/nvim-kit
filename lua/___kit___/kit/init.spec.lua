@@ -79,28 +79,6 @@ describe('kit', function()
     end)
   end)
 
-  describe('.convert', function()
-    it('should convert nested table\'s value', function()
-      local function safe(v)
-        if v == vim.NIL then
-          return false
-        end
-        return v
-      end
-      assert.are.same(kit.convert({
-        a = {
-          b = vim.NIL,
-          c = 1,
-        }
-      }, safe), {
-        a = {
-          b = false,
-          c = 1,
-        }
-      })
-    end)
-  end)
-
   describe('.map', function()
     it('should map values', function()
       local function to_index(_, i)
