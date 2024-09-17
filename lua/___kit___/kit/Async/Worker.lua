@@ -5,6 +5,7 @@ local AsyncTask = require('___kit___.kit.Async.AsyncTask')
 ---@field public runtimepath string[]
 
 ---@class ___kit___.kit.Async.Worker
+---@field private runner string
 local Worker = {}
 Worker.__index = Worker
 
