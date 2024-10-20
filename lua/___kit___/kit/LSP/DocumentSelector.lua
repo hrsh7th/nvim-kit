@@ -49,7 +49,7 @@ end
 ---@param filter? ___kit___.kit.LSP.DocumentSelector.NormalizedFilter
 ---@param uri string
 ---@param language string
----@return number
+---@return integer
 local function score(filter, uri, language)
   if not filter then
     return 0
@@ -97,7 +97,6 @@ local DocumentSelector = {}
 function DocumentSelector.score(bufnr, document_selector)
   local uri = vim.uri_from_bufnr(bufnr)
   local language = LanguageId.from_filetype(vim.api.nvim_buf_get_option(bufnr, 'filetype'))
-
   local r = 0
   for _, document_filter in ipairs(document_selector) do
     local filter = normalize_filter(document_filter)
