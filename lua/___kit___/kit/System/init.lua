@@ -57,32 +57,39 @@ function System.LineBuffering:create(callback)
   }
 end
 
----@class ___kit___.kit.System.RegexBuffering: ___kit___.kit.System.Buffering
+---@class ___kit___.kit.System.PatternBuffering: ___kit___.kit.System.Buffering
 ---@field pattern string
-System.RegexBuffering = {}
-System.RegexBuffering.__index = System.RegexBuffering
+System.PatternBuffering = {}
+System.PatternBuffering.__index = System.PatternBuffering
 
----Create RegexBuffering.
+---Create PatternBuffering.
 ---@param option { pattern: string }
-function System.RegexBuffering.new(option)
+function System.PatternBuffering.new(option)
   return setmetatable({
     pattern = option.pattern,
-  }, System.RegexBuffering)
+  }, System.PatternBuffering)
 end
 
----Create RawBuffer object.
-function System.RegexBuffering:create(callback)
+---Create PatternBuffer object.
+function System.PatternBuffering:create(callback)
   local buffer = {}
-  local regex = vim.regex(self.pattern)
   return {
     write = function(data)
-      table.insert(buffer, data)
-      local has = regex:match_str(data)
-      if has then
-        local texts = vim.split(table.concat(buffer, ''), self.pattern, { plain = false })
-        buffer = texts[#texts] ~= '' and { table.remove(texts) } or {}
-        for _, text in ipairs(texts) do
-          callback(text)
+      while true do
+        local s, e = data:find(self.pattern)
+        if s then
+          table.insert(buffer, data:sub(1, s - 1))
+          callback(table.concat(buffer, ''))
+          buffer = {}
+
+          if e < #data then
+            data = data:sub(e + 1)
+          else
+            break
+          end
+        else
+          table.insert(buffer, data)
+          break
         end
       end
     end,

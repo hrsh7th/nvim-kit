@@ -173,16 +173,15 @@ function AsyncTask:sync(timeout)
 end
 
 ---Await async task.
----@param fast_only? boolean
 ---@return any
-function AsyncTask:await(fast_only)
+function AsyncTask:await()
   local Async = require('___kit___.kit.Async')
   local in_fast_event = vim.in_fast_event()
   local ok, res = pcall(Async.await, self)
   if not ok then
     error(res, 2)
   end
-  if not fast_only and not in_fast_event and vim.in_fast_event() then
+  if not in_fast_event and vim.in_fast_event() then
     Async.schedule():await()
   end
   return res

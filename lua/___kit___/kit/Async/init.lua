@@ -69,9 +69,10 @@ function Async.run(runner, ...)
   return AsyncTask.new(function(resolve, reject)
     local function next_step(ok, v)
       if getmetatable(v) == Interrupt then
-        return vim.defer_fn(function()
+        vim.defer_fn(function()
           next_step(coroutine.resume(thread))
         end, v.timeout)
+        return
       end
 
       if coroutine.status(thread) == 'dead' then
