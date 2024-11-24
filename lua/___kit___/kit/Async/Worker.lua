@@ -34,7 +34,7 @@ function Worker:__call(...)
 
       --Run runner function.
       local ok, res = pcall(function()
-        return require('___kit___.kit.Async.AsyncTask').resolve(assert(loadstring(runner))(unpack(args))):sync()
+        return require('___kit___.kit.Async.AsyncTask').resolve(assert(loadstring(runner))(unpack(args))):sync(5000)
       end)
 
       res = vim.mpack.encode({ res })

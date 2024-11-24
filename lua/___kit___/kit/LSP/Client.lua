@@ -75,9 +75,7 @@ function Client:workspace_workspaceFolders(params)
   return task
 end
 
----@class ___kit___.kit.LSP.IntersectionType01 : ___kit___.kit.LSP.ConfigurationParams, ___kit___.kit.LSP.PartialResultParams
-
----@param params ___kit___.kit.LSP.IntersectionType01
+---@param params ___kit___.kit.LSP.ConfigurationParams
 function Client:workspace_configuration(params)
   local that, request_id, reject_ = self, nil, nil
   local task = AsyncTask.new(function(resolve, reject)
@@ -142,6 +140,26 @@ function Client:textDocument_foldingRange(params)
   local that, request_id, reject_ = self, nil, nil
   local task = AsyncTask.new(function(resolve, reject)
     request_id = self.client.request('textDocument/foldingRange', params, function(err, res)
+      if err then
+        reject(err)
+      else
+        resolve(res)
+      end
+    end)
+    reject_ = reject
+  end)
+  function task.cancel()
+    that.client.cancel_request(request_id)
+    reject_(LSP.ErrorCodes.RequestCancelled)
+  end
+  return task
+end
+
+---@param params nil
+function Client:workspace_foldingRange_refresh(params)
+  local that, request_id, reject_ = self, nil, nil
+  local task = AsyncTask.new(function(resolve, reject)
+    request_id = self.client.request('workspace/foldingRange/refresh', params, function(err, res)
       if err then
         reject(err)
       else
@@ -697,6 +715,26 @@ function Client:workspace_diagnostic_refresh(params)
   return task
 end
 
+---@param params ___kit___.kit.LSP.InlineCompletionParams
+function Client:textDocument_inlineCompletion(params)
+  local that, request_id, reject_ = self, nil, nil
+  local task = AsyncTask.new(function(resolve, reject)
+    request_id = self.client.request('textDocument/inlineCompletion', params, function(err, res)
+      if err then
+        reject(err)
+      else
+        resolve(res)
+      end
+    end)
+    reject_ = reject
+  end)
+  function task.cancel()
+    that.client.cancel_request(request_id)
+    reject_(LSP.ErrorCodes.RequestCancelled)
+  end
+  return task
+end
+
 ---@param params ___kit___.kit.LSP.RegistrationParams
 function Client:client_registerCapability(params)
   local that, request_id, reject_ = self, nil, nil
@@ -1182,6 +1220,26 @@ function Client:textDocument_rangeFormatting(params)
   local that, request_id, reject_ = self, nil, nil
   local task = AsyncTask.new(function(resolve, reject)
     request_id = self.client.request('textDocument/rangeFormatting', params, function(err, res)
+      if err then
+        reject(err)
+      else
+        resolve(res)
+      end
+    end)
+    reject_ = reject
+  end)
+  function task.cancel()
+    that.client.cancel_request(request_id)
+    reject_(LSP.ErrorCodes.RequestCancelled)
+  end
+  return task
+end
+
+---@param params ___kit___.kit.LSP.DocumentRangesFormattingParams
+function Client:textDocument_rangesFormatting(params)
+  local that, request_id, reject_ = self, nil, nil
+  local task = AsyncTask.new(function(resolve, reject)
+    request_id = self.client.request('textDocument/rangesFormatting', params, function(err, res)
       if err then
         reject(err)
       else

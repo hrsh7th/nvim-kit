@@ -1,9 +1,12 @@
 local AsyncTask = require('___kit___.kit.Async.AsyncTask')
 
+local Interrupt = {}
+
 local Async = {}
 
----@type table<thread, integer>
-Async.___threads___ = {}
+_G.kit = _G.kit or {}
+_G.kit.Async = _G.kit.Async or {}
+_G.kit.Async.___threads___ = _G.kit.Async.___threads___ or {}
 
 ---Alias of AsyncTask.all.
 ---@param tasks ___kit___.kit.Async.AsyncTask[]
@@ -41,63 +44,72 @@ function Async.new(runner)
 end
 
 ---Run async function immediately.
----@generic T: fun(): ___kit___.kit.Async.AsyncTask
----@param runner T
+---@generic A: ...
+---@param runner fun(...: A): any
+---@param ...? A
 ---@return ___kit___.kit.Async.AsyncTask
-function Async.run(runner)
-  return Async.async(runner)()
+function Async.run(runner, ...)
+  local args = { ... }
+  if Async.in_context() then
+    return Async.new(function(resolve, reject)
+      local o = { pcall(runner, args) }
+      if o[1] then
+        resolve(unpack(o, 2))
+      else
+        reject(unpack(o, 2))
+      end
+    end)
+  end
+
+  local thread = coroutine.create(runner)
+  _G.kit.Async.___threads___[thread] = {
+    thread = thread,
+    now = os.clock() * 1000,
+  }
+  return AsyncTask.new(function(resolve, reject)
+    local function next_step(ok, v)
+      if getmetatable(v) == Interrupt then
+        return vim.defer_fn(function()
+          next_step(coroutine.resume(thread))
+        end, v.timeout)
+      end
+
+      if coroutine.status(thread) == 'dead' then
+        _G.kit.Async.___threads___[thread] = nil
+        if AsyncTask.is(v) then
+          v:dispatch(resolve, reject)
+        else
+          if ok then
+            resolve(v)
+          else
+            reject(v)
+          end
+        end
+        return
+      end
+
+      v:dispatch(function(...)
+        next_step(coroutine.resume(thread, true, ...))
+      end, function(...)
+        next_step(coroutine.resume(thread, false, ...))
+      end)
+    end
+
+    next_step(coroutine.resume(thread, unpack(args)))
+  end)
 end
 
 ---Return current context is async coroutine or not.
 ---@return boolean
 function Async.in_context()
-  return Async.___threads___[coroutine.running()] ~= nil
-end
-
----Create async function.
----@generic T: fun(...): ___kit___.kit.Async.AsyncTask
----@param runner T
----@return T
-function Async.async(runner)
-  return function(...)
-    local args = { ... }
-
-    local thread = coroutine.create(runner)
-    return AsyncTask.new(function(resolve, reject)
-      Async.___threads___[thread] = 1
-
-      local function next_step(ok, v)
-        if coroutine.status(thread) == 'dead' then
-          Async.___threads___[thread] = nil
-          if AsyncTask.is(v) then
-            v:dispatch(resolve, reject)
-          else
-            if ok then
-              resolve(v)
-            else
-              reject(v)
-            end
-          end
-          return
-        end
-
-        v:dispatch(function(...)
-          next_step(coroutine.resume(thread, true, ...))
-        end, function(...)
-          next_step(coroutine.resume(thread, false, ...))
-        end)
-      end
-
-      next_step(coroutine.resume(thread, unpack(args)))
-    end)
-  end
+  return _G.kit.Async.___threads___[coroutine.running()] ~= nil
 end
 
 ---Await async task.
 ---@param task ___kit___.kit.Async.AsyncTask
 ---@return any
 function Async.await(task)
-  if not Async.___threads___[coroutine.running()] then
+  if not _G.kit.Async.___threads___[coroutine.running()] then
     error('`Async.await` must be called in async context.')
   end
   if not AsyncTask.is(task) then
@@ -109,6 +121,23 @@ function Async.await(task)
     error(res, 2)
   end
   return res
+end
+
+---Interrupt sync process.
+---@param interval integer
+---@param timeout? integer
+function Async.interrupt(interval, timeout)
+  local thread = coroutine.running()
+  if not _G.kit.Async.___threads___[thread] then
+    error('`Async.interrupt` must be called in async context.')
+  end
+
+  local curr_now = os.clock() * 1000
+  local prev_now = _G.kit.Async.___threads___[thread].now
+  if (curr_now - prev_now) > interval then
+    coroutine.yield(setmetatable({ timeout = timeout or 16 }, Interrupt))
+    _G.kit.Async.___threads___[thread].now = os.clock() * 1000
+  end
 end
 
 ---Create vim.schedule task.

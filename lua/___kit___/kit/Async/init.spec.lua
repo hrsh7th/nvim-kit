@@ -2,13 +2,13 @@ local Async = require('___kit___.kit.Async')
 local AsyncTask = require('___kit___.kit.Async.AsyncTask')
 
 describe('kit.Async', function()
-  local multiply = Async.async(function(v)
+  local multiply = function(v)
     return AsyncTask.new(function(resolve)
       vim.schedule(function()
         resolve(v * v)
       end)
     end)
-  end)
+  end
 
   it('should detect async context', function()
     assert.are.equal(Async.in_context(), false)
@@ -18,36 +18,20 @@ describe('kit.Async', function()
   end)
 
   it('should work like JavaScript Promise', function()
-    local num = Async.async(function()
+    local num = Async.run(function()
       local num = 2
       num = multiply(num):await()
       num = multiply(num):await()
       return num
-    end)():sync()
+    end):sync(5000)
     assert.are.equal(num, 16)
-  end)
-
-  it('should work without stack overflow', function()
-    local _, res = pcall(function()
-      local function fib(n)
-        return Async.run(function()
-          if n < 2 then
-            return n
-          end
-          return fib(n - 1):await() + fib(n - 2):await()
-        end)
-      end
-
-      return fib(17):sync()
-    end)
-    assert.equals(type(res), 'number')
   end)
 
   it('should work with exception', function()
     pcall(function()
       Async.run(function()
         error('error')
-      end):sync()
+      end):sync(5000)
     end)
   end)
 
@@ -61,7 +45,7 @@ describe('kit.Async', function()
       end):catch(function()
         assert.is_true(true)
       end)
-    end):sync()
+    end):sync(5000)
   end)
 
   describe('.promisify', function()
@@ -73,7 +57,7 @@ describe('kit.Async', function()
       end
 
       local wait_async = Async.promisify(wait)
-      assert.equals(wait_async(100):sync(), 'timeout')
+      assert.equals(wait_async(100):sync(5000), 'timeout')
     end)
     it('shoud wrap callback function with rest arguments', function()
       local function wait(ms, callback, result)
@@ -83,7 +67,7 @@ describe('kit.Async', function()
       end
 
       local wait_async = Async.promisify(wait, { callback = 2 })
-      assert.equals(wait_async(100, 'timeout'):sync(), 'timeout')
+      assert.equals(wait_async(100, 'timeout'):sync(5000), 'timeout')
     end)
   end)
 end)

@@ -10,10 +10,8 @@ describe('kit.Vim.Keymap', function()
   end)
 
   it('should send multiple keys in sequence', function()
-    vim.keymap.set(
-      'i',
-      '(',
-      Async.async(function()
+    vim.keymap.set('i', '(', function()
+      return Async.run(function()
         Keymap.send('('):await()
         assert.equals('[(', vim.api.nvim_get_current_line())
 
@@ -23,7 +21,8 @@ describe('kit.Vim.Keymap', function()
         Keymap.send(Keymap.termcodes('<Left>a<Right>')):await()
         assert.equals('[(a)', vim.api.nvim_get_current_line())
       end)
-    )
+    end)
+
     Keymap.spec(function()
       Keymap.send('i'):await()
       Keymap.send({ '[', { keys = '(', remap = true }, ']' }):await()
@@ -38,13 +37,7 @@ describe('kit.Vim.Keymap', function()
         error('error')
       end)
     end)
-    assert.are_not.equals(
-      string.match(
-        err--[[@as string]],
-        'error$'
-      ),
-      nil
-    )
+    assert.are_not.equals(string.match(err --[[@as string]], 'error$'), nil)
   end)
 
   it('should create sendable key notation', function()
@@ -55,5 +48,13 @@ describe('kit.Vim.Keymap', function()
       Keymap.send(key):await()
     end)
     assert.equals('in_sendable', vim.api.nvim_get_current_line())
+  end)
+
+  it('should return correct key notation', function()
+    assert.equals(' ', Keymap.normalize('<space>'))
+    assert.equals(' ', Keymap.normalize('<Space>'))
+    assert.equals('<C-J>', Keymap.normalize('<C-j>'))
+    assert.equals('<M-j>', Keymap.normalize('<A-j>'))
+    assert.equals('<M-;>', Keymap.normalize('<A-;>'))
   end)
 end)

@@ -40,7 +40,7 @@ return function(bang, plugin_path, plugin_name)
     end
 
     -- Check `plugin_path` is a directory.
-    if not IO.is_directory(plugin_path):await(true) then
+    if not IO.is_directory(plugin_path):await() then
       vim.cmd([[redraw]])
       return vim.api.nvim_echo({ { '`plugin_path` is not a directory.', 'ErrorMsg' } }, true, {})
     end
@@ -66,14 +66,14 @@ return function(bang, plugin_path, plugin_name)
 
     -- Remove old kit if need.
     local kit_install_path = ([[%s/lua/%s/kit]]):format(plugin_path, plugin_name)
-    if IO.is_directory(kit_install_path):await(true) then
+    if IO.is_directory(kit_install_path):await() then
       confirm(bang, ('[%s] rm -rf %s'):format(plugin_name, kit_install_path))
-      IO.rm(kit_install_path, { recursive = true }):await(true)
+      IO.rm(kit_install_path, { recursive = true }):await()
     end
 
     -- Copy new kit.
     confirm(bang, ('[%s] cp -r %s %s'):format(plugin_name, get_kit_path(), kit_install_path))
-    IO.cp(get_kit_path(), kit_install_path, { recursive = true }):await(true)
+    IO.cp(get_kit_path(), kit_install_path, { recursive = true }):await()
 
     -- Remove `*.spec.lue` files.
     IO.walk(kit_install_path, function(err, entry)
@@ -82,15 +82,15 @@ return function(bang, plugin_path, plugin_name)
       end
       if entry.type == 'file' then
         if entry.path:match('%.spec%.lua$') then
-          IO.rm(entry.path):await(true)
+          IO.rm(entry.path):await()
         else
-          local content = IO.read_file(entry.path):await(true)
+          local content = IO.read_file(entry.path):await()
           content = RegExp.gsub(content, [=[\V___kit___\m]=], plugin_name)
           content = RegExp.gsub(content, [=[[^\n]*kit\.macro\.remove[^\n]*[[:space:]]*]=], '')
-          IO.write_file(entry.path, content):await(true)
+          IO.write_file(entry.path, content):await()
         end
       end
-    end):await(true)
+    end):await()
   end)
     :catch(vim.schedule_wrap(function(err)
       if err:match('Cancelled$') then
@@ -99,5 +99,5 @@ return function(bang, plugin_path, plugin_name)
         vim.api.nvim_echo({ { err, 'ErrorMsg' } }, true, {})
       end
     end))
-    :sync()
+    :sync(5000)
 end

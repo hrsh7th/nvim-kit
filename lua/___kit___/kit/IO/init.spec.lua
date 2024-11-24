@@ -8,7 +8,7 @@ describe('kit.IO', function()
       local entries = {}
       IO.walk('./fixture/IO/scandir/a', function(_, entry)
         table.insert(entries, entry)
-      end):sync()
+      end):sync(5000)
       assert.are.same({
         {
           path = IO.normalize('./fixture/IO/scandir/a'),
@@ -40,7 +40,7 @@ describe('kit.IO', function()
       local entries = {}
       IO.walk('./fixture/IO/scandir/a', function(_, entry)
         table.insert(entries, entry)
-      end, { postorder = true }):sync()
+      end, { postorder = true }):sync(5000)
       assert.are.same({
         {
           path = IO.normalize('./fixture/IO/scandir/a/0/1'),
@@ -75,7 +75,7 @@ describe('kit.IO', function()
         if IO.normalize('./fixture/IO/scandir/a/1') == entry.path then
           return IO.WalkStatus.Break
         end
-      end):sync()
+      end):sync(5000)
       assert.equals(count, 4)
     end)
     it('should break if found specified path (post)', function()
@@ -85,7 +85,7 @@ describe('kit.IO', function()
         if IO.normalize('./fixture/IO/scandir/a/1') == entry.path then
           return IO.WalkStatus.Break
         end
-      end, { postorder = true }):sync()
+      end, { postorder = true }):sync(5000)
       assert.equals(count, 3)
     end)
   end)
@@ -93,7 +93,7 @@ describe('kit.IO', function()
   describe('.read_file', function()
     it('should read the file', function()
       assert.are.equals(
-        IO.read_file('./fixture/IO/read_file.txt', 5):sync(),
+        IO.read_file('./fixture/IO/read_file.txt', 5):sync(5000),
         table.concat({
           'read_file',
           'read_file',
@@ -112,20 +112,20 @@ describe('kit.IO', function()
 
   describe('.write_file', function()
     it('should write the file', function()
-      if IO.fs_stat('./fixture/IO/write_file.txt'):catch(function() end):sync() then
-        IO.rm('./fixture/IO/write_file.txt'):sync()
+      if IO.fs_stat('./fixture/IO/write_file.txt'):catch(function() end):sync(5000) then
+        IO.rm('./fixture/IO/write_file.txt'):sync(5000)
       end
-      IO.write_file('./fixture/IO/write_file.txt', IO.read_file('./fixture/IO/read_file.txt', 5):sync())
-      local contents1 = IO.read_file('./fixture/IO/read_file.txt', 5):sync()
-      local contents2 = IO.read_file('./fixture/IO/write_file.txt', 5):sync()
+      IO.write_file('./fixture/IO/write_file.txt', IO.read_file('./fixture/IO/read_file.txt', 5):sync(5000))
+      local contents1 = IO.read_file('./fixture/IO/read_file.txt', 5):sync(5000)
+      local contents2 = IO.read_file('./fixture/IO/write_file.txt', 5):sync(5000)
       assert.are.equals(#contents1, #contents2)
-      IO.rm('./fixture/IO/write_file.txt'):sync()
+      IO.rm('./fixture/IO/write_file.txt'):sync(5000)
     end)
   end)
 
   describe('.scandir', function()
     it('should return entries', function()
-      local entries = IO.scandir('./fixture/IO/scandir/a'):sync()
+      local entries = IO.scandir('./fixture/IO/scandir/a'):sync(5000)
       assert.are.same({
         {
           path = IO.normalize('./fixture/IO/scandir/a/0'),
@@ -149,33 +149,33 @@ describe('kit.IO', function()
 
   describe('.cp', function()
     it('should copy directory recursively', function()
-      IO.cp('./fixture/IO/scandir/a', './fixture/IO/scandir/b', { recursive = true }):sync()
-      assert.is_true(IO.is_directory('./fixture/IO/scandir/b'):sync())
-      IO.rm('./fixture/IO/scandir/b', { recursive = true }):sync()
+      IO.cp('./fixture/IO/scandir/a', './fixture/IO/scandir/b', { recursive = true }):sync(5000)
+      assert.is_true(IO.is_directory('./fixture/IO/scandir/b'):sync(5000))
+      IO.rm('./fixture/IO/scandir/b', { recursive = true }):sync(5000)
     end)
   end)
 
   describe('.rm', function()
     it('should remove dir or file', function()
       local target_dir = tmpdir .. '/rm'
-      if not IO.is_directory(target_dir):sync() then
-        IO.mkdir(target_dir, tonumber('777', 8), { recursive = true }):sync()
+      if not IO.is_directory(target_dir):sync(5000) then
+        IO.mkdir(target_dir, tonumber('777', 8), { recursive = true }):sync(5000)
       end
-      assert.is_true(IO.is_directory(target_dir):sync())
-      IO.rm(target_dir, { recursive = true }):sync()
-      assert.is_false(IO.is_directory(target_dir):sync())
+      assert.is_true(IO.is_directory(target_dir):sync(5000))
+      IO.rm(target_dir, { recursive = true }):sync(5000)
+      assert.is_false(IO.is_directory(target_dir):sync(5000))
     end)
   end)
 
   describe('.mkdir', function()
     it('should create dir', function()
       local target_dir = tmpdir .. '/mkdir'
-      if IO.is_directory(target_dir):sync() then
-        IO.rm(target_dir, { recursive = true }):sync()
+      if IO.is_directory(target_dir):sync(5000) then
+        IO.rm(target_dir, { recursive = true }):sync(5000)
       end
-      assert.is_false(IO.is_directory(target_dir):sync())
-      IO.mkdir(target_dir, tonumber('777', 8), { recursive = true }):sync()
-      assert.is_true(IO.is_directory(target_dir):sync())
+      assert.is_false(IO.is_directory(target_dir):sync(5000))
+      IO.mkdir(target_dir, tonumber('777', 8), { recursive = true }):sync(5000)
+      assert.is_true(IO.is_directory(target_dir):sync(5000))
     end)
   end)
 end)
