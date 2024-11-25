@@ -10,9 +10,9 @@ local function fib(n)
 end
 
 collectgarbage('collect')
-local s = os.clock()
+local s = vim.uv.hrtime() / 1000000
 fib(26):next(function()
-  print('time: ', os.clock() - s)
+  print('time: ', vim.uv.hrtime() / 1000000 - s)
   print('memory: ', collectgarbage("count") / 1024)
   print('count: ', Async.count)
 end)

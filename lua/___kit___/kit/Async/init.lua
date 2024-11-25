@@ -64,7 +64,7 @@ function Async.run(runner, ...)
   local thread = coroutine.create(runner)
   _G.kit.Async.___threads___[thread] = {
     thread = thread,
-    now = os.clock() * 1000,
+    now = vim.uv.hrtime() / 1000000
   }
   return AsyncTask.new(function(resolve, reject)
     local function next_step(ok, v)
@@ -133,11 +133,11 @@ function Async.interrupt(interval, timeout)
     error('`Async.interrupt` must be called in async context.')
   end
 
-  local curr_now = os.clock() * 1000
+  local curr_now = vim.uv.hrtime() / 1000000
   local prev_now = _G.kit.Async.___threads___[thread].now
   if (curr_now - prev_now) > interval then
     coroutine.yield(setmetatable({ timeout = timeout or 16 }, Interrupt))
-    _G.kit.Async.___threads___[thread].now = os.clock() * 1000
+    _G.kit.Async.___threads___[thread].now = vim.uv.hrtime() / 1000000
   end
 end
 

@@ -6,6 +6,7 @@ local System = {}
 
 ---@class ___kit___.kit.System.Buffer
 ---@field write fun(data: string)
+---@field close fun()
 
 ---@class ___kit___.kit.System.Buffering
 ---@field create fun(self: any, callback: fun(data: string)): ___kit___.kit.System.Buffer
@@ -54,6 +55,11 @@ function System.LineBuffering:create(callback)
         end
       end
     end,
+    close = function()
+      if #buffer > 0 then
+        callback(table.concat(buffer, ''))
+      end
+    end
   }
 end
 
@@ -75,24 +81,27 @@ function System.PatternBuffering:create(callback)
   local buffer = {}
   return {
     write = function(data)
+      table.insert(buffer, data)
       while true do
-        local s, e = data:find(self.pattern)
-        if s then
-          table.insert(buffer, data:sub(1, s - 1))
-          callback(table.concat(buffer, ''))
-          buffer = {}
-
-          if e < #data then
-            data = data:sub(e + 1)
+        local text = table.concat(buffer, '')
+        local s, e = text:find(self.pattern)
+        if s and e then
+          callback(text)
+          if e < #text then
+            buffer = { text:sub(e + 1) }
           else
-            break
+            buffer = {}
           end
         else
-          table.insert(buffer, data)
           break
         end
       end
     end,
+    close = function()
+      if #buffer > 0 then
+        callback(table.concat(buffer, ''))
+      end
+    end
   }
 end
 
@@ -111,6 +120,9 @@ function System.RawBuffering:create(callback)
     write = function(data)
       callback(data)
     end,
+    close = function()
+      -- noop.
+    end
   }
 end
 
@@ -148,6 +160,18 @@ function System.spawn(command, params)
     table.insert(env_pairs, string.format('%s=%s', k, tostring(v)))
   end
 
+  local buffering = params.buffering or System.RawBuffering.new()
+  local stdout_buffer = buffering:create(function(text)
+    if params.on_stdout then
+      params.on_stdout(text)
+    end
+  end)
+  local stderr_buffer = buffering:create(function(text)
+    if params.on_stderr then
+      params.on_stderr(text)
+    end
+  end)
+
   local close --[[@type fun()]]
   local stdin = params.input and assert(vim.uv.new_pipe())
   local stdout = assert(vim.uv.new_pipe())
@@ -163,17 +187,11 @@ function System.spawn(command, params)
     detached = false,
     verbatim = false,
   } --[[@as any]], function(code, signal)
+    stdout_buffer.close()
+    stderr_buffer.close()
     close()
     if params.on_exit then
       params.on_exit(code, signal)
-    end
-  end)
-
-  local buffering = params.buffering or System.RawBuffering.new()
-
-  local stdout_buffer = buffering:create(function(text)
-    if params.on_stdout then
-      params.on_stdout(text)
     end
   end)
   stdout:read_start(function(err, data)
@@ -182,12 +200,6 @@ function System.spawn(command, params)
     end
     if data then
       stdout_buffer.write(data)
-    end
-  end)
-
-  local stderr_buffer = buffering:create(function(text)
-    if params.on_stderr then
-      params.on_stderr(text)
     end
   end)
   stderr:read_start(function(err, data)
