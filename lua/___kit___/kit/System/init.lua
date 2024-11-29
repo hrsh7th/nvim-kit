@@ -1,6 +1,7 @@
 -- luacheck: ignore 212
---
+
 local kit = require('___kit___.kit')
+local Async = require('___kit___.kit.Async')
 
 local System = {}
 
@@ -29,8 +30,7 @@ function System.LineBuffering:create(callback)
   local buffer = {}
   return {
     write = function(data)
-      data = (data:gsub('\r\n', '\n'))
-      data = (data:gsub('\r', '\n'))
+      data = (data:gsub('\r\n?', '\n'))
       table.insert(buffer, data)
 
       local has = false
@@ -86,7 +86,7 @@ function System.PatternBuffering:create(callback)
         local text = table.concat(buffer, '')
         local s, e = text:find(self.pattern)
         if s and e then
-          callback(text)
+          callback(text:sub(1, s - 1))
           if e < #text then
             buffer = { text:sub(e + 1) }
           else
@@ -172,7 +172,7 @@ function System.spawn(command, params)
     end
   end)
 
-  local close --[[@type fun()]]
+  local close --[[@type fun(): ___kit___.kit.Async.AsyncTask]]
   local stdin = params.input and assert(vim.uv.new_pipe())
   local stdout = assert(vim.uv.new_pipe())
   local stderr = assert(vim.uv.new_pipe())
@@ -189,10 +189,11 @@ function System.spawn(command, params)
   } --[[@as any]], function(code, signal)
     stdout_buffer.close()
     stderr_buffer.close()
-    close()
-    if params.on_exit then
-      params.on_exit(code, signal)
-    end
+    close():next(function()
+      if params.on_exit then
+        params.on_exit(code, signal)
+      end
+    end)
   end)
   stdout:read_start(function(err, data)
     if err then
@@ -211,23 +212,43 @@ function System.spawn(command, params)
     end
   end)
 
-  if params.input and stdin then
-    for _, input in ipairs(kit.to_array(params.input)) do
-      stdin:write(input)
+  local stdin_closing = Async.new(function(resolve)
+    if params.input and stdin then
+      for _, input in ipairs(kit.to_array(params.input)) do
+        stdin:write(input)
+      end
+      if stdin then
+        stdin:close(resolve)
+      end
+    else
+      resolve()
     end
-    stdin:close()
-  end
+  end)
 
   close = function()
-    if not stdout:is_closing() then
-      stdout:close()
-    end
-    if not stderr:is_closing() then
-      stderr:close()
-    end
-    if not process:is_closing() then
-      process:close()
-    end
+    local closing = { stdin_closing }
+    table.insert(closing, Async.new(function(resolve)
+      if not stdout:is_closing() then
+        stdout:close(resolve)
+      else
+        resolve()
+      end
+    end))
+    table.insert(closing, Async.new(function(resolve)
+      if not stderr:is_closing() then
+        stderr:close(resolve)
+      else
+        resolve()
+      end
+    end))
+    table.insert(closing, Async.new(function(resolve)
+      if not process:is_closing() then
+        process:close(resolve)
+      else
+        resolve()
+      end
+    end))
+    return Async.all(closing)
   end
 
   return function(signal)

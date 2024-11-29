@@ -88,8 +88,11 @@ describe('kit', function()
   end)
 
   describe('.concat', function()
-    it('should concat two list', function()
-      assert.are.same(kit.concat({ 1, 2, 3 }, { 4, 5, 6 }), { 1, 2, 3, 4, 5, 6 })
+    it('should concat', function()
+      assert.are.same({ 1, 2, 3, 4, 5, 6 }, kit.concat({ 1, 2, 3 }, { 4, 5, 6 }))
+    end)
+    it('should concat nil contained list', function()
+      assert.are.same({ 1, 3, 4, 6 }, kit.concat({ 1, nil, 3 }, { 4, nil, 6 }))
     end)
   end)
 

@@ -194,25 +194,28 @@ end
 function kit.throttle(callback, throttle_ms)
   local timer = assert(vim.uv.new_timer())
   local arguments = nil
-  local last_time = vim.uv.now() - throttle_ms
+  local last_time = (vim.uv.hrtime() / 1000000) - throttle_ms - 1
+  local running = false
   return setmetatable({
     throttle_ms = throttle_ms,
   }, {
     __call = function(self, ...)
       arguments = { ... }
 
-      local timeout_ms = self.throttle_ms - (vim.uv.now() - last_time)
-      if timeout_ms <= 0 then
-        timer:stop()
-        callback(unpack(arguments))
-        last_time = vim.uv.now()
-      else
-        timer:stop()
-        timer:start(timeout_ms, 0, function()
-          timer:stop()
+      if not running then
+        local timeout_ms = math.max(0, self.throttle_ms - ((vim.uv.hrtime() / 1000000) - last_time))
+        if timeout_ms == 0 then
+          last_time = (vim.uv.hrtime() / 1000000)
           callback(unpack(arguments))
-          last_time = vim.uv.now()
-        end)
+        else
+          running = true
+          timer:start(timeout_ms, 0, function()
+            running = false
+            timer:stop()
+            last_time = (vim.uv.hrtime() / 1000000)
+            callback(unpack(arguments))
+          end)
+        end
       end
     end,
   })
@@ -300,12 +303,17 @@ end
 ---@return table
 function kit.concat(tbl1, ...)
   local new_tbl = {}
-  for _, item in ipairs(tbl1) do
-    table.insert(new_tbl, item)
+
+  local off = 0
+  for _, item in pairs(tbl1) do
+    new_tbl[off + 1] = item
+    off = off + 1
   end
+
   for _, tbl2 in ipairs({ ... }) do
-    for _, item in ipairs(tbl2) do
-      table.insert(new_tbl, item)
+    for _, item in pairs(kit.to_array(tbl2)) do
+      new_tbl[off + 1] = item
+      off = off + 1
     end
   end
   return new_tbl
