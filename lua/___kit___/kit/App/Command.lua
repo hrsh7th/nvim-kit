@@ -1,9 +1,15 @@
+---@class ___kit___.kit.App.Command.SubCommand.Argument
+---@field public complete? fun(prefix: string):string[]
+---@field public required? boolean
+
 ---@class ___kit___.kit.App.Command.SubCommandSpecifier
----@field public args table<string|number, fun(input: string):string[]>
+---@field public desc? string
+---@field public args? table<string|number, ___kit___.kit.App.Command.SubCommand.Argument>
 ---@field public execute fun(params: ___kit___.kit.App.Command.ExecuteParams, arguments: table<string, string>)
----
+
 ---@class ___kit___.kit.App.Command.SubCommand: ___kit___.kit.App.Command.SubCommandSpecifier
 ---@field public name string
+---@field public args table<string|number, ___kit___.kit.App.Command.SubCommand.Argument>
 
 ---@class ___kit___.kit.App.Command
 ---@field public name string
@@ -15,14 +21,17 @@ Command.__index = Command
 ---@param name string
 ---@param subcommand_specifiers table<string, ___kit___.kit.App.Command.SubCommandSpecifier>
 function Command.new(name, subcommand_specifiers)
+  -- normalize subcommand specifiers.
   local subcommands = {}
   for subcommand_name, subcommand_specifier in pairs(subcommand_specifiers) do
-    subcommands[subcommand_name] = setmetatable({
+    subcommands[subcommand_name] = {
       name = subcommand_name,
-      args = subcommand_specifier.args,
+      args = subcommand_specifier.args or {},
       execute = subcommand_specifier.execute
-    }, Command)
+    }
   end
+
+  -- create command.
   return setmetatable({
     name = name,
     subcommands = subcommands
@@ -58,16 +67,26 @@ function Command:execute(params)
   for i, part in ipairs(parsed) do
     if i > 1 then
       local is_named_argument = vim.iter(pairs(subcommand.args)):any(function(name)
-        name = tostring(name)
-        return part.text:sub(1, #name + 1) == ('%s='):format(name)
+        return type(name) == 'string' and part.text:sub(1, #name + 1) == ('%s='):format(name)
       end)
       if is_named_argument then
-        local name, value = part.text:match('^(.-)=(.*)$')
-        arguments[name] = value
+        local s = part.text:find('=', 1, true)
+        if s then
+          local name = part.text:sub(1, s - 1)
+          local value = part.text:sub(s + 1)
+          arguments[name] = value
+        end
       else
         arguments[pos] = part.text
         pos = pos + 1
       end
+    end
+  end
+
+  -- check required arguments.
+  for name, arg in pairs(subcommand.args or {}) do
+    if arg.required and not arguments[name] then
+      error(('Argument %s is required.'):format(name))
     end
   end
 
@@ -85,51 +104,60 @@ function Command:complete(cmdline, cursor)
     return {}
   end
 
-  -- check subcommand.
+  -- complete subcommand names.
   if parsed[2] and parsed[2].s <= cursor and cursor <= parsed[2].e then
     return vim.iter(pairs(self.subcommands)):map(function(_, subcommand)
       return subcommand.name
     end):totable()
   end
 
-  -- check subcommand name.
+  -- check subcommand is exists.
   local subcommand = self.subcommands[parsed[2].text]
   if not subcommand then
     return {}
   end
 
-  -- check subcommand args.
+  -- check subcommand arguments.
   local pos = 1
   for i, part in ipairs(parsed) do
     if i > 2 then
-      -- check named args args.
       local is_named_argument_name = vim.regex([=[^--\?[^=]*$]=]):match_str(part.text) ~= nil
-
       local is_named_argument_value = vim.iter(pairs(subcommand.args)):any(function(name)
         name = tostring(name)
         return part.text:sub(1, #name + 1) == ('%s='):format(name)
       end)
 
+      -- current cursor argument.
       if part.s <= cursor and cursor <= part.e then
         if is_named_argument_name then
+          -- return named-argument completion.
           return vim.iter(pairs(subcommand.args)):map(function(name)
             return name
           end):filter(function(name)
             return type(name) == 'string'
           end):totable()
         elseif is_named_argument_value then
+          -- return specific named-argument value completion.
           for name, argument in pairs(subcommand.args) do
             if type(name) == 'string' then
               if part.text:sub(1, #name + 1) == ('%s='):format(name) then
-                return argument(part.text:sub(#name + 2))
+                if argument.complete then
+                  return argument.complete(part.text:sub(#name + 2))
+                end
+                return {}
               end
             end
           end
         elseif subcommand.args[pos] then
-          return subcommand.args[pos](part.text:sub(1, cursor - part.s))
+          local argument = subcommand.args[pos]
+          if argument.complete then
+            return argument.complete(part.text)
+          end
+          return {}
         end
       end
 
+      -- increment positional argument.
       if not is_named_argument_name and not is_named_argument_value then
         pos = pos + 1
       end

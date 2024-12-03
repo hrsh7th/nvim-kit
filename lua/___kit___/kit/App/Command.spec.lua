@@ -4,28 +4,32 @@ describe('kit.App.Command', function()
   local command = Command.new('Misc', {
     month = {
       args = {
-        ['--lang'] = function()
-          return {
-            'en',
-            'ja'
-          }
-        end,
-        [1] = function()
-          return {
-            'January',
-            'February',
-            'March',
-            'April',
-            'May',
-            'June',
-            'July',
-            'August',
-            'September',
-            'October',
-            'November',
-            'December'
-          }
-        end
+        ['--lang'] = {
+          complete = function()
+            return {
+              'en',
+              'ja'
+            }
+          end
+        },
+        [1] = {
+          complete = function()
+            return {
+              'January',
+              'February',
+              'March',
+              'April',
+              'May',
+              'June',
+              'July',
+              'August',
+              'September',
+              'October',
+              'November',
+              'December'
+            }
+          end
+        }
       },
       execute = function()
         vim.print('Misc')

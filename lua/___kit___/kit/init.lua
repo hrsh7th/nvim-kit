@@ -167,55 +167,67 @@ end
 ---Create debounced callback.
 ---@generic T: fun(...: any): nil
 ---@param callback T
----@param ms integer
+---@param timeout_ms integer
 ---@return T
-function kit.debounce(callback, ms)
-  local run_id = 0
+function kit.debounce(callback, timeout_ms)
   local timer = assert(vim.uv.new_timer())
-  return function(...)
-    local arguments = { ... }
-
-    run_id = run_id + 1
-    timer:stop()
-    timer:start(ms, 0, function()
-      if run_id ~= run_id then
-        return
-      end
+  return setmetatable({
+    timeout_ms = timeout_ms,
+    is_running = function()
+      return timer:is_active()
+    end,
+    stop = function()
       timer:stop()
-      callback(unpack(arguments))
-    end)
-  end
+    end,
+  }, {
+    __call = function(self, ...)
+      local arguments = { ... }
+
+      self.running = true
+      timer:stop()
+      timer:start(self.timeout_ms, 0, function()
+        self.running = false
+        timer:stop()
+        callback(unpack(arguments))
+      end)
+    end
+  })
 end
 
 ---Create throttled callback.
+---First call will be called immediately.
 ---@generic T: fun(...: any): nil
 ---@param callback T
----@param throttle_ms integer
-function kit.throttle(callback, throttle_ms)
+---@param timeout_ms integer
+function kit.throttle(callback, timeout_ms)
   local timer = assert(vim.uv.new_timer())
   local arguments = nil
-  local last_time = (vim.uv.hrtime() / 1000000) - throttle_ms - 1
-  local running = false
+  local last_time = (vim.uv.hrtime() / 1000000) - timeout_ms - 1
   return setmetatable({
-    throttle_ms = throttle_ms,
+    timeout_ms = timeout_ms,
+    is_running = function()
+      return timer:is_active()
+    end,
+    stop = function()
+      timer:stop()
+    end,
   }, {
     __call = function(self, ...)
       arguments = { ... }
 
-      if not running then
-        local timeout_ms = math.max(0, self.throttle_ms - ((vim.uv.hrtime() / 1000000) - last_time))
-        if timeout_ms == 0 then
+      if self.is_running() then
+        timer:stop()
+      end
+      local delay_ms = self.timeout_ms - ((vim.uv.hrtime() / 1000000) - last_time)
+      if delay_ms > 0 then
+        timer:start(delay_ms, 0, function()
+          timer:stop()
           last_time = (vim.uv.hrtime() / 1000000)
           callback(unpack(arguments))
-        else
-          running = true
-          timer:start(timeout_ms, 0, function()
-            running = false
-            timer:stop()
-            last_time = (vim.uv.hrtime() / 1000000)
-            callback(unpack(arguments))
-          end)
-        end
+        end)
+      else
+        last_time = (vim.uv.hrtime() / 1000000)
+        callback(unpack(arguments))
       end
     end,
   })
