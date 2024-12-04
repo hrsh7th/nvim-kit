@@ -82,9 +82,7 @@ function kit.findup(path, markers)
   while path ~= '/' do
     for _, marker in ipairs(markers) do
       local target = vim.fs.joinpath(path, (marker:gsub('/', '')))
-      if marker:match('/$') and vim.fn.isdirectory(target) == 1 then
-        return path
-      elseif vim.fn.filereadable(target) == 1 then
+      if vim.fn.isdirectory(target) == 1 or vim.fn.filereadable(target) == 1 then
         return path
       end
     end

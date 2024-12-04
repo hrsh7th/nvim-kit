@@ -63,37 +63,98 @@ function System.LineBuffering:create(callback)
   }
 end
 
----@class ___kit___.kit.System.PatternBuffering: ___kit___.kit.System.Buffering
----@field pattern string
-System.PatternBuffering = {}
-System.PatternBuffering.__index = System.PatternBuffering
+---@class ___kit___.kit.System.DelimiterBuffering: ___kit___.kit.System.Buffering
+---@field delimiter string
+System.DelimiterBuffering = {}
+System.DelimiterBuffering.__index = System.DelimiterBuffering
 
----Create PatternBuffering.
----@param option { pattern: string }
-function System.PatternBuffering.new(option)
+---Create Buffering.
+---@param option { delimiter: string }
+function System.DelimiterBuffering.new(option)
   return setmetatable({
-    pattern = option.pattern,
-  }, System.PatternBuffering)
+    delimiter = option.delimiter,
+  }, System.DelimiterBuffering)
 end
 
----Create PatternBuffer object.
-function System.PatternBuffering:create(callback)
+---Create Delimiter object.
+function System.DelimiterBuffering:create(callback)
   local buffer = {}
+  local state = {
+    delimiter_pos = 1,
+    curr_buffer_pos = { 1, 1 },
+  }
+
+  local function next_pos(start_i, start_j)
+    if not buffer[start_i] then
+      return start_i, start_j
+    end
+    if start_j >= #buffer[start_i] then
+      return start_i + 1, 1
+    end
+    return start_i, start_j + 1
+  end
+
+  local function is_ended(i, j)
+    local is_not_ended = i < #buffer or (i == #buffer and j < #buffer[i])
+    return not is_not_ended
+  end
+
+  local function buf_chars(start_i, start_j)
+    return function()
+      if start_i <= #buffer then
+        if start_j <= #buffer[start_i] then
+          local current_i, current_j = start_i, start_j
+          start_i, start_j = next_pos(start_i, start_j)
+          return buffer[current_i]:sub(current_j, current_j), current_i, current_j
+        end
+      end
+    end
+  end
   return {
     write = function(data)
       table.insert(buffer, data)
-      while true do
-        local text = table.concat(buffer, '')
-        local s, e = text:find(self.pattern)
-        if s and e then
-          callback(text:sub(1, s - 1))
-          if e < #text then
-            buffer = { text:sub(e + 1) }
-          else
-            buffer = {}
+
+      local match_start_pos = nil --[[@as { [1]: integer, [2]: integer }|nil]]
+      for char, i, j in buf_chars(state.curr_buffer_pos[1], state.curr_buffer_pos[2]) do
+        if char == self.delimiter:sub(state.delimiter_pos, state.delimiter_pos) then
+          if state.delimiter_pos == 1 then
+            match_start_pos = { i, j }
+          end
+          state.delimiter_pos = state.delimiter_pos + 1
+
+          if state.delimiter_pos > #self.delimiter and match_start_pos then
+            local texts = {}
+            for k = 1, match_start_pos[1] do
+              if k == match_start_pos[1] then
+                table.insert(texts, buffer[k]:sub(1, match_start_pos[2] - 1))
+              else
+                table.insert(texts, buffer[k])
+              end
+            end
+            callback(table.concat(texts, ''))
+
+            if not is_ended(i, j) then
+              local next_buffer = {}
+              for k = i, #buffer do
+                if k == i then
+                  if #buffer[k] ~= j then
+                    table.insert(next_buffer, buffer[k]:sub(j + 1))
+                  end
+                else
+                  table.insert(next_buffer, buffer[k])
+                end
+              end
+              buffer = next_buffer
+            else
+              buffer = {}
+            end
+            state.delimiter_pos = 1
+            state.curr_buffer_pos = { 1, 1 }
+            break
           end
         else
-          break
+          state.delimiter_pos = 1
+          state.curr_buffer_pos = (match_start_pos and { next_pos(match_start_pos[1], match_start_pos[2]) } or { next_pos(i, j) })
         end
       end
     end,
@@ -129,6 +190,7 @@ end
 ---Spawn a new process.
 ---@class ___kit___.kit.System.SpawnParams
 ---@field cwd string
+---@field env? table<string, string>
 ---@field input? string|string[]
 ---@field on_stdout? fun(data: string)
 ---@field on_stderr? fun(data: string)
@@ -151,9 +213,12 @@ function System.spawn(command, params)
     table.insert(args, command[i])
   end
 
-  local env = vim.fn.environ()
-  env.NVIM = vim.v.servername
-  env.NVIM_LISTEN_ADDRESS = nil
+  local env = params.env
+  if not env then
+    env = vim.fn.environ()
+    env.NVIM = vim.v.servername
+    env.NVIM_LISTEN_ADDRESS = nil
+  end
 
   local env_pairs = {}
   for k, v in pairs(env) do
@@ -172,7 +237,7 @@ function System.spawn(command, params)
     end
   end)
 
-  local close --[[@type fun(): ___kit___.kit.Async.AsyncTask]]
+  local close --[[@type fun(signal?: integer): ___kit___.kit.Async.AsyncTask]]
   local stdin = params.input and assert(vim.uv.new_pipe())
   local stdout = assert(vim.uv.new_pipe())
   local stderr = assert(vim.uv.new_pipe())
@@ -195,6 +260,7 @@ function System.spawn(command, params)
       end
     end)
   end)
+
   stdout:read_start(function(err, data)
     if err then
       error(err)
@@ -213,19 +279,19 @@ function System.spawn(command, params)
   end)
 
   local stdin_closing = Async.new(function(resolve)
-    if params.input and stdin then
+    if stdin then
       for _, input in ipairs(kit.to_array(params.input)) do
         stdin:write(input)
       end
-      if stdin then
+      stdin:shutdown(function()
         stdin:close(resolve)
-      end
+      end)
     else
       resolve()
     end
   end)
 
-  close = function()
+  close = function(signal)
     local closing = { stdin_closing }
     table.insert(closing, Async.new(function(resolve)
       if not stdout:is_closing() then
@@ -242,20 +308,27 @@ function System.spawn(command, params)
       end
     end))
     table.insert(closing, Async.new(function(resolve)
-      if not process:is_closing() then
+      if signal and process:is_active() then
+        process:kill(signal)
+      end
+      if process and not process:is_closing() then
         process:close(resolve)
       else
         resolve()
       end
     end))
-    return Async.all(closing)
+
+    local closing_task = Async.resolve()
+    for _, task in ipairs(closing) do
+      closing_task = closing_task:next(function()
+        return task
+      end)
+    end
+    return closing_task
   end
 
   return function(signal)
-    if signal and process:is_active() and not process:is_closing() then
-      process:kill(signal)
-    end
-    close()
+    close(signal)
   end
 end
 
