@@ -114,47 +114,47 @@ function System.DelimiterBuffering:create(callback)
     write = function(data)
       table.insert(buffer, data)
 
-      local match_start_pos = nil --[[@as { [1]: integer, [2]: integer }|nil]]
-      for char, i, j in buf_chars(state.curr_buffer_pos[1], state.curr_buffer_pos[2]) do
-        if char == self.delimiter:sub(state.delimiter_pos, state.delimiter_pos) then
-          if state.delimiter_pos == 1 then
-            match_start_pos = { i, j }
-          end
-          state.delimiter_pos = state.delimiter_pos + 1
-
-          if state.delimiter_pos > #self.delimiter and match_start_pos then
-            local texts = {}
-            for k = 1, match_start_pos[1] do
-              if k == match_start_pos[1] then
-                table.insert(texts, buffer[k]:sub(1, match_start_pos[2] - 1))
-              else
-                table.insert(texts, buffer[k])
-              end
+      while not is_ended(state.curr_buffer_pos[1], state.curr_buffer_pos[2]) do
+        local match_start_pos = nil --[[@as { [1]: integer, [2]: integer }|nil]]
+        for char, i, j in buf_chars(state.curr_buffer_pos[1], state.curr_buffer_pos[2]) do
+          if char == self.delimiter:sub(state.delimiter_pos, state.delimiter_pos) then
+            if state.delimiter_pos == 1 then
+              match_start_pos = { i, j }
             end
-            callback(table.concat(texts, ''))
 
-            if not is_ended(i, j) then
-              local next_buffer = {}
-              for k = i, #buffer do
-                if k == i then
-                  if #buffer[k] ~= j then
-                    table.insert(next_buffer, buffer[k]:sub(j + 1))
-                  end
+            if state.delimiter_pos == #self.delimiter and match_start_pos then
+              local texts = {}
+              for k = 1, match_start_pos[1] do
+                if k == match_start_pos[1] then
+                  table.insert(texts, buffer[k]:sub(1, match_start_pos[2] - 1))
                 else
-                  table.insert(next_buffer, buffer[k])
+                  table.insert(texts, buffer[k])
                 end
               end
-              buffer = next_buffer
-            else
-              buffer = {}
+              callback(table.concat(texts, ''))
+
+              if not is_ended(i, j) then
+                local next_buffer = {}
+                for k = i, #buffer do
+                  if k == i then
+                    table.insert(next_buffer, buffer[k]:sub(j + 1))
+                  else
+                    table.insert(next_buffer, buffer[k])
+                  end
+                end
+                buffer = next_buffer
+              else
+                buffer = {}
+              end
+              state.delimiter_pos = 1
+              state.curr_buffer_pos = { 1, 1 }
+              break
             end
+            state.delimiter_pos = state.delimiter_pos + 1
+          else
             state.delimiter_pos = 1
-            state.curr_buffer_pos = { 1, 1 }
-            break
+            state.curr_buffer_pos = (match_start_pos and { next_pos(match_start_pos[1], match_start_pos[2]) } or { next_pos(i, j) })
           end
-        else
-          state.delimiter_pos = 1
-          state.curr_buffer_pos = (match_start_pos and { next_pos(match_start_pos[1], match_start_pos[2]) } or { next_pos(i, j) })
         end
       end
     end,
