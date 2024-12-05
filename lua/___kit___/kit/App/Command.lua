@@ -54,7 +54,7 @@ end
 ---Execute command.
 ---@param params ___kit___.kit.App.Command.ExecuteParams
 function Command:execute(params)
-  local parsed = self:_parse(params.args)
+  local parsed = self._parse(params.args)
 
   local subcommand = self.subcommands[parsed[1].text]
   if not subcommand then
@@ -97,7 +97,7 @@ end
 ---@param cmdline string
 ---@param cursor integer
 function Command:complete(cmdline, cursor)
-  local parsed = self:_parse(cmdline)
+  local parsed = self._parse(cmdline)
 
   -- check command.
   if parsed[1].text ~= self.name then
@@ -168,7 +168,7 @@ end
 ---Parse command line.
 ---@param cmdline string
 ---@return { text: string, s: integer, e: integer }[]
-function Command:_parse(cmdline)
+function Command._parse(cmdline)
   ---@type { text: string, s: integer, e: integer }[]
   local parsed = {}
 
