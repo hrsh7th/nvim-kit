@@ -78,83 +78,137 @@ end
 
 ---Create Delimiter object.
 function System.DelimiterBuffering:create(callback)
-  local buffer = {}
   local state = {
+    buffer = {},
+    buffer_pos = 1,
     delimiter_pos = 1,
-    curr_buffer_pos = { 1, 1 },
+    match_pos = nil --[[@as integer?]],
   }
 
-  local function next_pos(start_i, start_j)
-    if not buffer[start_i] then
-      return start_i, start_j
+  local function len()
+    local l = 0
+    for i = 1, #state.buffer do
+      l = l + #state.buffer[i]
     end
-    if start_j >= #buffer[start_i] then
-      return start_i + 1, 1
-    end
-    return start_i, start_j + 1
+    return l
   end
 
-  local function is_ended(i, j)
-    local is_not_ended = i < #buffer or (i == #buffer and j < #buffer[i])
-    return not is_not_ended
-  end
+  local function split(s, e)
+    local before = {}
+    local after = {}
+    local off = 0
+    for i = 1, #state.buffer do
+      local l = #state.buffer[i]
+      local sep_s = s - off
+      local sep_e = e - off
+      local buf_s = 1
+      local buf_e = l
 
-  local function buf_chars(start_i, start_j)
-    return function()
-      if start_i <= #buffer then
-        if start_j <= #buffer[start_i] then
-          local current_i, current_j = start_i, start_j
-          start_i, start_j = next_pos(start_i, start_j)
-          return buffer[current_i]:sub(current_j, current_j), current_i, current_j
+      if buf_e < sep_s then
+        table.insert(before, state.buffer[i])
+      elseif sep_e < buf_s then
+        table.insert(after, state.buffer[i])
+      else
+        if buf_s < sep_s then
+          table.insert(before, state.buffer[i]:sub(buf_s, sep_s - 1))
+        end
+        if sep_e < buf_e then
+          table.insert(after, state.buffer[i]:sub(sep_e + 1, buf_e))
         end
       end
+
+      off = off + l
     end
+    return before, after
   end
+
+  local function get(at)
+    local off = 0
+    for i = 1, #state.buffer do
+      local l = #state.buffer[i]
+      if at <= off + l then
+        local idx = at - off
+        return state.buffer[i]:sub(idx, idx)
+      end
+      off = off + l
+    end
+    return nil
+  end
+
+  local buffer_len = 0
+  local delimiter_len = #self.delimiter
+  local buffer
+  buffer = {
+    write = function(data)
+      table.insert(state.buffer, data)
+      buffer_len = len()
+
+      ::entrypoint::
+      while state.buffer_pos <= buffer_len do
+        local b = get(state.buffer_pos)
+        local d = self.delimiter:sub(state.delimiter_pos, state.delimiter_pos)
+        if b == d then
+          if state.delimiter_pos == 1 then
+            state.match_pos = state.buffer_pos
+          elseif state.delimiter_pos == delimiter_len then
+            local before, after = split(state.match_pos, state.buffer_pos)
+            callback(table.concat(before, ''))
+            state.buffer = after
+            state.buffer_pos = 1
+            state.delimiter_pos = 1
+            state.match_pos = nil
+            buffer_len = len()
+            goto entrypoint;
+          end
+          state.buffer_pos = state.buffer_pos + 1
+          state.delimiter_pos = state.delimiter_pos + 1
+        else
+          state.buffer_pos = state.match_pos and state.match_pos + 1 or state.buffer_pos + 1
+          state.delimiter_pos = 1
+          state.match_pos = nil
+        end
+      end
+    end,
+    close = function()
+      if #state.buffer > 0 then
+        callback(table.concat(state.buffer, ''))
+      end
+    end
+  }
+  return buffer
+end
+
+---@class ___kit___.kit.System.PatternBuffering: ___kit___.kit.System.Buffering
+---@field pattern string
+System.PatternBuffering = {}
+System.PatternBuffering.__index = System.PatternBuffering
+
+---Create PatternBuffering.
+---@param option { pattern: string }
+function System.PatternBuffering.new(option)
+  return setmetatable({
+    pattern = option.pattern,
+  }, System.PatternBuffering)
+end
+
+---Create PatternBuffer object.
+function System.PatternBuffering:create(callback)
+  local buffer = {}
   return {
     write = function(data)
       table.insert(buffer, data)
-
-      while not is_ended(state.curr_buffer_pos[1], state.curr_buffer_pos[2]) do
-        local match_start_pos = nil --[[@as { [1]: integer, [2]: integer }|nil]]
-        for char, i, j in buf_chars(state.curr_buffer_pos[1], state.curr_buffer_pos[2]) do
-          if char == self.delimiter:sub(state.delimiter_pos, state.delimiter_pos) then
-            if state.delimiter_pos == 1 then
-              match_start_pos = { i, j }
-            end
-
-            if state.delimiter_pos == #self.delimiter and match_start_pos then
-              local texts = {}
-              for k = 1, match_start_pos[1] do
-                if k == match_start_pos[1] then
-                  table.insert(texts, buffer[k]:sub(1, match_start_pos[2] - 1))
-                else
-                  table.insert(texts, buffer[k])
-                end
-              end
-              callback(table.concat(texts, ''))
-
-              if not is_ended(i, j) then
-                local next_buffer = {}
-                for k = i, #buffer do
-                  if k == i then
-                    table.insert(next_buffer, buffer[k]:sub(j + 1))
-                  else
-                    table.insert(next_buffer, buffer[k])
-                  end
-                end
-                buffer = next_buffer
-              else
-                buffer = {}
-              end
-              state.delimiter_pos = 1
-              state.curr_buffer_pos = { 1, 1 }
-              break
-            end
-            state.delimiter_pos = state.delimiter_pos + 1
+      while true do
+        local text = table.concat(buffer, '')
+        local s, e = text:find(self.pattern, 1, true)
+        if s and e then
+          callback(text:sub(1, s - 1))
+          if e < #text then
+            buffer = { text:sub(e + 1) }
           else
-            state.delimiter_pos = 1
-            state.curr_buffer_pos = (match_start_pos and { next_pos(match_start_pos[1], match_start_pos[2]) } or { next_pos(i, j) })
+            buffer = {}
           end
+        else
+          break
         end
       end
     end,
@@ -260,7 +314,6 @@ function System.spawn(command, params)
       end
     end)
   end)
-
   stdout:read_start(function(err, data)
     if err then
       error(err)
