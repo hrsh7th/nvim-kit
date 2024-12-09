@@ -143,14 +143,11 @@ function System.DelimiterBuffering:create(callback)
       table.insert(state.buffer, data)
       buffer_len = len()
 
-      ::entrypoint::
       while state.buffer_pos <= buffer_len do
         local b = get(state.buffer_pos)
         local d = self.delimiter:sub(state.delimiter_pos, state.delimiter_pos)
         if b == d then
-          if state.delimiter_pos == 1 then
-            state.match_pos = state.buffer_pos
-          elseif state.delimiter_pos == delimiter_len then
+          if state.delimiter_pos == delimiter_len then
             local before, after = split(state.match_pos, state.buffer_pos)
             callback(table.concat(before, ''))
             state.buffer = after
@@ -158,10 +155,13 @@ function System.DelimiterBuffering:create(callback)
             state.delimiter_pos = 1
             state.match_pos = nil
             buffer_len = len()
-            goto entrypoint;
+          else
+            if state.delimiter_pos == 1 then
+              state.match_pos = state.buffer_pos
+            end
+            state.buffer_pos = state.buffer_pos + 1
+            state.delimiter_pos = state.delimiter_pos + 1
           end
-          state.buffer_pos = state.buffer_pos + 1
-          state.delimiter_pos = state.delimiter_pos + 1
         else
           state.buffer_pos = state.match_pos and state.match_pos + 1 or state.buffer_pos + 1
           state.delimiter_pos = 1

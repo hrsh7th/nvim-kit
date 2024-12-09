@@ -80,11 +80,11 @@ describe('kit.App.Command', function()
       { text = 'Misc',  s = 0,  e = 4 },
       { text = 'month', s = 5,  e = 10 },
       { text = 'j',     s = 11, e = 12 }
-    }, command:_parse('Misc month j'))
+    }, command._parse('Misc month j'))
     assert.are.same({
       { text = 'Misc',  s = 0,  e = 4 },
       { text = 'month', s = 5,  e = 10 },
       { text = '',      s = 11, e = 11 }
-    }, command:_parse('Misc month '))
+    }, command._parse('Misc month '))
   end)
 end)
