@@ -34,19 +34,19 @@ import metaModel from '../../tmp/language-server-protocol/_specifications/lsp/3.
     return dedent`
       ${params}
       function Client:${request.method.replace(/\//g, '_')}(params)
-        local that, request_id, reject_ = self, nil, nil
+        local that, _, request_id, reject_ = self, nil, nil, nil
         local task = AsyncTask.new(function(resolve, reject)
-          request_id = self.client.request('${request.method}', params, function(err, res)
+          reject_ = reject
+          _, request_id = self.client:request('${request.method}', params, function(err, res)
             if err then
               reject(err)
             else
               resolve(res)
             end
           end)
-          reject_ = reject
         end)
         function task.cancel()
-          that.client.cancel_request(request_id)
+          that.client:cancel_request(request_id)
           reject_(LSP.ErrorCodes.RequestCancelled)
         end
         return task

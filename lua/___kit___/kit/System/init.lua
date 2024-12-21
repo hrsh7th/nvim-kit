@@ -59,7 +59,7 @@ function System.LineBuffering:create(callback)
       if #buffer > 0 then
         callback(table.concat(buffer, ''))
       end
-    end
+    end,
   }
 end
 
@@ -173,7 +173,7 @@ function System.DelimiterBuffering:create(callback)
       if #state.buffer > 0 then
         callback(table.concat(state.buffer, ''))
       end
-    end
+    end,
   }
   return buffer
 end
@@ -216,7 +216,7 @@ function System.PatternBuffering:create(callback)
       if #buffer > 0 then
         callback(table.concat(buffer, ''))
       end
-    end
+    end,
   }
 end
 
@@ -237,7 +237,7 @@ function System.RawBuffering:create(callback)
     end,
     close = function()
       -- noop.
-    end
+    end,
   }
 end
 
@@ -255,11 +255,11 @@ end
 ---@return fun(signal?: integer)
 function System.spawn(command, params)
   command = vim
-      .iter(command)
-      :filter(function(c)
-        return c ~= nil
-      end)
-      :totable()
+    .iter(command)
+    :filter(function(c)
+      return c ~= nil
+    end)
+    :totable()
 
   local cmd = command[1]
   local args = {}
@@ -346,30 +346,39 @@ function System.spawn(command, params)
 
   close = function(signal)
     local closing = { stdin_closing }
-    table.insert(closing, Async.new(function(resolve)
-      if not stdout:is_closing() then
-        stdout:close(resolve)
-      else
-        resolve()
-      end
-    end))
-    table.insert(closing, Async.new(function(resolve)
-      if not stderr:is_closing() then
-        stderr:close(resolve)
-      else
-        resolve()
-      end
-    end))
-    table.insert(closing, Async.new(function(resolve)
-      if signal and process:is_active() then
-        process:kill(signal)
-      end
-      if process and not process:is_closing() then
-        process:close(resolve)
-      else
-        resolve()
-      end
-    end))
+    table.insert(
+      closing,
+      Async.new(function(resolve)
+        if not stdout:is_closing() then
+          stdout:close(resolve)
+        else
+          resolve()
+        end
+      end)
+    )
+    table.insert(
+      closing,
+      Async.new(function(resolve)
+        if not stderr:is_closing() then
+          stderr:close(resolve)
+        else
+          resolve()
+        end
+      end)
+    )
+    table.insert(
+      closing,
+      Async.new(function(resolve)
+        if signal and process:is_active() then
+          process:kill(signal)
+        end
+        if process and not process:is_closing() then
+          process:close(resolve)
+        else
+          resolve()
+        end
+      end)
+    )
 
     local closing_task = Async.resolve()
     for _, task in ipairs(closing) do

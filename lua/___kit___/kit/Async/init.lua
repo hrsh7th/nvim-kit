@@ -57,7 +57,7 @@ function Async.run(runner, ...)
   _G.kit.Async.___threads___[thread] = {
     thread = thread,
     thread_parent = thread_parent,
-    now = vim.uv.hrtime() / 1000000
+    now = vim.uv.hrtime() / 1000000,
   }
   return AsyncTask.new(function(resolve, reject)
     local function next_step(ok, v)

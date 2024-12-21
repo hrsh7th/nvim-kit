@@ -188,7 +188,7 @@ function kit.debounce(callback, timeout_ms)
         timer:stop()
         callback(unpack(arguments))
       end)
-    end
+    end,
   })
 end
 

@@ -8,9 +8,9 @@ describe('kit.App.Command', function()
           complete = function()
             return {
               'en',
-              'ja'
+              'ja',
             }
-          end
+          end,
         },
         [1] = {
           complete = function()
@@ -26,15 +26,15 @@ describe('kit.App.Command', function()
               'September',
               'October',
               'November',
-              'December'
+              'December',
             }
-          end
-        }
+          end,
+        },
       },
       execute = function()
         vim.print('Misc')
-      end
-    }
+      end,
+    },
   })
 
   it('complete', function()
@@ -50,10 +50,10 @@ describe('kit.App.Command', function()
       'September',
       'October',
       'November',
-      'December'
+      'December',
     }, command:complete('Misc month ', 11))
     assert.are.same({
-      '--lang'
+      '--lang',
     }, command:complete('Misc month -', 12))
     assert.are.same({
       'en',
@@ -71,20 +71,20 @@ describe('kit.App.Command', function()
       'September',
       'October',
       'November',
-      'December'
+      'December',
     }, command:complete('Misc month --lang=ja ', 21))
   end)
 
   it('_parse', function()
     assert.are.same({
-      { text = 'Misc',  s = 0,  e = 4 },
-      { text = 'month', s = 5,  e = 10 },
-      { text = 'j',     s = 11, e = 12 }
+      { text = 'Misc', s = 0, e = 4 },
+      { text = 'month', s = 5, e = 10 },
+      { text = 'j', s = 11, e = 12 },
     }, command._parse('Misc month j'))
     assert.are.same({
-      { text = 'Misc',  s = 0,  e = 4 },
-      { text = 'month', s = 5,  e = 10 },
-      { text = '',      s = 11, e = 11 }
+      { text = 'Misc', s = 0, e = 4 },
+      { text = 'month', s = 5, e = 10 },
+      { text = '', s = 11, e = 11 },
     }, command._parse('Misc month '))
   end)
 end)

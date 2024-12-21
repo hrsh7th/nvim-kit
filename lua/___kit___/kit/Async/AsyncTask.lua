@@ -67,6 +67,11 @@ end
 ---@return ___kit___.kit.Async.AsyncTask
 function AsyncTask.all(tasks)
   return AsyncTask.new(function(resolve, reject)
+    if #tasks == 0 then
+      resolve({})
+      return
+    end
+
     local values = {}
     local count = 0
     for i, task in ipairs(tasks) do

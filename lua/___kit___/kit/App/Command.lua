@@ -27,14 +27,14 @@ function Command.new(name, subcommand_specifiers)
     subcommands[subcommand_name] = {
       name = subcommand_name,
       args = subcommand_specifier.args or {},
-      execute = subcommand_specifier.execute
+      execute = subcommand_specifier.execute,
     }
   end
 
   -- create command.
   return setmetatable({
     name = name,
-    subcommands = subcommands
+    subcommands = subcommands,
   }, Command)
 end
 
@@ -106,9 +106,12 @@ function Command:complete(cmdline, cursor)
 
   -- complete subcommand names.
   if parsed[2] and parsed[2].s <= cursor and cursor <= parsed[2].e then
-    return vim.iter(pairs(self.subcommands)):map(function(_, subcommand)
-      return subcommand.name
-    end):totable()
+    return vim
+      .iter(pairs(self.subcommands))
+      :map(function(_, subcommand)
+        return subcommand.name
+      end)
+      :totable()
   end
 
   -- check subcommand is exists.
@@ -131,11 +134,15 @@ function Command:complete(cmdline, cursor)
       if part.s <= cursor and cursor <= part.e then
         if is_named_argument_name then
           -- return named-argument completion.
-          return vim.iter(pairs(subcommand.args)):map(function(name)
-            return name
-          end):filter(function(name)
-            return type(name) == 'string'
-          end):totable()
+          return vim
+            .iter(pairs(subcommand.args))
+            :map(function(name)
+              return name
+            end)
+            :filter(function(name)
+              return type(name) == 'string'
+            end)
+            :totable()
         elseif is_named_argument_value then
           -- return specific named-argument value completion.
           for name, argument in pairs(subcommand.args) do
@@ -185,7 +192,7 @@ function Command._parse(cmdline)
         table.insert(parsed, {
           text = table.concat(part),
           s = s - 1,
-          e = i - 1
+          e = i - 1,
         })
         part = {}
         s = i + 1
@@ -200,7 +207,7 @@ function Command._parse(cmdline)
     table.insert(parsed, {
       text = table.concat(part),
       s = s - 1,
-      e = i - 1
+      e = i - 1,
     })
     return parsed
   end
@@ -208,7 +215,7 @@ function Command._parse(cmdline)
   table.insert(parsed, {
     text = '',
     s = #cmdline,
-    e = #cmdline + 1
+    e = #cmdline + 1,
   })
 
   return parsed
