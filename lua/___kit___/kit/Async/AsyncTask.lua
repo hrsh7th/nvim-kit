@@ -162,7 +162,7 @@ function AsyncTask:sync(timeout)
     if is_thread then
       uv.run('once')
     else
-      vim.wait(16)
+      vim.wait(0)
     end
   end
   if self.status == AsyncTask.Status.Pending then

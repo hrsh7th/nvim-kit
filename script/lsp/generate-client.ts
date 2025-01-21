@@ -9,12 +9,12 @@ import metaModel from '../../tmp/language-server-protocol/_specifications/lsp/3.
     local AsyncTask = require('___kit___.kit.Async.AsyncTask')
 
     ---@class ___kit___.kit.LSP.Client
-    ---@field public client table
+    ---@field public client vim.lsp.Client
     local Client = {}
     Client.__index = Client
 
     ---Create LSP Client wrapper.
-    ---@param client table
+    ---@param client vim.lsp.Client
     ---@return ___kit___.kit.LSP.Client
     function Client.new(client)
       local self = setmetatable({}, Client)

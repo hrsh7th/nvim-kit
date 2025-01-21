@@ -90,16 +90,17 @@ function kit.findup(path, markers)
   end
 end
 
----Create unique id.
----@return integer
-kit.unique_id = setmetatable({
-  unique_id = 0,
-}, {
-  __call = function(self)
-    self.unique_id = self.unique_id + 1
-    return self.unique_id
-  end,
-})
+do
+  _G.kit = _G.kit or {}
+  _G.kit.unique_id = 0
+
+  ---Create unique id.
+  ---@return integer
+  kit.unique_id = function()
+    _G.kit.unique_id = _G.kit.unique_id + 1
+    return _G.kit.unique_id
+  end
+end
 
 ---Map array.
 ---@deprecated
@@ -252,6 +253,10 @@ do
       return new_tbl
     else
       local new_tbl = {}
+      local meta = getmetatable(target)
+      if meta then
+        setmetatable(new_tbl, meta)
+      end
       seen[target] = new_tbl
       for k, v in pairs(target) do
         new_tbl[k] = do_clone(v, seen)
@@ -276,8 +281,8 @@ end
 ---@param tbl2 T
 ---@return T
 function kit.merge(tbl1, tbl2)
-  local is_dict1 = kit.is_dict(tbl1)
-  local is_dict2 = kit.is_dict(tbl2)
+  local is_dict1 = kit.is_dict(tbl1) and getmetatable(tbl1) == nil
+  local is_dict2 = kit.is_dict(tbl2) and getmetatable(tbl2) == nil
   if is_dict1 and is_dict2 then
     local new_tbl = {}
     for k, v in pairs(tbl2) do
