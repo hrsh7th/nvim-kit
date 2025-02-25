@@ -112,7 +112,7 @@ describe('kit.IO', function()
 
   describe('.write_file', function()
     it('should write the file', function()
-      if IO.fs_stat('./fixture/IO/write_file.txt'):catch(function() end):sync(5000) then
+      if IO.stat('./fixture/IO/write_file.txt'):catch(function() end):sync(5000) then
         IO.rm('./fixture/IO/write_file.txt'):sync(5000)
       end
       IO.write_file('./fixture/IO/write_file.txt', IO.read_file('./fixture/IO/read_file.txt', 5):sync(5000))
