@@ -1,6 +1,25 @@
 local uv = vim.uv
 local Async = require('___kit___.kit.Async')
 
+local backslash = string.byte('\\')
+local slash = string.byte('/')
+local tilde = string.byte('~')
+
+---@param path string
+---@return string
+local function sep(path)
+  for i = 1, #path do
+    local c = path:byte(i)
+    if c == slash then
+      return path
+    end
+    if c == backslash then
+      return (path:gsub('\\', '/'))
+    end
+  end
+  return path
+end
+
 ---@see https://github.com/luvit/luvit/blob/master/deps/fs.lua
 local IO = {}
 
@@ -306,6 +325,7 @@ function IO.walk(start_path, callback, option)
         return status
       end
       for entry in iter_entries do
+        entry.path = IO.normalize(entry.path)
         if entry.type == 'directory' then
           if walk_pre(entry) == IO.WalkStatus.Break then
             return IO.WalkStatus.Break
@@ -326,6 +346,7 @@ function IO.walk(start_path, callback, option)
         return callback(iter_entries, dir)
       end
       for entry in iter_entries do
+        entry.path = IO.normalize(entry.path)
         if entry.type == 'directory' then
           if walk_post(entry) == IO.WalkStatus.Break then
             return IO.WalkStatus.Break
@@ -395,31 +416,26 @@ end
 ---@param path string
 ---@return string
 function IO.normalize(path)
-  path = path:gsub('\\', '/')
+  path = sep(path)
 
   -- remove trailing slash.
-  if #path > 1 and path:sub(-1) == '/' then
+  if #path > 1 and path:byte(-1) == slash then
     path = path:sub(1, -2)
   end
 
-  -- skip if the path already absolute.
-  if IO.is_absolute(path) then
-    return path
-  end
-
   -- homedir.
-  if path:sub(1, 1) == '~' then
+  if path:byte(1) == tilde then
     path = IO.join(uv.os_homedir() or vim.fs.normalize('~'), path:sub(2))
   end
 
   -- absolute.
   if IO.is_absolute(path) then
-    return path:sub(-1) == '/' and path:sub(1, -2) or path
+    return path
   end
 
   -- resolve relative path.
-  local up = assert(uv.cwd())
-  up = up:sub(-1) == '/' and up:sub(1, -2) or up
+  local up = sep(assert(uv.cwd()))
+  up = up:byte(-1) == slash and up:sub(1, -2) or up
   while true do
     if path:sub(1, 3) == '../' then
       path = path:sub(4)
@@ -435,34 +451,46 @@ end
 
 ---Join the paths.
 ---@param base string
----@param path string
+---@vararg string
 ---@return string
-function IO.join(base, path)
-  base = base:gsub('\\', '/')
-  path = path:gsub('\\', '/')
-  if base:sub(-1) == '/' then
-    base = base:sub(1, -2)
+function IO.join(base, ...)
+  base = sep(base)
+  for i = 1, select('#', ...) do
+    local path = sep(select(i, ...))
+    if vim.startswith(path, './') then
+      path = path:sub(3)
+    end
+    while vim.startswith(path, '../') do
+      base = IO.dirname(base)
+      path = path:sub(4)
+    end
+    base = ('%s/%s'):format(base, path)
   end
-  return base .. '/' .. path
+  return base
 end
 
 ---Return the path of the current working directory.
 ---@param path string
 ---@return string
 function IO.dirname(path)
-  path = path:gsub('\\', '/')
+  path = sep(path)
   if path:sub(-1) == '/' then
     path = path:sub(1, -2)
   end
-  return (path:gsub('/[^/]+$', ''))
+  for i = #path, 1, -1 do
+    if path:byte(i) == slash then
+      return path:sub(1, i - 1)
+    end
+  end
+  return path
 end
 
 ---Return the path is absolute or not.
 ---@param path string
 ---@return boolean
 function IO.is_absolute(path)
-  path = path:gsub('\\', '/')
-  return path:sub(1, 1) == '/' or path:match('^%a://')
+  path = sep(path)
+  return path:sub(1, 1) == '/' or path:match('^%a:/')
 end
 
 return IO

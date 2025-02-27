@@ -2,11 +2,25 @@
 
 local kit = {}
 
----Clear table.
----@param tbl table
-kit.clear = require('table.clear') or function(tbl)
-  for k, _ in pairs(tbl) do
-    tbl[k] = nil
+do
+  local clear = require('table.clear')
+
+  ---Clear table.
+  ---@generic T: table
+  ---@param tbl T
+  ---@return T
+  kit.clear = function(tbl)
+    if type(tbl) ~= 'table' then
+      return tbl
+    end
+    if clear then
+      clear(tbl)
+    else
+      for k, _ in pairs(tbl) do
+        tbl[k] = nil
+      end
+    end
+    return tbl
   end
 end
 
