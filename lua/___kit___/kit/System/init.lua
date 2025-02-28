@@ -26,38 +26,45 @@ function System.LineBuffering.new(option)
 end
 
 ---Create LineBuffer object.
+---@param callback fun(data: string)
 function System.LineBuffering:create(callback)
+  local callback_wrapped = callback
+  if self.ignore_empty then
+    ---@param data string
+    function callback_wrapped(data)
+      if data:find('%g') then
+        return callback(data)
+      end
+    end
+  end
+
   local buffer = {}
+  ---@type ___kit___.kit.System.Buffer
   return {
     write = function(data)
-      data = (data:gsub('\r\n?', '\n'))
-      table.insert(buffer, data)
+      data = data:gsub('\r\n?', '\n')
 
-      local has = false
-      for i = #data, 1, -1 do
-        if data:sub(i, i) == '\n' then
-          has = true
-          break
-        end
+      local first = 1
+      local last = data:find('\n', first, true)
+      if not last then
+        table.insert(buffer, data)
+        return
       end
+      callback_wrapped(('%s%s'):format(table.concat(buffer, ''), data:sub(first, last - 1)))
 
-      if has then
-        local texts = vim.split(table.concat(buffer, ''), '\n')
-        buffer = texts[#texts] ~= '' and { table.remove(texts) } or {}
-        for _, text in ipairs(texts) do
-          if self.ignore_empty then
-            if not text:match('^%s*$') then
-              callback(text)
-            end
-          else
-            callback(text)
-          end
+      while true do
+        first = last + 1
+        last = data:find('\n', first, true)
+        if not last then
+          buffer = first <= #data and { data:sub(first) } or {}
+          return
         end
+        callback_wrapped(data:sub(first, last - 1))
       end
     end,
     close = function()
       if #buffer > 0 then
-        callback(table.concat(buffer, ''))
+        callback_wrapped(table.concat(buffer, ''))
       end
     end,
   }
