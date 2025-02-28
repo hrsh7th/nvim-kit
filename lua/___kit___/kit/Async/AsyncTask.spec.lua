@@ -21,13 +21,13 @@ describe('kit.Async', function()
         resolve(1)
       end)
     end))
-    assert.are.equals(one_task:sync(5000), 1)
+    assert.are.equal(one_task:sync(5000), 1)
 
     -- next with return value.
     local two_task = one_task:next(once(function(value)
       return value + 1
     end))
-    assert.are.equals(two_task:sync(5000), 2)
+    assert.are.equal(two_task:sync(5000), 2)
 
     -- next with return AsyncTask.
     local three_task = two_task:next(once(function(value)
@@ -37,7 +37,7 @@ describe('kit.Async', function()
         end)
       end)
     end))
-    assert.are.equals(three_task:sync(5000), 3)
+    assert.are.equal(three_task:sync(5000), 3)
 
     -- throw error.
     local err_task = three_task:next(once(function()
@@ -46,7 +46,7 @@ describe('kit.Async', function()
     local _, err = pcall(function()
       return err_task:sync(5000)
     end)
-    assert.are_not.equals(string.match(err, 'error$'), nil)
+    assert.are_not.equal(string.match(err, 'error$'), nil)
 
     -- skip rejected task's next.
     local steps = {}
@@ -65,7 +65,7 @@ describe('kit.Async', function()
         return value
       end)
     assert.are.same(steps, { 3 })
-    assert.are.equals(catch_task:sync(5000), 'catch')
+    assert.are.equal(catch_task:sync(5000), 'catch')
   end)
 
   it('should reject if resolve called with rejected task', function()
@@ -175,7 +175,7 @@ describe('kit.Async', function()
     end)
     called = false
     vim.wait(1)
-    assert.are.equals(called, true)
+    assert.are.equal(called, true)
 
     -- has no catched.
     AsyncTask.new(function()
@@ -185,7 +185,7 @@ describe('kit.Async', function()
     end)
     called = false
     vim.wait(1)
-    assert.are.equals(called, true)
+    assert.are.equal(called, true)
 
     -- has no catched.
     AsyncTask.new(function(resolve)
@@ -195,7 +195,7 @@ describe('kit.Async', function()
     end)
     called = false
     vim.wait(1)
-    assert.are.equals(called, true)
+    assert.are.equal(called, true)
 
     -- has no catched.
     AsyncTask.new(function(_, reject)
@@ -205,7 +205,7 @@ describe('kit.Async', function()
     end)
     called = false
     vim.wait(1)
-    assert.are.equals(called, true)
+    assert.are.equal(called, true)
 
     -- catched.
     AsyncTask.new(function()
@@ -215,7 +215,7 @@ describe('kit.Async', function()
     end)
     called = false
     vim.wait(1)
-    assert.are.equals(called, false)
+    assert.are.equal(called, false)
 
     -- has no catched task but synced.
     local task = AsyncTask.new(function()
@@ -226,6 +226,6 @@ describe('kit.Async', function()
     end)
     called = false
     vim.wait(1)
-    assert.are.equals(called, false)
+    assert.are.equal(called, false)
   end)
 end)

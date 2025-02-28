@@ -1,24 +1,28 @@
 local uv = vim.uv
 local Async = require('___kit___.kit.Async')
 
-local backslash = string.byte('\\')
-local slash = string.byte('/')
-local tilde = string.byte('~')
+local bytes = {
+  backslash = string.byte('\\'),
+  slash = string.byte('/'),
+  tilde = string.byte('~'),
+}
 
 ---@param path string
 ---@return string
 local function sep(path)
   for i = 1, #path do
     local c = path:byte(i)
-    if c == slash then
+    if c == bytes.slash then
       return path
     end
-    if c == backslash then
+    if c == bytes.backslash then
       return (path:gsub('\\', '/'))
     end
   end
   return path
 end
+
+local home = sep(assert(vim.uv.os_homedir()))
 
 ---@see https://github.com/luvit/luvit/blob/master/deps/fs.lua
 local IO = {}
@@ -137,10 +141,13 @@ function IO.exists(path)
   end)
 end
 
+---Get realpath.
+---@param path string
+---@return ___kit___.kit.Async.AsyncTask
 function IO.realpath(path)
   path = IO.normalize(path)
   return Async.run(function()
-    return uv_fs_realpath(path):await()
+    return IO.normalize(uv_fs_realpath(path):await())
   end)
 end
 
@@ -325,7 +332,6 @@ function IO.walk(start_path, callback, option)
         return status
       end
       for entry in iter_entries do
-        entry.path = IO.normalize(entry.path)
         if entry.type == 'directory' then
           if walk_pre(entry) == IO.WalkStatus.Break then
             return IO.WalkStatus.Break
@@ -346,7 +352,6 @@ function IO.walk(start_path, callback, option)
         return callback(iter_entries, dir)
       end
       for entry in iter_entries do
-        entry.path = IO.normalize(entry.path)
         if entry.type == 'directory' then
           if walk_post(entry) == IO.WalkStatus.Break then
             return IO.WalkStatus.Break
@@ -419,13 +424,13 @@ function IO.normalize(path)
   path = sep(path)
 
   -- remove trailing slash.
-  if #path > 1 and path:byte(-1) == slash then
+  if #path > 1 and path:byte(-1) == bytes.slash then
     path = path:sub(1, -2)
   end
 
   -- homedir.
-  if path:byte(1) == tilde then
-    path = IO.join(uv.os_homedir() or vim.fs.normalize('~'), path:sub(2))
+  if path:byte(1) == bytes.tilde then
+    path = (path:gsub('^~/', home))
   end
 
   -- absolute.
@@ -434,19 +439,7 @@ function IO.normalize(path)
   end
 
   -- resolve relative path.
-  local up = sep(assert(uv.cwd()))
-  up = up:byte(-1) == slash and up:sub(1, -2) or up
-  while true do
-    if path:sub(1, 3) == '../' then
-      path = path:sub(4)
-      up = IO.dirname(up)
-    elseif path:sub(1, 2) == './' then
-      path = path:sub(3)
-    else
-      break
-    end
-  end
-  return IO.join(up, path)
+  return IO.join(sep(assert(uv.cwd())), path)
 end
 
 ---Join the paths.
@@ -455,16 +448,23 @@ end
 ---@return string
 function IO.join(base, ...)
   base = sep(base)
+
+  -- remove trailing slash.
+  if #base > 1 and base:byte(-1) == bytes.slash then
+    base = base:sub(1, -2)
+  end
+
   for i = 1, select('#', ...) do
     local path = sep(select(i, ...))
-    if vim.startswith(path, './') then
-      path = path:sub(3)
+    local path_s = 1
+    if path:find('./', path_s, true) then
+      path_s = path_s + 2
     end
-    while vim.startswith(path, '../') do
+    while path:find('../', path_s, true) do
       base = IO.dirname(base)
-      path = path:sub(4)
+      path_s = path_s + 3
     end
-    base = ('%s/%s'):format(base, path)
+    base = ('%s/%s'):format(base, path:sub(path_s))
   end
   return base
 end
@@ -474,11 +474,8 @@ end
 ---@return string
 function IO.dirname(path)
   path = sep(path)
-  if path:sub(-1) == '/' then
-    path = path:sub(1, -2)
-  end
-  for i = #path, 1, -1 do
-    if path:byte(i) == slash then
+  for i = #path - 1, 1, -1 do
+    if path:byte(i) == bytes.slash then
       return path:sub(1, i - 1)
     end
   end
@@ -490,7 +487,7 @@ end
 ---@return boolean
 function IO.is_absolute(path)
   path = sep(path)
-  return path:sub(1, 1) == '/' or path:match('^%a:/')
+  return path:byte(1) == bytes.slash or path:match('^%a:/')
 end
 
 return IO

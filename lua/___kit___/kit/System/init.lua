@@ -3,6 +3,11 @@
 local kit = require('___kit___.kit')
 local Async = require('___kit___.kit.Async')
 
+local bytes = {
+  ['\n'] = 10,
+  ['\r'] = 13,
+}
+
 local System = {}
 
 ---@class ___kit___.kit.System.Buffer
@@ -38,34 +43,39 @@ function System.LineBuffering:create(callback)
     end
   end
 
-  local buffer = {}
+  local buffer = kit.buffer()
   ---@type ___kit___.kit.System.Buffer
   return {
     write = function(data)
-      data = data:gsub('\r\n?', '\n')
-
-      local first = 1
-      local last = data:find('\n', first, true)
-      if not last then
-        table.insert(buffer, data)
-        return
+      if data:find('\r', 1, true) then
+        data = data:gsub('\r\n?', '\n')
       end
-      callback_wrapped(('%s%s'):format(table.concat(buffer, ''), data:sub(first, last - 1)))
+      buffer.put(data)
 
-      while true do
-        first = last + 1
-        last = data:find('\n', first, true)
-        if not last then
-          buffer = first <= #data and { data:sub(first) } or {}
-          return
+      local found = true
+      while found do
+        found = false
+        for i, byte in buffer.iter_bytes() do
+          if byte == bytes['\n'] then
+            callback_wrapped(buffer.get(i - 1))
+            buffer.skip(1)
+            found = true
+            break
+          end
         end
-        callback_wrapped(data:sub(first, last - 1))
+        if not found then
+          break
+        end
       end
     end,
     close = function()
-      if #buffer > 0 then
-        callback_wrapped(table.concat(buffer, ''))
+      for byte, i in buffer.iter_bytes() do
+        if byte == bytes['\n'] then
+          callback_wrapped(buffer.get(i - 1))
+          buffer.skip(1)
+        end
       end
+      callback_wrapped(buffer.get())
     end,
   }
 end
@@ -185,48 +195,6 @@ function System.DelimiterBuffering:create(callback)
   return buffer
 end
 
----@class ___kit___.kit.System.PatternBuffering: ___kit___.kit.System.Buffering
----@field pattern string
-System.PatternBuffering = {}
-System.PatternBuffering.__index = System.PatternBuffering
-
----Create PatternBuffering.
----@param option { pattern: string }
-function System.PatternBuffering.new(option)
-  return setmetatable({
-    pattern = option.pattern,
-  }, System.PatternBuffering)
-end
-
----Create PatternBuffer object.
-function System.PatternBuffering:create(callback)
-  local buffer = {}
-  return {
-    write = function(data)
-      table.insert(buffer, data)
-      while true do
-        local text = table.concat(buffer, '')
-        local s, e = text:find(self.pattern, 1, true)
-        if s and e then
-          callback(text:sub(1, s - 1))
-          if e < #text then
-            buffer = { text:sub(e + 1) }
-          else
-            buffer = {}
-          end
-        else
-          break
-        end
-      end
-    end,
-    close = function()
-      if #buffer > 0 then
-        callback(table.concat(buffer, ''))
-      end
-    end,
-  }
-end
-
 ---@class ___kit___.kit.System.RawBuffering: ___kit___.kit.System.Buffering
 System.RawBuffering = {}
 System.RawBuffering.__index = System.RawBuffering
@@ -262,11 +230,11 @@ end
 ---@return fun(signal?: integer)
 function System.spawn(command, params)
   command = vim
-    .iter(command)
-    :filter(function(c)
-      return c ~= nil
-    end)
-    :totable()
+      .iter(command)
+      :filter(function(c)
+        return c ~= nil
+      end)
+      :totable()
 
   local cmd = command[1]
   local args = {}

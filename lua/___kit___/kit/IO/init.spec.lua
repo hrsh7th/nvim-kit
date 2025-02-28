@@ -76,7 +76,7 @@ describe('kit.IO', function()
           return IO.WalkStatus.Break
         end
       end):sync(5000)
-      assert.equals(count, 4)
+      assert.equal(count, 4)
     end)
     it('should break if found specified path (post)', function()
       local count = 0
@@ -86,13 +86,13 @@ describe('kit.IO', function()
           return IO.WalkStatus.Break
         end
       end, { postorder = true }):sync(5000)
-      assert.equals(count, 3)
+      assert.equal(count, 3)
     end)
   end)
 
   describe('.read_file', function()
     it('should read the file', function()
-      assert.are.equals(
+      assert.are.equal(
         IO.read_file('./fixture/IO/read_file.txt', 5):sync(5000),
         table.concat({
           'read_file',
@@ -118,7 +118,7 @@ describe('kit.IO', function()
       IO.write_file('./fixture/IO/write_file.txt', IO.read_file('./fixture/IO/read_file.txt', 5):sync(5000))
       local contents1 = IO.read_file('./fixture/IO/read_file.txt', 5):sync(5000)
       local contents2 = IO.read_file('./fixture/IO/write_file.txt', 5):sync(5000)
-      assert.are.equals(#contents1, #contents2)
+      assert.are.equal(#contents1, #contents2)
       IO.rm('./fixture/IO/write_file.txt'):sync(5000)
     end)
   end)

@@ -57,7 +57,7 @@ describe('kit.Async', function()
       end
 
       local wait_async = Async.promisify(wait)
-      assert.equals(wait_async(100):sync(5000), 'timeout')
+      assert.equal(wait_async(100):sync(5000), 'timeout')
     end)
     it('shoud wrap callback function with rest arguments', function()
       local function wait(ms, callback, result)
@@ -67,7 +67,7 @@ describe('kit.Async', function()
       end
 
       local wait_async = Async.promisify(wait, { callback = 2 })
-      assert.equals(wait_async(100, 'timeout'):sync(5000), 'timeout')
+      assert.equal(wait_async(100, 'timeout'):sync(5000), 'timeout')
     end)
   end)
 end)
