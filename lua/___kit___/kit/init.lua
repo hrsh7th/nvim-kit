@@ -12,7 +12,7 @@
 local kit = {}
 
 do
-  local buffer = require('string.buffer')
+  local buffer = package.preload['string.buffer'] and require('string.buffer')
   if buffer then
     ---Create buffer object.
     ---@return ___kit___.kit.buffer.Buffer
@@ -149,7 +149,7 @@ kit.buffer = function()
 end
 
 do
-  local clear = require('table.clear')
+  local clear = package.preload['table.clear'] and require('table.clear')
 
   ---Clear table.
   ---@generic T: table
