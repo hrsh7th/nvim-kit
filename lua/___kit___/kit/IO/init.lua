@@ -457,10 +457,10 @@ function IO.join(base, ...)
   for i = 1, select('#', ...) do
     local path = sep(select(i, ...))
     local path_s = 1
-    if path:find('./', path_s, true) then
+    if path:find('./', path_s, true) == path_s then
       path_s = path_s + 2
     end
-    while path:find('../', path_s, true) do
+    while path:find('../', path_s, true) == path_s do
       base = IO.dirname(base)
       path_s = path_s + 3
     end
