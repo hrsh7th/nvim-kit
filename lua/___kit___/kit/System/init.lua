@@ -44,21 +44,24 @@ function System.LineBuffering:create(callback)
   end
 
   local buffer = kit.buffer()
+  local iter = buffer.iter_bytes()
   ---@type ___kit___.kit.System.Buffer
   return {
     write = function(data)
-      if data:find('\r', 1, true) then
-        data = data:gsub('\r\n?', '\n')
-      end
       buffer.put(data)
-
       local found = true
       while found do
         found = false
-        for i, byte in buffer.iter_bytes() do
+        for i, byte in iter do
           if byte == bytes['\n'] then
-            callback_wrapped(buffer.get(i - 1))
-            buffer.skip(1)
+            if buffer.peek(i - 1) == bytes['\r'] then
+              callback_wrapped(buffer.get(i - 2))
+              buffer.skip(2)
+            else
+              callback_wrapped(buffer.get(i - 1))
+              buffer.skip(1)
+            end
+            iter = buffer.iter_bytes()
             found = true
             break
           end
@@ -71,8 +74,13 @@ function System.LineBuffering:create(callback)
     close = function()
       for byte, i in buffer.iter_bytes() do
         if byte == bytes['\n'] then
-          callback_wrapped(buffer.get(i - 1))
-          buffer.skip(1)
+          if buffer.peek(i - 1) == bytes['\r'] then
+            callback_wrapped(buffer.get(i - 2))
+            buffer.skip(2)
+          else
+            callback_wrapped(buffer.get(i - 1))
+            buffer.skip(1)
+          end
         end
       end
       callback_wrapped(buffer.get())

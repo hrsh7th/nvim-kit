@@ -5,6 +5,7 @@
 ---@field get fun(byte_size?: integer): string
 ---@field len integer
 ---@field skip fun(byte_size: integer)
+---@field peek fun(index: integer): integer?
 ---@field clear fun()
 ---@field reserve fun(byte_size: integer)
 ---@field iter_bytes fun(): fun(): integer, integer
@@ -35,13 +36,20 @@ do
         clear = function()
           buf:reset()
         end,
+        peek = function(index)
+          local ptr, len = buf:ref()
+          if index < 1 or index > len then
+            return nil
+          end
+          return ptr[index - 1]
+        end,
         reserve = function(byte_size)
           buf:reserve(byte_size)
         end,
         iter_bytes = function()
           local i = 0
-          local ptr, len = buf:ref()
           return function()
+            local ptr, len = buf:ref()
             if i < len then
               local byte = ptr[i]
               i = i + 1
@@ -108,6 +116,16 @@ function kit.buffer_tbl()
     end,
     skip = function(byte_size)
       buffer.get(byte_size)
+    end,
+    peek = function(index)
+      local i = 1
+      while i <= #buf do
+        if index <= #buf[i] then
+          return buf[i]:byte(index)
+        end
+        index = index - #buf[i]
+        i = i + 1
+      end
     end,
     clear = function()
       kit.clear(buf)

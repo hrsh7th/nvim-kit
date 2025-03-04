@@ -25,6 +25,17 @@ describe('kit', function()
           assert.are.equal(buffer.len(), 0)
           assert.are.equal(buffer.get(3), '')
 
+          -- peek.
+          buffer.clear()
+          buffer.put('foo')
+          assert.are.equal(buffer.peek(0), nil)
+          assert.are.equal(buffer.peek(1), ('f'):byte())
+          assert.are.equal(buffer.peek(2), ('o'):byte())
+          assert.are.equal(buffer.peek(3), ('o'):byte())
+          assert.are.equal(buffer.peek(4), nil)
+          assert.are.equal(buffer.len(), 3)
+          assert.are.equal(buffer.get(), 'foo')
+
           -- iter_bytes.
           buffer.clear()
           buffer.put('foo')

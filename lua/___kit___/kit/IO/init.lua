@@ -5,6 +5,7 @@ local bytes = {
   backslash = string.byte('\\'),
   slash = string.byte('/'),
   tilde = string.byte('~'),
+  dot = string.byte('.'),
 }
 
 ---@param path string
@@ -292,11 +293,12 @@ function IO.cp(from, to, option)
       if not option.recursive then
         error(('IO.cp: `%s` is a directory.'):format(from))
       end
+      local from_pat = ('^%s'):format(vim.pesc(from))
       IO.walk(from, function(err, entry)
         if err then
           error('IO.cp: ' .. tostring(err))
         end
-        local new_path = entry.path:gsub(vim.pesc(from), to)
+        local new_path = entry.path:gsub(from_pat, to)
         if entry.type == 'directory' then
           IO.mkdir(new_path, tonumber(stat.mode, 10), { recursive = true }):await()
         else
@@ -429,7 +431,7 @@ function IO.normalize(path)
   end
 
   -- homedir.
-  if path:byte(1) == bytes.tilde then
+  if path:byte(1) == bytes.tilde and path:byte(2) == bytes.slash then
     path = (path:gsub('^~/', home))
   end
 
@@ -439,44 +441,89 @@ function IO.normalize(path)
   end
 
   -- resolve relative path.
-  return IO.join(sep(assert(uv.cwd())), path)
+  return IO.join(IO.cwd(), path)
 end
 
----Join the paths.
----@param base string
----@vararg string
----@return string
-function IO.join(base, ...)
-  base = sep(base)
+do
+  local cache = {
+    raw = nil,
+    fix = nil
+  }
 
-  -- remove trailing slash.
-  if #base > 1 and base:byte(-1) == bytes.slash then
-    base = base:sub(1, -2)
+  ---Return the current working directory.
+  ---@return string
+  function IO.cwd()
+    local cwd = assert(uv.cwd())
+    if cache.raw == cwd then
+      return cache.fix
+    end
+    cache.raw = cwd
+    cache.fix = sep(cwd)
+    return cache.fix
   end
+end
 
-  for i = 1, select('#', ...) do
-    local path = sep(select(i, ...))
-    local path_s = 1
-    if path:find('./', path_s, true) == path_s then
-      path_s = path_s + 2
+do
+  local cache_pat = {}
+
+  ---Join the paths.
+  ---@param base string
+  ---@vararg string
+  ---@return string
+  function IO.join(base, ...)
+    base = sep(base)
+
+    -- remove trailing slash.
+    -- ./   → ./
+    -- aaa/ → aaa
+    if base:byte(-2) ~= bytes.dot and base:byte(-1) == bytes.slash then
+      base = base:sub(1, -2)
     end
-    while path:find('../', path_s, true) == path_s do
-      base = IO.dirname(base)
-      path_s = path_s + 3
+
+    for i = 1, select('#', ...) do
+      local path = sep(select(i, ...))
+      local path_s = 1
+      if path:byte(path_s) == bytes.dot and path:byte(path_s + 1) == bytes.slash then
+        path_s = path_s + 2
+      end
+      local up_count = 0
+      while path:byte(path_s) == bytes.dot and path:byte(path_s + 1) == bytes.dot and path:byte(path_s + 2) == bytes.slash do
+        up_count = up_count + 1
+        path_s = path_s + 3
+      end
+      if path_s > 1 then
+        cache_pat[path_s] = cache_pat[path_s] or ('^%s'):format(('.'):rep(path_s - 2))
+      end
+
+      -- optimize for avoiding new string creation.
+      if path_s == 1 then
+        base = ('%s/%s'):format(IO.dirname(base, up_count), path)
+      else
+        base = path:gsub(cache_pat[path_s], IO.dirname(base, up_count))
+      end
     end
-    base = ('%s/%s'):format(base, path:sub(path_s))
+    return base
   end
-  return base
 end
 
 ---Return the path of the current working directory.
 ---@param path string
+---@param level? integer
 ---@return string
-function IO.dirname(path)
+function IO.dirname(path, level)
   path = sep(path)
+  level = level or 1
+
+  if level == 0 then
+    return path
+  end
+
   for i = #path - 1, 1, -1 do
     if path:byte(i) == bytes.slash then
-      return path:sub(1, i - 1)
+      if level == 1 then
+        return path:sub(1, i - 1)
+      end
+      level = level - 1
     end
   end
   return path
