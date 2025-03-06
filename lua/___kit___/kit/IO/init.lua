@@ -476,7 +476,7 @@ do
     -- remove trailing slash.
     -- ./   → ./
     -- aaa/ → aaa
-    if base:byte(-2) ~= bytes.dot and base:byte(-1) == bytes.slash then
+    if not (base == './' or base == '../') and base:byte(-1) == bytes.slash then
       base = base:sub(1, -2)
     end
 
