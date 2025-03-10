@@ -19,25 +19,30 @@ do
     ---@return ___kit___.kit.buffer.Buffer
     function kit.buffer_jit()
       local buf = buffer.new()
+      local ptr, len = buf:ref()
       ---@type ___kit___.kit.buffer.Buffer
       return setmetatable({
         put = function(data)
           buf:put(data)
+          ptr, len = buf:ref()
         end,
         get = function(byte_size)
-          return buf:get(byte_size)
+          local o = buf:get(byte_size)
+          ptr, len = buf:ref()
+          return o
         end,
         len = function()
-          return select(2, buf:ref())
+          return len
         end,
         skip = function(byte_size)
           buf:skip(byte_size)
+          ptr, len = buf:ref()
         end,
         clear = function()
           buf:reset()
+          ptr, len = buf:ref()
         end,
         peek = function(index)
-          local ptr, len = buf:ref()
           if index < 1 or index > len then
             return nil
           end
@@ -49,7 +54,6 @@ do
         iter_bytes = function()
           local i = 0
           return function()
-            local ptr, len = buf:ref()
             if i < len then
               local byte = ptr[i]
               i = i + 1
