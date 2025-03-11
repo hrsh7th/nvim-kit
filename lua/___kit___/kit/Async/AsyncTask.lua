@@ -52,7 +52,7 @@ AsyncTask.Status = {
 ---Handle unhandled rejection.
 ---@param err any
 function AsyncTask.on_unhandled_rejection(err)
-  error('AsyncTask.on_unhandled_rejection: ' .. vim.inspect(err), 2)
+  error('AsyncTask.on_unhandled_rejection: ' .. (type(err) == 'table' and vim.inspect(err) or tostring(err)), 2)
 end
 
 ---Return the value is AsyncTask or not.
