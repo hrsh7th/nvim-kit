@@ -288,6 +288,7 @@ end
 ---Find up directory.
 ---@param path string
 ---@param markers string[]
+---@return string?
 function kit.findup(path, markers)
   path = vim.fs.normalize(path)
   if vim.fn.filereadable(path) == 1 then
