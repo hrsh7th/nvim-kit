@@ -37,7 +37,7 @@ function System.LineBuffering:create(callback)
   if self.ignore_empty then
     ---@param data string
     function callback_wrapped(data)
-      if data:find('%g') then
+      if data ~= '' then
         return callback(data)
       end
     end
