@@ -61,7 +61,7 @@ describe('kit', function()
         local count = 0
         local fn = kit.debounce(function()
           count = count + 1
-        end, 200)
+        end, 180) -- `vim.schedule` time.
         fn()
         assert.are.equal(count, 0)
         fn()
@@ -85,7 +85,7 @@ describe('kit', function()
         local count = 0
         local throttled = kit.throttle(function()
           count = count + 1
-        end, 200)
+        end, 180) -- `vim.schedule` time.
         throttled()
         assert.are.equal(count, 1)
         throttled()
