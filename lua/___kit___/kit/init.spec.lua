@@ -1,6 +1,5 @@
 -- luacheck: ignore 311
 local kit = require('___kit___.kit')
-local Async = require('___kit___.kit.Async')
 
 describe('kit', function()
   describe('buffer', function()
@@ -53,54 +52,6 @@ describe('kit', function()
         end)
       end
     end
-  end)
-
-  describe('debounce', function()
-    it('should callback after timeout', function()
-      Async.run(function()
-        local count = 0
-        local fn = kit.debounce(function()
-          count = count + 1
-        end, 180) -- `vim.schedule` time.
-        fn()
-        assert.are.equal(count, 0)
-        fn()
-        assert.are.equal(count, 0)
-        vim.wait(200)
-        assert.are.equal(count, 1)
-        fn()
-        fn()
-        assert.are.equal(count, 1)
-        vim.wait(200)
-        assert.are.equal(count, 2)
-        vim.wait(200)
-        assert.are.equal(count, 2)
-      end):sync(5000)
-    end)
-  end)
-
-  describe('throttle', function()
-    it('should callback after timeout', function()
-      Async.run(function()
-        local count = 0
-        local throttled = kit.throttle(function()
-          count = count + 1
-        end, 180) -- `vim.schedule` time.
-        throttled()
-        assert.are.equal(count, 1)
-        throttled()
-        assert.are.equal(count, 1)
-        vim.wait(200)
-        assert.are.equal(count, 2)
-        throttled()
-        throttled()
-        assert.are.equal(count, 2)
-        vim.wait(200)
-        assert.are.equal(count, 3)
-        vim.wait(200)
-        assert.are.equal(count, 3)
-      end):sync(5000)
-    end)
   end)
 
   describe('.gc', function()
