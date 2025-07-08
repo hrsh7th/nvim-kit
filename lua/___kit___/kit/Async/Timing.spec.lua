@@ -8,7 +8,7 @@ describe('kit.Async.Timing', function()
         local count = 0
         local fn = Timing.debounce(function()
           count = count + 1
-        end, 200)
+        end, { timeout_ms = 200 })
         fn.timer:set_schedule_fn(function(callback)
           callback()
         end)
@@ -35,7 +35,7 @@ describe('kit.Async.Timing', function()
         local count = 0
         local fn = Timing.throttle(function()
           count = count + 1
-        end, 200)
+        end, { timeout_ms = 200, leading = true })
         fn.timer:set_schedule_fn(function(callback)
           callback()
         end)
@@ -52,6 +52,34 @@ describe('kit.Async.Timing', function()
         assert.are.equal(count, 3)
         vim.wait(200)
         assert.are.equal(count, 3)
+      end):sync(5000)
+    end)
+
+    it('should callback immediately if leading=true specified', function()
+      Async.run(function()
+        local count = 0
+        local fn = Timing.throttle(function()
+          count = count + 1
+        end, { timeout_ms = 200, leading = true })
+        fn.timer:set_schedule_fn(function(callback)
+          callback()
+        end)
+        fn()
+        assert.are.equal(count, 1)
+      end):sync(5000)
+    end)
+
+    it('should callback lately if leading=false specified', function()
+      Async.run(function()
+        local count = 0
+        local fn = Timing.throttle(function()
+          count = count + 1
+        end, { timeout_ms = 200, leading = false })
+        fn.timer:set_schedule_fn(function(callback)
+          callback()
+        end)
+        fn()
+        assert.are.equal(count, 0)
       end):sync(5000)
     end)
   end)
