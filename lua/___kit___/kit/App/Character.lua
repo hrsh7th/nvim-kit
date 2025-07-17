@@ -30,7 +30,7 @@ end)
 ---@param byte integer
 ---@return boolean
 function Character.is_alpha(byte)
-  return not not (Character.alpha[byte] ~= nil or (byte and Character.alpha[byte + 32] ~= nil))
+  return not not (Character.upper[byte] or Character.alpha[byte])
 end
 
 ---Return specified byte is digit or not.
@@ -91,11 +91,11 @@ end
 
 ---@param a integer
 ---@param b integer
-function Character.match_ignorecase(a, b)
+function Character.match_icase(a, b)
   if a == b then
     return true
-  elseif Character.is_alpha(a) and Character.is_alpha(b) then
-    return (a == b + 32) or (a == b - 32)
+  elseif math.abs(a - b) == 32 and Character.is_alpha(a) and Character.is_alpha(b) then
+    return true
   end
   return false
 end
