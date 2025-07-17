@@ -86,7 +86,7 @@ end
 ---@param byte integer
 ---@return boolean
 function Character.is_utf8_part(byte)
-  return byte >= 128
+  return byte and byte >= 128
 end
 
 ---@param a integer
