@@ -167,6 +167,16 @@ describe('kit.IO', function()
     end)
   end)
 
+  describe('.dirname', function()
+    it('should return parent directory', function()
+      assert.are.equal(IO.dirname('/a/b/c/'), '/a/b')
+      assert.are.equal(IO.dirname('/a/b/c'), '/a/b')
+      assert.are.equal(IO.dirname('/a/'), '/')
+      assert.are.equal(IO.dirname('/a'), '/')
+      assert.are.equal(IO.dirname('/'), '/')
+    end)
+  end)
+
   describe('.mkdir', function()
     it('should create dir', function()
       local target_dir = tmpdir .. '/mkdir'
