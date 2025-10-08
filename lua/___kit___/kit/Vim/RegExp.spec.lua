@@ -19,6 +19,7 @@ describe('kit.Vim.RegExp', function()
 
         assert.equal(spec('foo|bar', 'foo'), 'foo')
         assert.equal(spec('foo|bar', 'bar'), 'bar')
+        assert.equal(spec('foo 1 + 2 * (3 - 1) | bar', [=[\s*\zs\%(\s\|math\.\w\+\|\d\+\%(\.\d\+\)\?\|[()*/+\-,]\)\+]=]), '1 + 2 * (3 - 1)  ')
       end)
     end)
   end)
