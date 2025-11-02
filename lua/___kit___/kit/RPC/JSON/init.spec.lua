@@ -28,10 +28,13 @@ describe('kit.RPC.JSON', function()
       return ctx.params.a + ctx.params.b
     end)
 
-    assert.are.equal(a:request('sum', {
-      a = 1,
-      b = 2
-    }):sync(200), 3)
+    assert.are.equal(
+      a:request('sum', {
+        a = 1,
+        b = 2,
+      }):sync(200),
+      3
+    )
   end)
 
   it('should work with notification', function()
