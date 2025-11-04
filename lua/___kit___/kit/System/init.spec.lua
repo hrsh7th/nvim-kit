@@ -14,12 +14,14 @@ describe('kit.System', function()
         '',
       }
       local c = 1
-      local buffer = System.LineBuffering.new({
-        ignore_empty = false
-      }):create(function(text)
-        assert.are.equal(text, expects[c])
-        c = c + 1
-      end)
+      local buffer = System.LineBuffering
+        .new({
+          ignore_empty = false,
+        })
+        :create(function(text)
+          assert.are.equal(text, expects[c])
+          c = c + 1
+        end)
       buffer.write('1\n')
       buffer.write('\n')
       buffer.write('2')
@@ -38,12 +40,14 @@ describe('kit.System', function()
         '3',
       }
       local c = 1
-      local buffer = System.LineBuffering.new({
-        ignore_empty = true
-      }):create(function(text)
-        assert.are.equal(text, expects[c])
-        c = c + 1
-      end)
+      local buffer = System.LineBuffering
+        .new({
+          ignore_empty = true,
+        })
+        :create(function(text)
+          assert.are.equal(text, expects[c])
+          c = c + 1
+        end)
       buffer.write('1\n')
       buffer.write('\n')
       buffer.write('2')
