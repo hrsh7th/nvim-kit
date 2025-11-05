@@ -27,7 +27,7 @@ import metaModel from '../../tmp/language-server-protocol/_specifications/lsp/3.
     ---@param params table
     ---@return ___kit___.kit.Async.AsyncTask|{cancel: fun()}
     function Client:request(method, params)
-      local that, _, request_id, reject_ = self, nil, nil, nil
+      local _, request_id, reject_ ---@type any, integer?, fun(err: any?)
       ---@type ___kit___.kit.Async.AsyncTask|{cancel: fun()}
       local task = AsyncTask.new(function(resolve, reject)
         reject_ = reject
@@ -40,8 +40,10 @@ import metaModel from '../../tmp/language-server-protocol/_specifications/lsp/3.
         end)
       end)
       function task.cancel()
-        that.client:cancel_request(request_id)
-        reject_(LSP.ErrorCodes.RequestCancelled)
+        if request_id then
+          self.client:cancel_request(request_id)
+        end
+        reject_(LSP.LSPErrorCodes.RequestCancelled)
       end
       return task
     end
@@ -59,7 +61,7 @@ import metaModel from '../../tmp/language-server-protocol/_specifications/lsp/3.
             ${params}
             ---@return ___kit___.kit.Async.AsyncTask|{cancel: fun()}
             function Client:${request.method.replace(/\//g, '_')}(params)
-              local that, _, request_id, reject_ = self, nil, nil, nil
+              local _, request_id, reject_ ---@type any, integer?, fun(err: any?)
               ---@type ___kit___.kit.Async.AsyncTask|{cancel: fun()}
               local task = AsyncTask.new(function(resolve, reject)
                 reject_ = reject
@@ -72,8 +74,10 @@ import metaModel from '../../tmp/language-server-protocol/_specifications/lsp/3.
                 end)
               end)
               function task.cancel()
-                that.client:cancel_request(request_id)
-                reject_(LSP.ErrorCodes.RequestCancelled)
+                if request_id then
+                  self.client:cancel_request(request_id)
+                end
+                reject_(LSP.LSPErrorCodes.RequestCancelled)
               end
               return task
             end
