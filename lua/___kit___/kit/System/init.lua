@@ -172,6 +172,9 @@ function System.DelimiterBuffering:create(callback)
         local b = get(state.buffer_pos)
         local d = self.delimiter:sub(state.delimiter_pos, state.delimiter_pos)
         if b == d then
+          if state.delimiter_pos == 1 then
+            state.match_pos = state.buffer_pos
+          end
           if state.delimiter_pos == delimiter_len then
             local before, after = split(state.match_pos, state.buffer_pos)
             callback(table.concat(before, ''))
@@ -181,9 +184,6 @@ function System.DelimiterBuffering:create(callback)
             state.match_pos = nil
             buffer_len = len()
           else
-            if state.delimiter_pos == 1 then
-              state.match_pos = state.buffer_pos
-            end
             state.buffer_pos = state.buffer_pos + 1
             state.delimiter_pos = state.delimiter_pos + 1
           end
