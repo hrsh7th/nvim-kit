@@ -14,7 +14,7 @@ local function create_mock_lsp_client(config)
     offset_encoding = 'utf-16',
   }
 
-  function mock:request(method, params, callback)
+  function mock.request(_, method, params, callback)
     table.insert(recorded.requests, { method = method, params = params })
     vim.schedule(function()
       callback(nil, config.responses and config.responses[method] or nil)
@@ -22,15 +22,15 @@ local function create_mock_lsp_client(config)
     return true, #recorded.requests
   end
 
-  function mock:cancel_request() end
+  function mock.cancel_request() end
 
-  function mock:notify(method, params)
+  function mock.notify(_, method, params)
     table.insert(recorded.notifications, { method = method, params = params })
   end
 
-  function mock:_registration_provider() return nil end
+  function mock._registration_provider() return nil end
 
-  function mock:_get_registrations() return {} end
+  function mock._get_registrations() return {} end
 
   return mock, recorded
 end
