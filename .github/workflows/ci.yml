@@ -21,48 +21,44 @@ jobs:
           - stable
 
     steps:
-      - uses: actions/checkout@v5
-      - uses: rhysd/action-setup-vim@v1
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: rhysd/action-setup-vim@febef33995d6649302e9d88dda81e071b68f16a7 # v1.6.1
         with:
           neovim: true
           version: ${{ matrix.nvim }}
-      - uses: leafo/gh-actions-lua@v12
+      - uses: leafo/gh-actions-lua@ea0ae38722c0b45aa4e770f7c4a650c6b26800d0 # v8.0.0
         with:
           luaVersion: "5.1"
-      - uses: leafo/gh-actions-luarocks@v6
-
-      - name: Node.js
-        uses: actions/setup-node@v6
-        with:
-          cache: npm
+      - uses: leafo/gh-actions-luarocks@e65774a6386cb4f24e293dca7fc4ff89165b64c5 # v4.3.0
 
       - name: Install dependencies
         run: |
           luarocks install vusted
           luarocks install luassert
           luarocks install luacheck
-          npm ci
-          npm run update
 
-      - name: Check
-        run: |
-          npm run test
-          npm run lint
+      - name: Luacheck
+        run: luacheck --codes ./lua
+
+      - name: Test
+        env:
+          NODE_ENV: test
+        run: vusted --output=gtest --pattern=.spec ./lua
 
   auto-format:
     needs: check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
-      - uses: JohnnyMorganz/stylua-action@v4
+      - uses: JohnnyMorganz/stylua-action@479972f01e665acfcba96ada452c36608bdbbb5e # v4.1.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           version: latest
           args: "plugin lua"
-      - uses: stefanzweifel/git-auto-commit-action@v7
+      - uses: stefanzweifel/git-auto-commit-action@778341af668090896ca464160c2def5d1d1a3eb0 # v6.0.1
         with:
           commit_message: "style: run stylua"
           file_pattern: |
